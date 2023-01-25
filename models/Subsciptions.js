@@ -1,17 +1,18 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-//Product names
+
+// Product names
 const PRODUCT_TREE = "tree-testing";
 const PRODUCT_PARTICIPATORY = "participatory-design";
 const PRODUCT_CARD = "card-sorting";
 
-//PLANS
+// PLANS
 const PLAN_FREE = 0;
 const PLAN_MONTHLY = 1;
 const PLAN_YEARLY = 2;
 const PLAN_ENTERPRISES = 3;
 
-//Subscription Status
+// Subscription Status
 const SUBSCRIPTION_INACTIVE = 0;
 const SUBSCRIPTION_ACTIVE = 1;
 const SUBSCRIPTION_CANCELLED = 2;

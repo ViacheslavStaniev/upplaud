@@ -6,6 +6,8 @@ const dbHost = MONGO_HOST || "mongo";
 const dbName = MONGO_DATABASE || "podasq";
 const db = `${MONGO_CONNECTION_PREFIX}://${MONGO_USERNAME}:${MONGO_PASSWORD}@${dbHost}/${dbName}?${MONGO_CONNECTION_PARAMS}`;
 
+const uri = "mongodb+srv://tcmhack:tcmpriya@tcmhack.olsdl.mongodb.net/?retryWrites=true&w=majority";
+
 const connectDB = async (max_attempts = 5) => {
   const attempt = async () => {
     if (max_attempts === 0) {
@@ -14,7 +16,7 @@ const connectDB = async (max_attempts = 5) => {
     }
 
     try {
-      await mongoose.connect(db, {
+      await mongoose.connect(uri, {
         useNewUrlParser: true, // current URL string parser is deprecated
         useFindAndModify: false, //`findOneAndUpdate()` and `findOneAndDelete()` without the `useFindAndModify` option set to false are deprecated.
         useUnifiedTopology: true,
