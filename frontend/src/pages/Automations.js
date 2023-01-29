@@ -6,7 +6,7 @@ import { useSettingsContext } from '../components/settings';
 
 // ----------------------------------------------------------------------
 
-export default function PageTwo() {
+export default function Automations() {
   const { themeStretch } = useSettingsContext();
 
   return (

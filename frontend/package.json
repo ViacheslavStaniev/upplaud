@@ -1,8 +1,8 @@
 {
-  "name": "@minimal/minimal-kit-react",
-  "author": "Minimals UI",
-  "version": "4.2.0",
-  "description": "Simple React Scripts & Javascript",
+  "name": "podasq",
+  "author": "Podasq",
+  "version": "0.0.1",
+  "description": "Podasq Application",
   "private": true,
   "scripts": {
     "start": "react-scripts start",
@@ -51,9 +51,11 @@
     "lodash": "^4.17.21",
     "notistack": "^2.0.8",
     "nprogress": "^0.2.0",
+    "numeral": "^2.0.6",
     "prop-types": "^15.8.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-dropzone": "^14.2.3",
     "react-helmet-async": "^1.3.0",
     "react-hook-form": "^7.42.1",
     "react-i18next": "^12.1.4",
@@ -65,6 +67,7 @@
     "stylis": "^4.1.3",
     "stylis-plugin-rtl": "^2.1.1",
     "web-vitals": "^3.1.1",
+    "yet-another-react-lightbox": "^2.2.7",
     "yup": "^0.32.11"
   },
   "devDependencies": {

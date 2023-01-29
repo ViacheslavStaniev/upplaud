@@ -101,7 +101,7 @@ export default function palette(themeMode) {
       secondary: GREY[600],
       disabled: GREY[500],
     },
-    background: { paper: '#FFFFFF', default: '#FFFFFF', neutral: GREY[200] },
+    background: { paper: '#FFFFFF', default: '#FFFFFF', neutral: GREY[200], purple: '#54006E' },
     action: {
       ...COMMON.action,
       active: GREY[600],

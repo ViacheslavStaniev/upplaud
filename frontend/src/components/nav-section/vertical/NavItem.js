@@ -11,8 +11,6 @@ import Iconify from '../../iconify';
 //
 import { StyledItem, StyledIcon, StyledDotIcon } from './styles';
 
-// ----------------------------------------------------------------------
-
 NavItem.propTypes = {
   open: PropTypes.bool,
   active: PropTypes.bool,
@@ -24,9 +22,9 @@ NavItem.propTypes = {
 export default function NavItem({ item, depth, open, active, isExternalLink, ...other }) {
   const { translate } = useLocales();
 
-  const { title, path, icon, info, children, disabled, caption, roles } = item;
-
   const subItem = depth !== 1;
+
+  const { title, path, icon, info, children, disabled, caption, roles } = item;
 
   const renderContent = (
     <StyledItem depth={depth} active={active} disabled={disabled} caption={!!caption} {...other}>
@@ -47,15 +45,8 @@ export default function NavItem({ item, depth, open, active, isExternalLink, ...
             </Tooltip>
           )
         }
-        primaryTypographyProps={{
-          noWrap: true,
-          component: 'span',
-          variant: active ? 'subtitle2' : 'body2',
-        }}
-        secondaryTypographyProps={{
-          noWrap: true,
-          variant: 'caption',
-        }}
+        primaryTypographyProps={{ noWrap: true, component: 'span', variant: active ? 'subtitle2' : 'body2' }}
+        secondaryTypographyProps={{ noWrap: true, variant: 'caption' }}
       />
 
       {info && (
@@ -65,11 +56,7 @@ export default function NavItem({ item, depth, open, active, isExternalLink, ...
       )}
 
       {!!children && (
-        <Iconify
-          width={16}
-          icon={open ? 'eva:arrow-ios-downward-fill' : 'eva:arrow-ios-forward-fill'}
-          sx={{ ml: 1, flexShrink: 0 }}
-        />
+        <Iconify width={16} icon={open ? 'eva:arrow-ios-downward-fill' : 'eva:arrow-ios-forward-fill'} sx={{ ml: 1, flexShrink: 0 }} />
       )}
     </StyledItem>
   );
@@ -84,9 +71,7 @@ export default function NavItem({ item, depth, open, active, isExternalLink, ...
       );
 
     // Has child
-    if (children) {
-      return renderContent;
-    }
+    if (children) return renderContent;
 
     // Default
     return (

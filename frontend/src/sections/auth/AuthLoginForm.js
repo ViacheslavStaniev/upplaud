@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import * as Yup from 'yup';
+import { Link as RouterLink } from 'react-router-dom';
 // form
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import { Link, Stack, Alert, IconButton, InputAdornment } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
+// routes
+import { PATH_AUTH } from '../../routes/paths';
 // auth
 import { useAuthContext } from '../../auth/useAuthContext';
 // components
@@ -44,9 +47,7 @@ export default function AuthLoginForm() {
       await login(data.email, data.password);
     } catch (error) {
       console.error(error);
-
       reset();
-
       setError('afterSubmit', {
         ...error,
         message: error.message || error,
@@ -78,7 +79,7 @@ export default function AuthLoginForm() {
       </Stack>
 
       <Stack alignItems="flex-end" sx={{ my: 2 }}>
-        <Link variant="body2" color="inherit" underline="always">
+        <Link component={RouterLink} to={PATH_AUTH.resetPassword} variant="body2" color="inherit" underline="always">
           Forgot password?
         </Link>
       </Stack>

@@ -16,8 +16,6 @@ import navConfig from './config-navigation';
 // import NavAccount from './NavAccount';
 // import NavToggleButton from './NavToggleButton';
 
-// ----------------------------------------------------------------------
-
 NavVertical.propTypes = {
   openNav: PropTypes.bool,
   onCloseNav: PropTypes.func,
@@ -29,32 +27,14 @@ export default function NavVertical({ openNav, onCloseNav }) {
   const isDesktop = useResponsive('up', 'lg');
 
   useEffect(() => {
-    if (openNav) {
-      onCloseNav();
-    }
+    if (openNav) onCloseNav();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
   const renderContent = (
-    <Scrollbar
-      sx={{
-        height: 1,
-        '& .simplebar-content': {
-          height: 1,
-          display: 'flex',
-          flexDirection: 'column',
-        },
-      }}
-    >
-      <Stack
-        spacing={3}
-        sx={{
-          pt: 3,
-          pb: 2,
-          px: 2.5,
-          flexShrink: 0,
-        }}
-      >
+    <Scrollbar sx={{ height: 1, '& .simplebar-content': { height: 1, display: 'flex', flexDirection: 'column' } }}>
+      <Stack spacing={3} sx={{ pt: 3, pb: 3, px: 2.5, flexShrink: 0, bgcolor: 'background.paper' }}>
         <Logo />
 
         {/* <NavAccount /> */}
@@ -67,27 +47,14 @@ export default function NavVertical({ openNav, onCloseNav }) {
   );
 
   return (
-    <Box
-      component="nav"
-      sx={{
-        flexShrink: { lg: 0 },
-        width: { lg: NAV.W_DASHBOARD },
-      }}
-    >
+    <Box component="nav" sx={{ flexShrink: { lg: 0 }, width: { lg: NAV.W_DASHBOARD } }}>
       {/* <NavToggleButton /> */}
 
       {isDesktop ? (
         <Drawer
           open
           variant="permanent"
-          PaperProps={{
-            sx: {
-              zIndex: 0,
-              width: NAV.W_DASHBOARD,
-              bgcolor: 'transparent',
-              borderRightStyle: 'dashed',
-            },
-          }}
+          PaperProps={{ sx: { zIndex: 0, width: NAV.W_DASHBOARD, borderRightStyle: 'hidden', bgcolor: 'background.purple' } }}
         >
           {renderContent}
         </Drawer>
@@ -95,14 +62,8 @@ export default function NavVertical({ openNav, onCloseNav }) {
         <Drawer
           open={openNav}
           onClose={onCloseNav}
-          ModalProps={{
-            keepMounted: true,
-          }}
-          PaperProps={{
-            sx: {
-              width: NAV.W_DASHBOARD,
-            },
-          }}
+          ModalProps={{ keepMounted: true }}
+          PaperProps={{ sx: { width: NAV.W_DASHBOARD, bgcolor: 'background.purple' } }}
         >
           {renderContent}
         </Drawer>

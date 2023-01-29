@@ -1,10 +1,8 @@
 // @mui
-import { alpha, styled } from '@mui/material/styles';
+import { styled } from '@mui/material/styles';
 import { ListItemIcon, ListSubheader, ListItemButton } from '@mui/material';
 // config
 import { ICON, NAV } from '../../../config-global';
-
-// ----------------------------------------------------------------------
 
 export const StyledItem = styled(ListItemButton, {
   shouldForwardProp: (prop) => prop !== 'active' && prop !== 'caption',
@@ -15,7 +13,7 @@ export const StyledItem = styled(ListItemButton, {
 
   const activeStyle = {
     color: theme.palette.primary.main,
-    backgroundColor: alpha(theme.palette.primary.main, theme.palette.action.selectedOpacity),
+    backgroundColor: theme.palette.background.default,
     ...(!isLight && {
       color: theme.palette.primary.light,
     }),
@@ -27,14 +25,15 @@ export const StyledItem = styled(ListItemButton, {
   };
 
   return {
+    borderRadius: 0,
     position: 'relative',
     textTransform: 'capitalize',
-    paddingLeft: theme.spacing(2),
+    paddingLeft: theme.spacing(2.5),
     paddingRight: theme.spacing(1.5),
-    marginBottom: theme.spacing(0.5),
-    color: theme.palette.text.secondary,
-    borderRadius: theme.shape.borderRadius,
+    // marginBottom: theme.spacing(0.5),
+    color: theme.palette.grey[100],
     height: NAV.H_DASHBOARD_ITEM,
+    // borderBottom: '1px solid rgba(255, 255, 255, 0.15)',
     // Sub item
     ...(subItem && {
       height: NAV.H_DASHBOARD_ITEM_SUB,
@@ -69,8 +68,6 @@ export const StyledItem = styled(ListItemButton, {
   };
 });
 
-// ----------------------------------------------------------------------
-
 export const StyledIcon = styled(ListItemIcon)({
   display: 'flex',
   alignItems: 'center',
@@ -78,8 +75,6 @@ export const StyledIcon = styled(ListItemIcon)({
   width: ICON.NAV_ITEM,
   height: ICON.NAV_ITEM,
 });
-
-// ----------------------------------------------------------------------
 
 export const StyledDotIcon = styled('span', {
   shouldForwardProp: (prop) => prop !== 'active',
@@ -97,12 +92,11 @@ export const StyledDotIcon = styled('span', {
   }),
 }));
 
-// ----------------------------------------------------------------------
-
 export const StyledSubheader = styled(ListSubheader)(({ theme }) => ({
   ...theme.typography.overline,
   fontSize: 11,
+  opacity: 0.7,
   paddingTop: theme.spacing(3),
-  paddingBottom: theme.spacing(1),
-  color: theme.palette.text.secondary,
+  paddingBottom: theme.spacing(2),
+  color: theme.palette.background.default,
 }));

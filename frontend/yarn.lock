@@ -2869,6 +2869,11 @@
   "resolved" "https://registry.npmjs.org/at-least-node/-/at-least-node-1.0.0.tgz"
   "version" "1.0.0"
 
+"attr-accept@^2.2.2":
+  "integrity" "sha512-7prDjvt9HmqiZ0cl5CRjtS84sEyhsHP2coDkaZKRKVfCDo9s7iw7ChVmar78Gu9pC4SoR/28wFu/G5JJhTnqEg=="
+  "resolved" "https://registry.npmjs.org/attr-accept/-/attr-accept-2.2.2.tgz"
+  "version" "2.2.2"
+
 "autoprefixer@^10.4.13":
   "integrity" "sha512-49vKpMqcZYsJjwotvt4+h/BCjJVnhGwcLpDt5xkcaOG3eLrG/HUYLagrihYsQ+qrIBgIzX1Rw7a6L8I/ZA1Atg=="
   "resolved" "https://registry.npmjs.org/autoprefixer/-/autoprefixer-10.4.13.tgz"
@@ -4735,6 +4740,13 @@
   dependencies:
     "loader-utils" "^2.0.0"
     "schema-utils" "^3.0.0"
+
+"file-selector@^0.6.0":
+  "integrity" "sha512-QlZ5yJC0VxHxQQsQhXvBaC7VRJ2uaxTf+Tfpu4Z/OcVQJVpZO+DGU0rkoVW5ce2SccxugvpBJoMvUs59iILYdw=="
+  "resolved" "https://registry.npmjs.org/file-selector/-/file-selector-0.6.0.tgz"
+  "version" "0.6.0"
+  dependencies:
+    "tslib" "^2.4.0"
 
 "filelist@^1.0.1":
   "integrity" "sha512-w1cEuf3S+DrLCQL7ET6kz+gmlJdbq9J7yXCSjK/OZCPA+qEN1WyF4ZAf0YYJa4/shHJra2t/d/r8SV4Ji+x+8Q=="
@@ -6779,6 +6791,11 @@
   dependencies:
     "boolbase" "^1.0.0"
 
+"numeral@^2.0.6":
+  "integrity" "sha512-qaKRmtYPZ5qdw4jWJD6bxEf1FJEqllJrwxCLIm0sQU/A7v2/czigzOb+C2uSiFsa9lBUzeH7M1oK+Q+OLxL3kA=="
+  "resolved" "https://registry.npmjs.org/numeral/-/numeral-2.0.6.tgz"
+  "version" "2.0.6"
+
 "nwsapi@^2.2.0":
   "integrity" "sha512-90yv+6538zuvUMnN+zCr8LuV6bPFdq50304114vJYJ8RDyK8D5O9Phpbd6SZWgI7PwzmmfN1upeOJlvybDSgCw=="
   "resolved" "https://registry.npmjs.org/nwsapi/-/nwsapi-2.2.2.tgz"
@@ -7877,13 +7894,22 @@
     "strip-ansi" "^6.0.1"
     "text-table" "^0.2.0"
 
-"react-dom@^15.x.x || ^16.x.x || ^17.x.x || ^18.x.x", "react-dom@^16.6.0 || ^17.0.0 || ^18.0.0", "react-dom@^16.8.0 || ^17.0.0 || ^18.0.0", "react-dom@^17.0.0 || ^18.0.0", "react-dom@^18.0.0", "react-dom@^18.2.0", "react-dom@>=16.6.0", "react-dom@>=16.8":
+"react-dom@^15.x.x || ^16.x.x || ^17.x.x || ^18.x.x", "react-dom@^16.6.0 || ^17.0.0 || ^18.0.0", "react-dom@^16.8.0 || ^17.0.0 || ^18.0.0", "react-dom@^17.0.0 || ^18.0.0", "react-dom@^18.0.0", "react-dom@^18.2.0", "react-dom@>=16.6.0", "react-dom@>=16.8", "react-dom@>=16.8.0":
   "integrity" "sha512-6IMTriUmvsjHUjNtEDudZfuDQUoWXVxKHhlEGSk81n4YFS+r/Kl99wXiwlVXtPBtJenozv2P+hxDsw9eA7Xo6g=="
   "resolved" "https://registry.npmjs.org/react-dom/-/react-dom-18.2.0.tgz"
   "version" "18.2.0"
   dependencies:
     "loose-envify" "^1.1.0"
     "scheduler" "^0.23.0"
+
+"react-dropzone@^14.2.3":
+  "integrity" "sha512-O3om8I+PkFKbxCukfIR3QAGftYXDZfOE2N1mr/7qebQJHs7U+/RSL/9xomJNpRg9kM5h9soQSdf0Gc7OHF5Fug=="
+  "resolved" "https://registry.npmjs.org/react-dropzone/-/react-dropzone-14.2.3.tgz"
+  "version" "14.2.3"
+  dependencies:
+    "attr-accept" "^2.2.2"
+    "file-selector" "^0.6.0"
+    "prop-types" "^15.8.1"
 
 "react-error-overlay@^6.0.11":
   "integrity" "sha512-/6UZ2qgEyH2aqzYZgQPxEnz33NJ2gNsnHA2o5+o4wW9bLM/JYQitNP9xPhsXwC08hMMovfGe/8retsdDsczPRg=="
@@ -8032,7 +8058,7 @@
     "loose-envify" "^1.4.0"
     "prop-types" "^15.6.2"
 
-"react@^15.x.x || ^16.x.x || ^17.x.x || ^18.x.x", "react@^16.6.0 || ^17.0.0 || ^18.0.0", "react@^16.8.0 || ^17 || ^18", "react@^16.8.0 || ^17.0.0 || ^18.0.0", "react@^17.0.0 || ^18.0.0", "react@^18.0.0", "react@^18.2.0", "react@>= 16", "react@>= 16.8.0", "react@>=16", "react@>=16.6.0", "react@>=16.8", "react@>=16.8.0":
+"react@^15.x.x || ^16.x.x || ^17.x.x || ^18.x.x", "react@^16.6.0 || ^17.0.0 || ^18.0.0", "react@^16.8.0 || ^17 || ^18", "react@^16.8.0 || ^17.0.0 || ^18.0.0", "react@^17.0.0 || ^18.0.0", "react@^18.0.0", "react@^18.2.0", "react@>= 16", "react@>= 16.8 || 18.0.0", "react@>= 16.8.0", "react@>=16", "react@>=16.6.0", "react@>=16.8", "react@>=16.8.0":
   "integrity" "sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ=="
   "resolved" "https://registry.npmjs.org/react/-/react-18.2.0.tgz"
   "version" "18.2.0"
@@ -9853,6 +9879,11 @@
     "string-width" "^4.2.0"
     "y18n" "^5.0.5"
     "yargs-parser" "^20.2.2"
+
+"yet-another-react-lightbox@^2.2.7":
+  "integrity" "sha512-v6/P2NUOjAQ9egmPYyn8BG3qs6tszVNGWC5fVaKaURqDXcwEqpoSBr4/9djWwiW6DdzxJh06KRV9Fas2HHeExg=="
+  "resolved" "https://registry.npmjs.org/yet-another-react-lightbox/-/yet-another-react-lightbox-2.2.7.tgz"
+  "version" "2.2.7"
 
 "yocto-queue@^0.1.0":
   "integrity" "sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q=="

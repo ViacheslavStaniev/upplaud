@@ -6,7 +6,7 @@ import { useSettingsContext } from '../components/settings';
 
 // ----------------------------------------------------------------------
 
-export default function PageSix() {
+export default function PostingTemplate() {
   const { themeStretch } = useSettingsContext();
 
   return (

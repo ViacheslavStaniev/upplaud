@@ -53,12 +53,7 @@ export default function DashboardLayout() {
       <>
         <Header onOpenNav={handleOpen} />
 
-        <Box
-          sx={{
-            display: { lg: 'flex' },
-            minHeight: { lg: 1 },
-          }}
-        >
+        <Box sx={{ display: { lg: 'flex' }, minHeight: { lg: 1 } }}>
           {isDesktop ? <NavMini /> : renderNavVertical}
 
           <Main>
@@ -73,12 +68,7 @@ export default function DashboardLayout() {
     <>
       <Header onOpenNav={handleOpen} />
 
-      <Box
-        sx={{
-          display: { lg: 'flex' },
-          minHeight: { lg: 1 },
-        }}
-      >
+      <Box sx={{ display: { lg: 'flex' }, minHeight: { lg: 1 } }}>
         {renderNavVertical}
 
         <Main>

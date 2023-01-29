@@ -6,7 +6,7 @@ import { useSettingsContext } from '../components/settings';
 
 // ----------------------------------------------------------------------
 
-export default function PageThree() {
+export default function EmailTemplate() {
   const { themeStretch } = useSettingsContext();
 
   return (

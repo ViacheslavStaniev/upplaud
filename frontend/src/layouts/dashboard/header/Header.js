@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 // @mui
 import { useTheme } from '@mui/material/styles';
-import { Stack, AppBar, Toolbar, IconButton } from '@mui/material';
+import { Stack, AppBar, Toolbar, IconButton, Divider } from '@mui/material';
 // utils
 import { bgBlur } from '../../../utils/cssStyles';
 // hooks
@@ -16,8 +16,8 @@ import { useSettingsContext } from '../../../components/settings';
 //
 import Searchbar from './Searchbar';
 import AccountPopover from './AccountPopover';
-import LanguagePopover from './LanguagePopover';
-import ContactsPopover from './ContactsPopover';
+// import LanguagePopover from './LanguagePopover';
+// import ContactsPopover from './ContactsPopover';
 import NotificationsPopover from './NotificationsPopover';
 
 // ----------------------------------------------------------------------
@@ -51,18 +51,14 @@ export default function Header({ onOpenNav }) {
 
       <Searchbar />
 
-      <Stack
-        flexGrow={1}
-        direction="row"
-        alignItems="center"
-        justifyContent="flex-end"
-        spacing={{ xs: 0.5, sm: 1.5 }}
-      >
-        <LanguagePopover />
+      <Stack flexGrow={1} direction="row" alignItems="center" justifyContent="flex-end" spacing={{ xs: 0.5, sm: 1.5 }}>
+        {/* <LanguagePopover /> */}
 
         <NotificationsPopover />
 
-        <ContactsPopover />
+        {/* <ContactsPopover /> */}
+
+        <Divider orientation="vertical" sx={{ py: 2 }} />
 
         <AccountPopover />
       </Stack>

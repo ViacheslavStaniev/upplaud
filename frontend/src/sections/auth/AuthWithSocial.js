@@ -62,7 +62,7 @@ export default function AuthWithSocial() {
         </IconButton>
 
         <IconButton onClick={handleINLogin}>
-          <Iconify icon="mdi:instagram" color="#fa7e1e" />
+          <Iconify icon="mdi:instagram" color="#C938AC" />
         </IconButton>
 
         <IconButton onClick={handleLNLogin}>

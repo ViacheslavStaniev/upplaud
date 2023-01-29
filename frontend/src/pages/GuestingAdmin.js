@@ -6,7 +6,7 @@ import { useSettingsContext } from '../components/settings';
 
 // ----------------------------------------------------------------------
 
-export default function PageFive() {
+export default function GuestingAdmin() {
   const { themeStretch } = useSettingsContext();
 
   return (
