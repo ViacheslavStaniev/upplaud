@@ -1,5 +1,7 @@
-import axios from '../utils/axios';
+// routes
 import { PATH_AUTH } from '../routes/paths';
+// utils
+import axios from '../utils/axios';
 
 // ----------------------------------------------------------------------
 
@@ -20,7 +22,9 @@ function jwtDecode(token) {
 // ----------------------------------------------------------------------
 
 export const isValidToken = (accessToken) => {
-  if (!accessToken) return false;
+  if (!accessToken) {
+    return false;
+  }
 
   const decoded = jwtDecode(accessToken);
 

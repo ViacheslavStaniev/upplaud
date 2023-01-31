@@ -8,6 +8,8 @@ import { MotionContainer, varBounce } from '../components/animate';
 // assets
 import { ForbiddenIllustration } from '../assets/illustrations';
 
+// ----------------------------------------------------------------------
+
 export default function Page403() {
   return (
     <>

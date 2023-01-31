@@ -4,6 +4,8 @@ import { Stack, Button, Typography, Box } from '@mui/material';
 import { useAuthContext } from '../../../auth/useAuthContext';
 // locales
 import { useLocales } from '../../../locales';
+// routes
+import { PATH_DOCS } from '../../../routes/paths';
 
 // ----------------------------------------------------------------------
 
@@ -36,7 +38,9 @@ export default function NavDocs() {
         </Typography>
       </div>
 
-      <Button variant="contained">{`${translate('docs.documentation')}`}</Button>
+      <Button href={PATH_DOCS.root} target="_blank" rel="noopener" variant="contained">
+        {`${translate('docs.documentation')}`}
+      </Button>
     </Stack>
   );
 }

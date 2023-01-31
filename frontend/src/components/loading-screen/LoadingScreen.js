@@ -42,7 +42,10 @@ export default function LoadingScreen() {
 
   const isDashboard = isInitialized && pathname.includes('/dashboard') && isDesktop;
 
-  const size = (themeLayout === 'mini' && NAV.W_DASHBOARD_MINI) || (themeLayout === 'vertical' && NAV.W_DASHBOARD) || 128;
+  const size =
+    (themeLayout === 'mini' && NAV.W_DASHBOARD_MINI) ||
+    (themeLayout === 'vertical' && NAV.W_DASHBOARD) ||
+    128;
 
   return (
     <>

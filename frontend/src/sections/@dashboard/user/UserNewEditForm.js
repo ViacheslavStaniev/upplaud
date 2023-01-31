@@ -11,13 +11,18 @@ import { Box, Card, Grid, Stack, Switch, Typography, FormControlLabel } from '@m
 // utils
 import { fData } from '../../../utils/formatNumber';
 // routes
-import { ROUTES } from '../../../routes/paths';
+import { PATH_DASHBOARD } from '../../../routes/paths';
 // assets
 import { countries } from '../../../assets/data';
 // components
 import Label from '../../../components/label';
 import { useSnackbar } from '../../../components/snackbar';
-import FormProvider, { RHFSelect, RHFSwitch, RHFTextField, RHFUploadAvatar } from '../../../components/hook-form';
+import FormProvider, {
+  RHFSelect,
+  RHFSwitch,
+  RHFTextField,
+  RHFUploadAvatar,
+} from '../../../components/hook-form';
 
 // ----------------------------------------------------------------------
 
@@ -95,7 +100,7 @@ export default function UserNewEditForm({ isEdit = false, currentUser }) {
       await new Promise((resolve) => setTimeout(resolve, 500));
       reset();
       enqueueSnackbar(!isEdit ? 'Create success!' : 'Update success!');
-      navigate(ROUTES.user.list);
+      navigate(PATH_DASHBOARD.user.list);
       console.log('DATA', data);
     } catch (error) {
       console.error(error);
@@ -165,7 +170,9 @@ export default function UserNewEditForm({ isEdit = false, currentUser }) {
                       <Switch
                         {...field}
                         checked={field.value !== 'active'}
-                        onChange={(event) => field.onChange(event.target.checked ? 'banned' : 'active')}
+                        onChange={(event) =>
+                          field.onChange(event.target.checked ? 'banned' : 'active')
+                        }
                       />
                     )}
                   />

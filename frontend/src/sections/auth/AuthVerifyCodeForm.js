@@ -7,7 +7,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { Stack, FormHelperText } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 // routes
-import { ROUTES } from '../../routes/paths';
+import { PATH_DASHBOARD } from '../../routes/paths';
 // components
 import { useSnackbar } from '../../components/snackbar';
 import FormProvider, { RHFCodes } from '../../components/hook-form';
@@ -53,7 +53,7 @@ export default function AuthVerifyCodeForm() {
       await new Promise((resolve) => setTimeout(resolve, 500));
       console.log('DATA', Object.values(data).join(''));
       enqueueSnackbar('Verify success!');
-      navigate(ROUTES.root);
+      navigate(PATH_DASHBOARD.root);
     } catch (error) {
       console.error(error);
     }
@@ -64,13 +64,25 @@ export default function AuthVerifyCodeForm() {
       <Stack spacing={3}>
         <RHFCodes keyName="code" inputs={['code1', 'code2', 'code3', 'code4', 'code5', 'code6']} />
 
-        {(!!errors.code1 || !!errors.code2 || !!errors.code3 || !!errors.code4 || !!errors.code5 || !!errors.code6) && (
+        {(!!errors.code1 ||
+          !!errors.code2 ||
+          !!errors.code3 ||
+          !!errors.code4 ||
+          !!errors.code5 ||
+          !!errors.code6) && (
           <FormHelperText error sx={{ px: 2 }}>
             Code is required
           </FormHelperText>
         )}
 
-        <LoadingButton fullWidth size="large" type="submit" variant="contained" loading={isSubmitting} sx={{ mt: 3 }}>
+        <LoadingButton
+          fullWidth
+          size="large"
+          type="submit"
+          variant="contained"
+          loading={isSubmitting}
+          sx={{ mt: 3 }}
+        >
           Verify
         </LoadingButton>
       </Stack>

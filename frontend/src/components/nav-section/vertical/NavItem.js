@@ -11,6 +11,8 @@ import Iconify from '../../iconify';
 //
 import { StyledItem, StyledIcon, StyledDotIcon } from './styles';
 
+// ----------------------------------------------------------------------
+
 NavItem.propTypes = {
   open: PropTypes.bool,
   active: PropTypes.bool,
@@ -22,9 +24,9 @@ NavItem.propTypes = {
 export default function NavItem({ item, depth, open, active, isExternalLink, ...other }) {
   const { translate } = useLocales();
 
-  const subItem = depth !== 1;
-
   const { title, path, icon, info, children, disabled, caption, roles } = item;
+
+  const subItem = depth !== 1;
 
   const renderContent = (
     <StyledItem depth={depth} active={active} disabled={disabled} caption={!!caption} {...other}>
@@ -36,6 +38,29 @@ export default function NavItem({ item, depth, open, active, isExternalLink, ...
         </StyledIcon>
       )}
 
+      {active && (
+        <Box
+          sx={{
+            zIndex: -1,
+            position: 'absolute',
+            height: 50,
+            width: 50,
+            top: -50,
+            right: 0,
+            bgcolor: 'background.default',
+          }}
+        >
+          <Box
+            sx={{
+              height: '100%',
+              width: '100%',
+              bgcolor: 'background.purple',
+              borderRadius: '0 0 100px 0',
+            }}
+          />
+        </Box>
+      )}
+
       <ListItemText
         primary={`${translate(title)}`}
         secondary={
@@ -45,9 +70,36 @@ export default function NavItem({ item, depth, open, active, isExternalLink, ...
             </Tooltip>
           )
         }
-        primaryTypographyProps={{ noWrap: true, component: 'span', variant: active ? 'subtitle2' : 'body2' }}
+        primaryTypographyProps={{
+          noWrap: true,
+          component: 'span',
+          variant: active ? 'subtitle2' : 'body2',
+        }}
         secondaryTypographyProps={{ noWrap: true, variant: 'caption' }}
       />
+
+      {active && (
+        <Box
+          sx={{
+            zIndex: -1,
+            position: 'absolute',
+            height: 50,
+            width: 50,
+            bottom: -50,
+            right: 0,
+            bgcolor: 'background.default',
+          }}
+        >
+          <Box
+            sx={{
+              height: '100%',
+              width: '100%',
+              bgcolor: 'background.purple',
+              borderRadius: '0 100px 0 0',
+            }}
+          />
+        </Box>
+      )}
 
       {info && (
         <Box component="span" sx={{ lineHeight: 0 }}>
@@ -56,7 +108,11 @@ export default function NavItem({ item, depth, open, active, isExternalLink, ...
       )}
 
       {!!children && (
-        <Iconify width={16} icon={open ? 'eva:arrow-ios-downward-fill' : 'eva:arrow-ios-forward-fill'} sx={{ ml: 1, flexShrink: 0 }} />
+        <Iconify
+          width={16}
+          sx={{ ml: 1, flexShrink: 0 }}
+          icon={open ? 'eva:arrow-ios-downward-fill' : 'eva:arrow-ios-forward-fill'}
+        />
       )}
     </StyledItem>
   );

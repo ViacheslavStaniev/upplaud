@@ -1,3 +1,5 @@
+// ----------------------------------------------------------------------
+
 export default function localStorageAvailable() {
   try {
     // Incognito mode might reject access to the localStorage for security reasons.

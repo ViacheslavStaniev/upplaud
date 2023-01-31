@@ -13,8 +13,11 @@ import Scrollbar from '../../../components/scrollbar';
 import { NavSectionVertical } from '../../../components/nav-section';
 //
 import navConfig from './config-navigation';
+// import NavDocs from './NavDocs';
 // import NavAccount from './NavAccount';
 // import NavToggleButton from './NavToggleButton';
+
+// ----------------------------------------------------------------------
 
 NavVertical.propTypes = {
   openNav: PropTypes.bool,
@@ -33,7 +36,12 @@ export default function NavVertical({ openNav, onCloseNav }) {
   }, [pathname]);
 
   const renderContent = (
-    <Scrollbar sx={{ height: 1, '& .simplebar-content': { height: 1, display: 'flex', flexDirection: 'column' } }}>
+    <Scrollbar
+      sx={{
+        height: 1,
+        '& .simplebar-content': { height: 1, display: 'flex', flexDirection: 'column' },
+      }}
+    >
       <Stack spacing={3} sx={{ pt: 3, pb: 3, px: 2.5, flexShrink: 0, bgcolor: 'background.paper' }}>
         <Logo />
 
@@ -43,6 +51,8 @@ export default function NavVertical({ openNav, onCloseNav }) {
       <NavSectionVertical data={navConfig} />
 
       <Box sx={{ flexGrow: 1 }} />
+
+      {/* <NavDocs /> */}
     </Scrollbar>
   );
 
@@ -54,7 +64,14 @@ export default function NavVertical({ openNav, onCloseNav }) {
         <Drawer
           open
           variant="permanent"
-          PaperProps={{ sx: { zIndex: 0, width: NAV.W_DASHBOARD, borderRightStyle: 'hidden', bgcolor: 'background.purple' } }}
+          PaperProps={{
+            sx: {
+              zIndex: 0,
+              width: NAV.W_DASHBOARD,
+              borderRightStyle: 'hidden',
+              bgcolor: 'background.purple',
+            },
+          }}
         >
           {renderContent}
         </Drawer>

@@ -1,1 +1,1 @@
-export { default } from './PodasqLogo';
+export { default } from './Logo';

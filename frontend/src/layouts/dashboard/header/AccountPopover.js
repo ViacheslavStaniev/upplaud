@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 // @mui
 import { Box, Divider, Typography, Stack, MenuItem } from '@mui/material';
 // routes
-import { PATH_AUTH } from '../../../routes/paths';
+import { PATH_DASHBOARD, PATH_AUTH } from '../../../routes/paths';
 // auth
 import { useAuthContext } from '../../../auth/useAuthContext';
 // components
@@ -12,22 +12,41 @@ import { CustomAvatar } from '../../../components/custom-avatar';
 import { useSnackbar } from '../../../components/snackbar';
 import MenuPopover from '../../../components/menu-popover';
 
+// ----------------------------------------------------------------------
+
 const OPTIONS = [
-  { label: 'Home', linkTo: '/' },
-  { label: 'Profile', linkTo: '/user/profile' },
-  { label: 'Settings', linkTo: '/' },
+  {
+    label: 'Home',
+    linkTo: '/',
+  },
+  {
+    label: 'Profile',
+    linkTo: PATH_DASHBOARD.user.profile,
+  },
+  {
+    label: 'Settings',
+    linkTo: PATH_DASHBOARD.user.account,
+  },
 ];
+
+// ----------------------------------------------------------------------
 
 export default function AccountPopover() {
   const navigate = useNavigate();
 
   const { user, logout } = useAuthContext();
+
   const { enqueueSnackbar } = useSnackbar();
 
   const [openPopover, setOpenPopover] = useState(null);
 
-  const handleClosePopover = () => setOpenPopover(null);
-  const handleOpenPopover = (event) => setOpenPopover(event.currentTarget);
+  const handleOpenPopover = (event) => {
+    setOpenPopover(event.currentTarget);
+  };
+
+  const handleClosePopover = () => {
+    setOpenPopover(null);
+  };
 
   const handleLogout = async () => {
     try {
@@ -47,7 +66,16 @@ export default function AccountPopover() {
 
   return (
     <>
-      <Stack onClick={handleOpenPopover} flexDirection="row" alignItems="center" gap={1} sx={{ cursor: 'pointer' }} color="black">
+      <Stack
+        onClick={handleOpenPopover}
+        sx={{
+          gap: 1,
+          cursor: 'pointer',
+          color: 'text.primary',
+          alignItems: 'center',
+          flexDirection: 'row',
+        }}
+      >
         <CustomAvatar src={user?.photoURL} alt={user?.displayName} name={user?.displayName} />
         <Typography variant="subtitle1">{user?.displayName}</Typography>
         <Iconify icon={`mdi:chevron-${openPopover ? 'up' : 'down'}`} />

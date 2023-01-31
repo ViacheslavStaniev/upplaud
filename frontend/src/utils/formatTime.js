@@ -1,5 +1,7 @@
 import { format, getTime, formatDistanceToNow } from 'date-fns';
 
+// ----------------------------------------------------------------------
+
 export function fDate(date, newFormat) {
   const fm = newFormat || 'dd MMM yyyy';
 
@@ -17,5 +19,9 @@ export function fTimestamp(date) {
 }
 
 export function fToNow(date) {
-  return date ? formatDistanceToNow(new Date(date), { addSuffix: true }) : '';
+  return date
+    ? formatDistanceToNow(new Date(date), {
+        addSuffix: true,
+      })
+    : '';
 }

@@ -22,10 +22,17 @@ export default function NavSectionVertical({ data, sx, ...other }) {
 
         return (
           <List key={key} disablePadding>
-            {group.subheader && <StyledSubheader disableSticky>{`${translate(group.subheader)}`}</StyledSubheader>}
+            {group.subheader && (
+              <StyledSubheader disableSticky>{`${translate(group.subheader)}`}</StyledSubheader>
+            )}
 
             {group.items.map((list) => (
-              <NavList depth={1} data={list} hasChild={!!list.children} key={list.title + list.path} />
+              <NavList
+                depth={1}
+                data={list}
+                hasChild={!!list.children}
+                key={list.title + list.path}
+              />
             ))}
           </List>
         );

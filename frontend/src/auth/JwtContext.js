@@ -84,7 +84,12 @@ export function AuthProvider({ children }) {
 
   // REGISTER
   const register = useCallback(async (email, password, firstName, lastName) => {
-    const response = await axios.post('/api/account/register', { email, password, firstName, lastName });
+    const response = await axios.post('/api/account/register', {
+      email,
+      password,
+      firstName,
+      lastName,
+    });
 
     const { accessToken, user } = response.data;
 

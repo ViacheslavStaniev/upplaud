@@ -2,6 +2,8 @@ import PropTypes from 'prop-types';
 // @mui
 import { Dialog, Button, DialogTitle, DialogActions, DialogContent } from '@mui/material';
 
+// ----------------------------------------------------------------------
+
 ConfirmDialog.propTypes = {
   open: PropTypes.bool,
   title: PropTypes.node,

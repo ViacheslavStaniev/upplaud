@@ -15,6 +15,8 @@ import { useAuthContext } from '../../auth/useAuthContext';
 import Iconify from '../../components/iconify';
 import FormProvider, { RHFTextField } from '../../components/hook-form';
 
+// ----------------------------------------------------------------------
+
 export default function AuthLoginForm() {
   const { login } = useAuthContext();
 
@@ -79,12 +81,24 @@ export default function AuthLoginForm() {
       </Stack>
 
       <Stack alignItems="flex-end" sx={{ my: 2 }}>
-        <Link component={RouterLink} to={PATH_AUTH.resetPassword} variant="body2" color="inherit" underline="always">
+        <Link
+          component={RouterLink}
+          to={PATH_AUTH.resetPassword}
+          variant="body2"
+          color="inherit"
+          underline="always"
+        >
           Forgot password?
         </Link>
       </Stack>
 
-      <LoadingButton fullWidth size="large" type="submit" variant="contained" loading={isSubmitSuccessful || isSubmitting}>
+      <LoadingButton
+        fullWidth
+        size="large"
+        type="submit"
+        variant="contained"
+        loading={isSubmitSuccessful || isSubmitting}
+      >
         Login
       </LoadingButton>
     </FormProvider>

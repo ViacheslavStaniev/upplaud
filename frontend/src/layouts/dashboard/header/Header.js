@@ -51,7 +51,13 @@ export default function Header({ onOpenNav }) {
 
       <Searchbar />
 
-      <Stack flexGrow={1} direction="row" alignItems="center" justifyContent="flex-end" spacing={{ xs: 0.5, sm: 1.5 }}>
+      <Stack
+        flexGrow={1}
+        direction="row"
+        alignItems="center"
+        justifyContent="flex-end"
+        spacing={{ xs: 0.5, sm: 1.5 }}
+      >
         {/* <LanguagePopover /> */}
 
         <NotificationsPopover />
@@ -95,14 +101,7 @@ export default function Header({ onOpenNav }) {
         }),
       }}
     >
-      <Toolbar
-        sx={{
-          height: 1,
-          px: { lg: 5 },
-        }}
-      >
-        {renderContent}
-      </Toolbar>
+      <Toolbar sx={{ height: 1, px: { lg: 5 } }}>{renderContent}</Toolbar>
     </AppBar>
   );
 }

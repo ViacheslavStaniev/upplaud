@@ -23,6 +23,7 @@ const CustomAvatar = forwardRef(({ color, name = '', BadgeProps, children, sx, .
   const theme = useTheme();
 
   const charAtName = getCharAtName(name);
+
   const colorByName = getColorByName(name);
 
   const colr = color || colorByName;
@@ -50,7 +51,11 @@ const CustomAvatar = forwardRef(({ color, name = '', BadgeProps, children, sx, .
     );
 
   return BadgeProps ? (
-    <Badge overlap="circular" anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} {...BadgeProps}>
+    <Badge
+      overlap="circular"
+      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      {...BadgeProps}
+    >
       {renderContent}
     </Badge>
   ) : (
@@ -63,7 +68,15 @@ CustomAvatar.propTypes = {
   name: PropTypes.string,
   children: PropTypes.node,
   BadgeProps: PropTypes.object,
-  color: PropTypes.oneOf(['default', 'primary', 'secondary', 'info', 'success', 'warning', 'error']),
+  color: PropTypes.oneOf([
+    'default',
+    'primary',
+    'secondary',
+    'info',
+    'success',
+    'warning',
+    'error',
+  ]),
 };
 
 export default CustomAvatar;

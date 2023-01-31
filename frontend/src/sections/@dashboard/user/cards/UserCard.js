@@ -11,6 +11,8 @@ import Image from '../../../../components/image';
 import Iconify from '../../../../components/iconify';
 import SvgColor from '../../../../components/svg-color';
 
+// ----------------------------------------------------------------------
+
 const StyledOverlay = styled('div')(({ theme }) => ({
   top: 0,
   left: 0,

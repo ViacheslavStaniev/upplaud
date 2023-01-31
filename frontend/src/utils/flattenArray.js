@@ -1,3 +1,5 @@
+// ----------------------------------------------------------------------
+
 export default function flattenArray(list, key = 'children') {
   let children = [];
 
@@ -5,7 +7,6 @@ export default function flattenArray(list, key = 'children') {
     if (item[key] && item[key].length) {
       children = [...children, ...item[key]];
     }
-
     return item;
   });
 

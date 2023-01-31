@@ -12,6 +12,8 @@ import { useAuthContext } from '../../auth/useAuthContext';
 import Iconify from '../../components/iconify';
 import FormProvider, { RHFTextField } from '../../components/hook-form';
 
+// ----------------------------------------------------------------------
+
 export default function AuthRegisterForm() {
   const { register } = useAuthContext();
 
@@ -85,7 +87,13 @@ export default function AuthRegisterForm() {
           }}
         />
 
-        <LoadingButton fullWidth size="large" type="submit" variant="contained" loading={isSubmitting || isSubmitSuccessful}>
+        <LoadingButton
+          fullWidth
+          size="large"
+          type="submit"
+          variant="contained"
+          loading={isSubmitting || isSubmitSuccessful}
+        >
           Create account
         </LoadingButton>
       </Stack>

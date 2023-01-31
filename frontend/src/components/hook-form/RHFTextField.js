@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
-import RHFInputLabel from './RHFInputLabel';
 import { TextField } from '@mui/material';
 import { useFormContext, Controller } from 'react-hook-form';
+import RHFInputLabel from './RHFInputLabel';
 
 RHFTextField.propTypes = {
   name: PropTypes.string,

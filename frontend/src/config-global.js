@@ -1,7 +1,8 @@
 // routes
-import { ROUTES } from './routes/paths';
+import { PATH_DASHBOARD } from './routes/paths';
 
-// API ----------------------------------------------------------------------
+// API
+// ----------------------------------------------------------------------
 
 export const HOST_API_KEY = process.env.REACT_APP_HOST_API_KEY || '';
 
@@ -28,7 +29,7 @@ export const AUTH0_API = {
 export const MAP_API = process.env.REACT_APP_MAPBOX_API;
 
 // ROOT PATH AFTER LOGIN SUCCESSFUL
-export const PATH_AFTER_LOGIN = ROUTES.accountAdmin;
+export const PATH_AFTER_LOGIN = PATH_DASHBOARD.guestii.accountAdmin; // as '/dashboard/account-admin'
 
 // LAYOUT
 // ----------------------------------------------------------------------
@@ -42,12 +43,11 @@ export const HEADER = {
 
 export const NAV = {
   W_BASE: 260,
-  W_LARGE: 320,
   W_DASHBOARD: 280,
   W_DASHBOARD_MINI: 88,
   //
   H_DASHBOARD_ITEM: 54,
-  H_DASHBOARD_ITEM_SUB: 36,
+  H_DASHBOARD_ITEM_SUB: 40,
   //
   H_DASHBOARD_ITEM_HORIZONTAL: 32,
 };
