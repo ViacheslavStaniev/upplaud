@@ -2,14 +2,14 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 // Authentication status
-const STATUS_ACTIVE = 0;
-const STATUS_INACTIVE = 1;
-const STATUS_DELETED = 2;
+const STATUS_ACTIVE = 1;
+const STATUS_INACTIVE = 0;
+const STATUS_DELETED = -1;
 
 // Gender types
-const GENDER_UNKNOWN = -1;
-const GENDER_FEMALE = 0;
 const GENDER_MALE = 1;
+const GENDER_FEMALE = 2;
+const GENDER_UNKNOWN = 0;
 
 // ADMIN
 const IS_ADMIN_NO = 0;
@@ -47,22 +47,33 @@ const UserSchema = new Schema(
         default: GENDER_UNKNOWN,
       },
     },
+    username: {
+      type: String,
+      default: "",
+    },
     timezone: {
       type: String,
-      default: "Asia/Singapore",
+      default: "Asia/New Delhi",
     },
     status: {
       type: Number,
-      default: STATUS_INACTIVE,
+      default: STATUS_ACTIVE,
     },
     resetToken: "",
     isAdmin: {
       type: Number,
       default: IS_ADMIN_NO,
     },
-    prefix: String,
+    isPublic: {
+      type: Boolean,
+      default: true,
+    },
+    account: {
+      ref: "Account",
+      type: Schema.Types.ObjectId,
+    },
   },
-  { timestamps: true }
+  { timestamps: true, autoCreate: true }
 );
 
 module.exports = User = mongoose.model("User", UserSchema);

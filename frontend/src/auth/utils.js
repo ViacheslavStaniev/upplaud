@@ -1,6 +1,4 @@
-// routes
 import { PATH_AUTH } from '../routes/paths';
-// utils
 import axios from '../utils/axios';
 
 // ----------------------------------------------------------------------
@@ -22,9 +20,7 @@ function jwtDecode(token) {
 // ----------------------------------------------------------------------
 
 export const isValidToken = (accessToken) => {
-  if (!accessToken) {
-    return false;
-  }
+  if (!accessToken) return false;
 
   const decoded = jwtDecode(accessToken);
 
@@ -39,11 +35,8 @@ export const tokenExpired = (exp) => {
   // eslint-disable-next-line prefer-const
   let expiredTimer;
 
-  const currentTime = Date.now();
-
-  // Test token expires after 10s
-  // const timeLeft = currentTime + 10000 - currentTime; // ~10s
-  const timeLeft = exp * 1000 - currentTime;
+  // // Test token expires after 10s
+  const timeLeft = exp * 1000 - Date.now();
 
   clearTimeout(expiredTimer);
 

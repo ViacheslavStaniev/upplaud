@@ -76,7 +76,11 @@ export default function AccountPopover() {
           flexDirection: 'row',
         }}
       >
-        <CustomAvatar src={user?.photoURL} alt={user?.displayName} name={user?.displayName} />
+        <CustomAvatar
+          src={user?.profile?.picture}
+          alt={user?.displayName}
+          name={user?.displayName}
+        />
         <Typography variant="subtitle1">{user?.displayName}</Typography>
         <Iconify icon={`mdi:chevron-${openPopover ? 'up' : 'down'}`} />
       </Stack>

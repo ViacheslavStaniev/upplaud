@@ -1,24 +1,25 @@
 import PropTypes from 'prop-types';
 import { createContext, useEffect, useReducer, useCallback, useMemo } from 'react';
-// utils
+import { API_PATHS } from '../utils/apipaths';
 import axios from '../utils/axios';
 import localStorageAvailable from '../utils/localStorageAvailable';
-//
 import { isValidToken, setSession } from './utils';
 import { AUTH_TYPE } from '../utils/types';
-
-// ----------------------------------------------------------------------
 
 // NOTE:
 // We only build demo at basic level.
 // Customer will need to do some extra handling yourself if you want to extend the logic and other features...
 
-// ----------------------------------------------------------------------
-
 const initialState = { user: null, isInitialized: false, isAuthenticated: false };
 
 const reducer = (state, action) => {
   const { type, payload } = action;
+
+  // add displayname attr
+  if (payload && payload.user) {
+    const { name } = payload.user;
+    payload.user.displayName = `${name.first} ${name.last}`;
+  }
 
   if (type === AUTH_TYPE.INITIAL) {
     return { isInitialized: true, isAuthenticated: payload.isAuthenticated, user: payload.user };
@@ -33,11 +34,7 @@ const reducer = (state, action) => {
   return state;
 };
 
-// ----------------------------------------------------------------------
-
 export const AuthContext = createContext(null);
-
-// ----------------------------------------------------------------------
 
 AuthProvider.propTypes = { children: PropTypes.node };
 
@@ -53,11 +50,9 @@ export function AuthProvider({ children }) {
       if (accessToken && isValidToken(accessToken)) {
         setSession(accessToken);
 
-        const response = await axios.get('/api/account/my-account');
+        const { data } = await axios.get(API_PATHS.auth.me);
 
-        const { user } = response.data;
-
-        dispatch({ type: AUTH_TYPE.INITIAL, payload: { isAuthenticated: true, user } });
+        dispatch({ type: AUTH_TYPE.INITIAL, payload: { isAuthenticated: true, user: data } });
       } else {
         dispatch({ type: AUTH_TYPE.INITIAL, payload: { isAuthenticated: false, user: null } });
       }
@@ -73,7 +68,7 @@ export function AuthProvider({ children }) {
 
   // LOGIN
   const login = useCallback(async (email, password) => {
-    const response = await axios.post('/api/account/login', { email, password });
+    const response = await axios.post(API_PATHS.auth.login, { email, password });
 
     const { accessToken, user } = response.data;
 
@@ -84,7 +79,7 @@ export function AuthProvider({ children }) {
 
   // REGISTER
   const register = useCallback(async (email, password, firstName, lastName) => {
-    const response = await axios.post('/api/account/register', {
+    const response = await axios.post(API_PATHS.auth.register, {
       email,
       password,
       firstName,

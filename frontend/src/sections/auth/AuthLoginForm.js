@@ -27,14 +27,9 @@ export default function AuthLoginForm() {
     password: Yup.string().required('Password is required'),
   });
 
-  const defaultValues = {
-    email: 'demo@minimals.cc',
-    password: 'demo1234',
-  };
-
   const methods = useForm({
     resolver: yupResolver(LoginSchema),
-    defaultValues,
+    defaultValues: { email: 'tcmhack@gmail.com', password: '12345678' },
   });
 
   const {
@@ -52,7 +47,7 @@ export default function AuthLoginForm() {
       reset();
       setError('afterSubmit', {
         ...error,
-        message: error.message || error,
+        message: error.errors[0].msg || error,
       });
     }
   };
@@ -62,7 +57,7 @@ export default function AuthLoginForm() {
       <Stack spacing={3}>
         {!!errors.afterSubmit && <Alert severity="error">{errors.afterSubmit.message}</Alert>}
 
-        <RHFTextField name="email" label="Email address" />
+        <RHFTextField autoFocus name="email" label="Email address" />
 
         <RHFTextField
           name="password"

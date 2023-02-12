@@ -1,8 +1,6 @@
 import { Link as RouterLink } from 'react-router-dom';
 // @mui
-import { Alert, Tooltip, Stack, Typography, Link, Box } from '@mui/material';
-// auth
-import { useAuthContext } from '../../auth/useAuthContext';
+import { Stack, Typography, Link } from '@mui/material';
 // routes
 import { PATH_AUTH } from '../../routes/paths';
 // layouts
@@ -14,12 +12,10 @@ import AuthWithSocial from './AuthWithSocial';
 // ----------------------------------------------------------------------
 
 export default function Login() {
-  const { method } = useAuthContext();
-
   return (
     <LoginLayout>
       <Stack spacing={2} sx={{ mb: 5, position: 'relative' }}>
-        <Typography variant="h4">Sign in to Minimal</Typography>
+        <Typography variant="h4">Sign in to Podasq</Typography>
 
         <Stack direction="row" spacing={0.5}>
           <Typography variant="body2">New user?</Typography>
@@ -28,20 +24,7 @@ export default function Login() {
             Create an account
           </Link>
         </Stack>
-
-        <Tooltip title={method} placement="left">
-          <Box
-            component="img"
-            alt={method}
-            src={`/assets/icons/auth/ic_${method}.png`}
-            sx={{ width: 32, height: 32, position: 'absolute', right: 0 }}
-          />
-        </Tooltip>
       </Stack>
-
-      <Alert severity="info" sx={{ mb: 3 }}>
-        Use email : <strong>demo@minimals.cc</strong> / password :<strong> demo1234</strong>
-      </Alert>
 
       <AuthLoginForm />
 

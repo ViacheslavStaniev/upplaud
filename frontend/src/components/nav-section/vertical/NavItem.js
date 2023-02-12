@@ -38,7 +38,7 @@ export default function NavItem({ item, depth, open, active, isExternalLink, ...
         </StyledIcon>
       )}
 
-      {active && (
+      {active && !subItem && (
         <Box
           sx={{
             zIndex: -1,
@@ -78,7 +78,7 @@ export default function NavItem({ item, depth, open, active, isExternalLink, ...
         secondaryTypographyProps={{ noWrap: true, variant: 'caption' }}
       />
 
-      {active && (
+      {active && !subItem && (
         <Box
           sx={{
             zIndex: -1,

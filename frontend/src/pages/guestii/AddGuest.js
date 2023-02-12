@@ -18,12 +18,12 @@ import * as Yup from 'yup';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 
-import useResponsive from '../../../hooks/useResponsive';
+import useResponsive from '../../hooks/useResponsive';
 
 // components
-import Iconify from '../../../components/iconify';
-import FormProvider, { RHFTextField } from '../../../components/hook-form';
-import { useSettingsContext } from '../../../components/settings';
+import Iconify from '../../components/iconify';
+import FormProvider, { RHFTextField } from '../../components/hook-form';
+import { useSettingsContext } from '../../components/settings';
 
 export default function AccountAdmin() {
   const { themeStretch } = useSettingsContext();

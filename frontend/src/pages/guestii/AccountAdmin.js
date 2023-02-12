@@ -20,14 +20,17 @@ import * as Yup from 'yup';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 
-import useResponsive from '../../../hooks/useResponsive';
+import { useAuthContext } from '../../auth/useAuthContext';
+
+import useResponsive from '../../hooks/useResponsive';
 
 // components
-import Iconify from '../../../components/iconify';
-import FormProvider, { RHFInputLabel, RHFTextField } from '../../../components/hook-form';
-import { useSettingsContext } from '../../../components/settings';
+import Iconify from '../../components/iconify';
+import FormProvider, { RHFInputLabel, RHFTextField } from '../../components/hook-form';
+import { useSettingsContext } from '../../components/settings';
 
 export default function AccountAdmin() {
+  const { user } = useAuthContext();
   const { themeStretch } = useSettingsContext();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -46,7 +49,13 @@ export default function AccountAdmin() {
     password: Yup.string().required('Password is required'),
   });
 
-  const defaultValues = { firstName: '', lastName: '', email: '', password: '', suffix: '' };
+  const defaultValues = {
+    firstName: user?.name.first,
+    lastName: user?.name.last,
+    email: user?.email,
+    password: '',
+    suffix: user?.username,
+  };
 
   const methods = useForm({
     resolver: yupResolver(AccountSchema),

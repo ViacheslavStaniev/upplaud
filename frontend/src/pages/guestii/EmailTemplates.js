@@ -2,7 +2,7 @@ import { Helmet } from 'react-helmet-async';
 // @mui
 import { Container, Typography } from '@mui/material';
 // components
-import { useSettingsContext } from '../../../components/settings';
+import { useSettingsContext } from '../../components/settings';
 
 // ----------------------------------------------------------------------
 

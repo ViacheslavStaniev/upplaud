@@ -1,12 +1,10 @@
 const mongoose = require("mongoose");
 
-const { MONGO_HOST, MONGO_DATABASE, MONGO_USERNAME, MONGO_PASSWORD, MONGO_CONNECTION_PARAMS, MONGO_CONNECTION_PREFIX } = process.env;
+// const { MONGO_HOST, MONGO_DATABASE, MONGO_USERNAME, MONGO_PASSWORD, MONGO_CONNECTION_PARAMS, MONGO_CONNECTION_PREFIX } = process.env;
 
-const dbHost = MONGO_HOST || "mongo";
-const dbName = MONGO_DATABASE || "podasq";
-const db = `${MONGO_CONNECTION_PREFIX}://${MONGO_USERNAME}:${MONGO_PASSWORD}@${dbHost}/${dbName}?${MONGO_CONNECTION_PARAMS}`;
+// const dbUri = `${MONGO_CONNECTION_PREFIX}://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}/${MONGO_DATABASE}?${MONGO_CONNECTION_PARAMS}`;
 
-const uri = "mongodb+srv://tcmhack:tcmpriya@tcmhack.olsdl.mongodb.net/?retryWrites=true&w=majority";
+const uri = "mongodb+srv://tcmhack:tcmpriya@tcmhack.olsdl.mongodb.net/podasq?retryWrites=true&w=majority";
 
 const connectDB = async (max_attempts = 5) => {
   const attempt = async () => {

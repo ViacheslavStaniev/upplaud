@@ -2,22 +2,22 @@ import { Helmet } from 'react-helmet-async';
 // @mui
 import { Container, Typography } from '@mui/material';
 // components
-import { useSettingsContext } from '../../../components/settings';
+import { useSettingsContext } from '../../components/settings';
 
 // ----------------------------------------------------------------------
 
-export default function Automations() {
+export default function PostingTemplate() {
   const { themeStretch } = useSettingsContext();
 
   return (
     <>
       <Helmet>
-        <title> Automations | Podasq</title>
+        <title> Posting Template | Podasq</title>
       </Helmet>
 
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <Typography variant="h3" component="h1" paragraph>
-          Automations
+          Posting Template
         </Typography>
 
         <Typography gutterBottom>
