@@ -19,7 +19,7 @@ export default function UserCardsPage() {
   return (
     <>
       <Helmet>
-        <title> User: Cards | Podasq</title>
+        <title> User: Cards | {process.env.REACT_APP_APP_NAME}</title>
       </Helmet>
 
       <Container maxWidth={themeStretch ? false : 'lg'}>

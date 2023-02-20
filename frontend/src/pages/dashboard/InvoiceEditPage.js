@@ -24,7 +24,7 @@ export default function InvoiceEditPage() {
   return (
     <>
       <Helmet>
-        <title> Invoice: Edit | Podasq</title>
+        <title> Invoice: Edit | {process.env.REACT_APP_APP_NAME}</title>
       </Helmet>
 
       <Container maxWidth={themeStretch ? false : 'lg'}>

@@ -11,7 +11,7 @@ export default function MaintenancePage() {
   return (
     <>
       <Helmet>
-        <title> Maintenance | Podasq</title>
+        <title> Maintenance | {process.env.REACT_APP_APP_NAME}</title>
       </Helmet>
 
       <Stack sx={{ alignItems: 'center' }}>

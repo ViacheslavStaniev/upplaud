@@ -14,7 +14,7 @@ export default function PaymentPage() {
   return (
     <>
       <Helmet>
-        <title> Payment | Podasq</title>
+        <title> Payment | {process.env.REACT_APP_APP_NAME}</title>
       </Helmet>
 
       <Container

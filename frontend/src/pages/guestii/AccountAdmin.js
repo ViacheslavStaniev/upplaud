@@ -12,6 +12,7 @@ import {
   Divider,
   Button,
   Box,
+  // Radio,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 
@@ -19,9 +20,7 @@ import { LoadingButton } from '@mui/lab';
 import * as Yup from 'yup';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-
 import { useAuthContext } from '../../auth/useAuthContext';
-
 import useResponsive from '../../hooks/useResponsive';
 
 // components
@@ -32,6 +31,8 @@ import { useSettingsContext } from '../../components/settings';
 export default function AccountAdmin() {
   const { user } = useAuthContext();
   const { themeStretch } = useSettingsContext();
+
+  // const [pack, setPack] = useState('month');
   const [showPassword, setShowPassword] = useState(false);
 
   const isDesktop = useResponsive('up', 'lg');
@@ -87,7 +88,7 @@ export default function AccountAdmin() {
   return (
     <>
       <Helmet>
-        <title> Account Admin | Podasq</title>
+        <title> Account Admin | {process.env.REACT_APP_APP_NAME}</title>
       </Helmet>
 
       <Container maxWidth={themeStretch ? false : 'xl'}>
@@ -146,7 +147,11 @@ export default function AccountAdmin() {
                 label="Guestii Prefix"
                 placeholder="SUFFIX"
                 InputProps={{
-                  startAdornment: <InputAdornment position="start">PODASQ.COM/</InputAdornment>,
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      {window.location.hostname.toUpperCase()}/
+                    </InputAdornment>
+                  ),
                 }}
               />
             </Stack>
@@ -222,19 +227,20 @@ export default function AccountAdmin() {
             <Button
               size="large"
               type="button"
+              shape="circular"
               variant="contained"
               startIcon={<Iconify icon="mdi:facebook" />}
-              style={{ borderRadius: 50, background: '#1877F2' }}
+              style={{ background: '#1877F2' }}
             >
               Connect with Facebook
             </Button>
             <Button
               size="large"
               type="button"
+              shape="circular"
               variant="contained"
               startIcon={<Iconify icon="mdi:instagram" />}
               style={{
-                borderRadius: 50,
                 background:
                   'radial-gradient(128.57% 128.57% at 10.71% 105.36%, #FFCB52 0%, #E34677 56.25%, #C938AC 100%)',
               }}
@@ -244,58 +250,86 @@ export default function AccountAdmin() {
             <Button
               size="large"
               type="button"
+              shape="circular"
               variant="contained"
               startIcon={<Iconify icon="mdi:linkedin" />}
-              style={{ borderRadius: 50, background: '#0A66C2' }}
+              style={{ background: '#0A66C2' }}
             >
               Connect with LinkedIn
             </Button>
           </Stack>
 
-          <Divider sx={{ my: 4, mt: 4 }} />
+          {/* <Divider sx={{ my: 4, mt: 4 }} /> */}
 
-          <Stack gap={3} flexDirection={isDesktop ? 'row' : 'column'} marginBottom={4}>
+          {/* <Stack gap={3} flexDirection={isDesktop ? 'row' : 'column'} marginBottom={4}>
             <Stack
               padding={2}
               borderRadius={2}
-              border="2px solid #00B8D9"
-              width={isDesktop ? 220 : '100%'}
+              width={isDesktop ? 300 : '100%'}
+              border={`2px solid ${pack === 'month' ? '#00B8D9' : '#e0e0e0'}`}
             >
-              <Typography color="ActiveBorder">MONTHLY</Typography>
+              <Stack
+                sx={{
+                  marginBottom: 2,
+                  alignItems: 'center',
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <Typography color="ActiveBorder">MONTHLY</Typography>
+                <Radio
+                  color="info"
+                  value="month"
+                  name="automation-type"
+                  checked={pack === 'month'}
+                  onChange={(e) => setPack('month')}
+                />
+              </Stack>
               <Typography>$20/month</Typography>
             </Stack>
 
             <Stack
               padding={2}
               borderRadius={2}
-              border="2px solid #e0e0e0"
-              width={isDesktop ? 220 : '100%'}
+              width={isDesktop ? 300 : '100%'}
+              border={`2px solid ${pack === 'pack5' ? '#00B8D9' : '#e0e0e0'}`}
             >
-              <Typography color="ActiveBorder">AUTOMATION PACK 5</Typography>
+              <Stack
+                sx={{
+                  marginBottom: 2,
+                  alignItems: 'center',
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <Typography color="ActiveBorder">AUTOMATION PACK 5</Typography>
+                <Radio
+                  color="info"
+                  value="pack5"
+                  name="automation-type"
+                  checked={pack === 'pack5'}
+                  onChange={(e) => setPack('pack5')}
+                />
+              </Stack>
               <Typography>$100/with quantity option</Typography>
             </Stack>
-          </Stack>
+          </Stack> */}
 
           <Stack gap={2} flexDirection="row">
             <LoadingButton
               size="large"
               type="submit"
+              shape="circular"
               variant="outlined"
-              style={{ borderRadius: 50, width: 100 }}
+              sx={{ minWidth: 120 }}
               loading={isSubmitSuccessful || isSubmitting}
             >
               SAVE
             </LoadingButton>
 
-            <Button
-              size="large"
-              type="button"
-              variant="contained"
-              color="info"
-              style={{ borderRadius: 50 }}
-            >
+            {/* <Button size="large" type="button" variant="contained" color="info" shape="circular">
               UPGRADE YOUR PACKAGE
-            </Button>
+            </Button> */}
           </Stack>
         </FormProvider>
       </Container>

@@ -185,7 +185,7 @@ export default function UserListPage() {
   return (
     <>
       <Helmet>
-        <title> User: List | Podasq</title>
+        <title> User: List | {process.env.REACT_APP_APP_NAME}</title>
       </Helmet>
 
       <Container maxWidth={themeStretch ? false : 'lg'}>
@@ -297,14 +297,13 @@ export default function UserListPage() {
           </TableContainer>
 
           <TablePaginationCustom
-            count={dataFiltered.length}
             page={page}
-            rowsPerPage={rowsPerPage}
-            onPageChange={onChangePage}
-            onRowsPerPageChange={onChangeRowsPerPage}
-            //
             dense={dense}
+            rowsPerPage={rowsPerPage}
+            count={dataFiltered.length}
+            onPageChange={onChangePage}
             onChangeDense={onChangeDense}
+            onRowsPerPageChange={onChangeRowsPerPage}
           />
         </Card>
       </Container>
@@ -320,8 +319,8 @@ export default function UserListPage() {
         }
         action={
           <Button
-            variant="contained"
             color="error"
+            variant="contained"
             onClick={() => {
               handleDeleteRows(selected);
               handleCloseConfirm();
@@ -334,8 +333,6 @@ export default function UserListPage() {
     </>
   );
 }
-
-// ----------------------------------------------------------------------
 
 function applyFilter({ inputData, comparator, filterName, filterStatus, filterRole }) {
   const stabilizedThis = inputData.map((el, index) => [el, index]);

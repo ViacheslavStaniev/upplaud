@@ -14,7 +14,7 @@ export default function Page500() {
   return (
     <>
       <Helmet>
-        <title> 500 Internal Server Error | Podasq</title>
+        <title> 500 Internal Server Error | {process.env.REACT_APP_APP_NAME}</title>
       </Helmet>
 
       <MotionContainer>

@@ -1,18 +1,28 @@
+import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-// @mui
-import { Container, Typography } from '@mui/material';
-// components
+import { Box, Container, Typography, Stack, Button } from '@mui/material';
+import { _userList } from '../../_mock/arrays';
 import { useSettingsContext } from '../../components/settings';
-
-// ----------------------------------------------------------------------
+import CustomTable from '../../components/table/CustomTable';
 
 export default function GuestingAdmin() {
   const { themeStretch } = useSettingsContext();
 
+  const [tableData, setTableData] = useState(_userList);
+
+  const tableHead = [
+    { id: 'name', label: 'SHOW NAME', align: 'left' },
+    { id: 'host', label: 'HOST', align: 'left' },
+    { id: 'status', label: 'STATUS', align: 'left' },
+    { id: 'date', label: 'DATE', align: 'center' },
+    { id: 'submission', label: 'SUBMISSION', align: 'left' },
+    { id: 'action', label: 'ACTIONS', align: 'right' },
+  ];
+
   return (
     <>
       <Helmet>
-        <title> Guesting Admin | Podasq</title>
+        <title> Guesting Admin | {process.env.REACT_APP_APP_NAME}</title>
       </Helmet>
 
       <Container maxWidth={themeStretch ? false : 'xl'}>
@@ -20,23 +30,26 @@ export default function GuestingAdmin() {
           Guesting Admin
         </Typography>
 
-        <Typography gutterBottom>
-          Curabitur turpis. Vestibulum facilisis, purus nec pulvinar iaculis, ligula mi congue nunc,
-          vitae euismod ligula urna in dolor. Nam quam nunc, blandit vel, luctus pulvinar, hendrerit
-          id, lorem. Phasellus blandit leo ut odio. Vestibulum ante ipsum primis in faucibus orci
-          luctus et ultrices posuere cubilia Curae; Fusce id purus. Aliquam lorem ante, dapibus in,
-          viverra quis, feugiat a, tellus. In consectetuer turpis ut velit. Aenean posuere, tortor
-          sed cursus feugiat, nunc augue blandit nunc, eu sollicitudin urna dolor sagittis lacus.
-          Vestibulum suscipit nulla quis orci. Nam commodo suscipit quam. Sed a libero.
-        </Typography>
+        <Stack sx={{ flexDirection: 'row', gap: 3, marginBottom: 3 }}>
+          <Typography flex={1}>
+            Here you can track the automation of your show appearances:
+          </Typography>
 
-        <Typography>
-          Praesent ac sem eget est egestas volutpat. Phasellus viverra nulla ut metus varius
-          laoreet. Curabitur ullamcorper ultricies nisi. Ut non enim eleifend felis pretium feugiat.
-          Donec mi odio, faucibus at, scelerisque quis, convallis in, nisi. Fusce vel dui. Quisque
-          libero metus, condimentum nec, tempor a, commodo mollis, magna. In enim justo, rhoncus ut,
-          imperdiet a, venenatis vitae, justo. Cras dapibus.
-        </Typography>
+          <Box flex="inherit">
+            <Button
+              fullWidth
+              color="info"
+              size="large"
+              type="button"
+              shape="circular"
+              variant="contained"
+            >
+              ADD SHOW
+            </Button>
+          </Box>
+        </Stack>
+
+        <CustomTable tableData={tableData} tableHead={tableHead} setTableData={setTableData} />
       </Container>
     </>
   );

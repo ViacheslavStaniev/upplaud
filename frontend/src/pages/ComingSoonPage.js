@@ -21,7 +21,7 @@ export default function ComingSoonPage() {
   return (
     <>
       <Helmet>
-        <title> Coming Soon | Podasq</title>
+        <title> Coming Soon | {process.env.REACT_APP_APP_NAME}</title>
       </Helmet>
 
       <Typography variant="h3" paragraph>

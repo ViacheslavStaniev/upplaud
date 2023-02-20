@@ -8,7 +8,7 @@ export default function RegisterPage() {
   return (
     <>
       <Helmet>
-        <title> Register | Podasq</title>
+        <title> Register | {process.env.REACT_APP_APP_NAME}</title>
       </Helmet>
 
       <Register />

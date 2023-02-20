@@ -1,9 +1,5 @@
 import { alpha } from '@mui/material/styles';
 
-// ----------------------------------------------------------------------
-
-// SETUP COLORS
-
 const GREY = {
   0: '#FFFFFF',
   100: '#F9FAFB',
@@ -18,12 +14,12 @@ const GREY = {
 };
 
 const PRIMARY = {
-  lighter: '#C8FACD',
-  light: '#5BE584',
-  main: '#00AB55',
-  dark: '#007B55',
-  darker: '#005249',
-  contrastText: '#FFFFFF',
+  lighter: '#e1bbe1',
+  light: '#b962b9',
+  main: '#6b0d88',
+  dark: '#4e067a',
+  darker: '#4e067a',
+  contrastText: '#f3e4f2',
 };
 
 const SECONDARY = {
@@ -71,6 +67,13 @@ const ERROR = {
   contrastText: '#FFFFFF',
 };
 
+const SOCIAL = {
+  facebook: '#1877F2',
+  linkedin: '#0A66C2',
+  instagram:
+    'radial-gradient(128.57% 128.57% at 10.71% 105.36%, #FFCB52 0%, #E34677 56.25%, #C938AC 100%)',
+};
+
 const COMMON = {
   common: { black: '#000000', white: '#FFFFFF' },
   primary: PRIMARY,
@@ -90,6 +93,7 @@ const COMMON = {
     hoverOpacity: 0.08,
     disabledOpacity: 0.48,
   },
+  social: SOCIAL,
 };
 
 export default function palette(themeMode) {
@@ -101,7 +105,13 @@ export default function palette(themeMode) {
       secondary: GREY[600],
       disabled: GREY[500],
     },
-    background: { paper: '#FFFFFF', default: '#FFFFFF', neutral: GREY[200], purple: '#54006E' },
+    background: {
+      paper: '#FFFFFF',
+      default: '#FFFFFF',
+      neutral: GREY[200],
+      purple: '#54006E',
+      lightPurple: '#F7F3F9',
+    },
     action: {
       ...COMMON.action,
       active: GREY[600],

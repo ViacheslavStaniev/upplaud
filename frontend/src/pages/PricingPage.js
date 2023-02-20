@@ -12,7 +12,7 @@ export default function PricingPage() {
   return (
     <>
       <Helmet>
-        <title> Pricing | Podasq</title>
+        <title> Pricing | {process.env.REACT_APP_APP_NAME}</title>
       </Helmet>
 
       <Container

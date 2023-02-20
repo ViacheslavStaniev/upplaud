@@ -243,7 +243,7 @@ export default function CalendarPage() {
   return (
     <>
       <Helmet>
-        <title> Calendar | Podasq</title>
+        <title> Calendar | {process.env.REACT_APP_APP_NAME}</title>
       </Helmet>
 
       <Container maxWidth={themeStretch ? false : 'xl'}>

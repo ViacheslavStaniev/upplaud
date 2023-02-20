@@ -76,7 +76,7 @@ export default function BlogPostPage() {
   return (
     <>
       <Helmet>
-        <title>{`Blog: ${post?.title || ''} | Podasq`}</title>
+        <title>{`Blog: ${post?.title || ''} | {process.env.REACT_APP_APP_NAME}`}</title>
       </Helmet>
 
       <Container maxWidth={themeStretch ? false : 'lg'}>

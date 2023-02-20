@@ -29,6 +29,7 @@ export const PATH_PAGE = {
   page403: '/403',
   page404: '/404',
   page500: '/500',
+  dashboard: ROOTS_DASHBOARD,
 };
 
 export const PATH_DASHBOARD = {
@@ -95,4 +96,4 @@ export const PATH_MINIMAL_ON_STORE = 'https://mui.com/store/items/minimal-dashbo
 export const PATH_FREE_VERSION = 'https://mui.com/store/items/minimal-dashboard-free/';
 
 export const PATH_FIGMA_PREVIEW =
-  'https://www.figma.com/file/rWMDOkMZYw2VpTdNuBBCvN/%5BPreview%5D-Minimal-Web.26.11.22?node-id=0%3A1&t=ya2mDFiuhTXXLLF1-1';
+  'https://www.figma.com/proto/UzqNrZHkqxGTw2k6FCtUdT/{process.env.REACT_APP_APP_NAME}?node-id=226%3A1488&scaling=scale-down-width&page-id=191%3A1534&starting-point-node-id=212%3A185';

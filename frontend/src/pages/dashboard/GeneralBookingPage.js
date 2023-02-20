@@ -35,7 +35,7 @@ export default function GeneralBookingPage() {
   return (
     <>
       <Helmet>
-        <title> General: Booking | Podasq</title>
+        <title> General: Booking | {process.env.REACT_APP_APP_NAME}</title>
       </Helmet>
 
       <Container maxWidth={themeStretch ? false : 'xl'}>

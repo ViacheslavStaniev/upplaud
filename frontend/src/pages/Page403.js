@@ -14,7 +14,7 @@ export default function Page403() {
   return (
     <>
       <Helmet>
-        <title> 403 Forbidden | Podasq</title>
+        <title> 403 Forbidden | {process.env.REACT_APP_APP_NAME}</title>
       </Helmet>
 
       <MotionContainer>

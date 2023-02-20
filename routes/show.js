@@ -1,7 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+const Show = require("../models/Show");
 const verifyAuth = require("../config/verifyAuth");
 const { sendEmail } = require("../helpers/email");
 const { register, getUserInfo } = require("./users");
@@ -11,14 +11,14 @@ const { randomString, getAuthResponse } = require("../helpers/utills");
 
 const router = express.Router();
 
-// @route   GET api/auth/me
-// @desc    Load current logged-in user
+// @route   GET api/show/showId
+// @desc    gets show details
 // @access  Public
-router.get("/me", verifyAuth, async (req, res) => {
+router.get("/:showId", verifyAuth, async (req, res) => {
   try {
-    let user = await getUserInfo(req.userId);
+    const show = await Show.findById(req.params.showId).populate("host");
 
-    res.json(user);
+    res.json(show);
   } catch (err) {
     // throw err;
     console.error({ msg: err.message });
@@ -26,11 +26,11 @@ router.get("/me", verifyAuth, async (req, res) => {
   }
 });
 
-// @route   POST api/auth/login
-// @desc    Authenticate user and get token
+// @route   POST api/show
+// @desc    Creates a show
 // @access  Public
 router.post(
-  "/login",
+  "/",
   [check("email", "Please enter a valid email address").isEmail(), check("password", "Password is required").exists()],
   async (req, res) => {
     const errors = validationResult(req);

@@ -1,7 +1,6 @@
 export * from './utils';
 
 export { default as useTable } from './useTable';
-
 export { default as TableNoData } from './TableNoData';
 export { default as TableSkeleton } from './TableSkeleton';
 export { default as TableEmptyRows } from './TableEmptyRows';

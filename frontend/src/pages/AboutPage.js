@@ -10,7 +10,7 @@ export default function AboutPage() {
   return (
     <>
       <Helmet>
-        <title> About us | Podasq</title>
+        <title> About us | {process.env.REACT_APP_APP_NAME}</title>
       </Helmet>
 
       <AboutHero />

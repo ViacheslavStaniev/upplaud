@@ -85,7 +85,7 @@ export default function EcommerceShopPage() {
   return (
     <>
       <Helmet>
-        <title> Ecommerce: Shop | Podasq</title>
+        <title> Ecommerce: Shop | {process.env.REACT_APP_APP_NAME}</title>
       </Helmet>
 
       <FormProvider methods={methods}>

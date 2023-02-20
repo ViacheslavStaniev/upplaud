@@ -21,12 +21,12 @@ import FormProvider, {
   RHFUploadAvatar,
 } from '../../../../components/hook-form';
 
-// ----------------------------------------------------------------------
-
 export default function AccountGeneral() {
   const { enqueueSnackbar } = useSnackbar();
 
   const { user } = useAuthContext();
+
+  console.log(user);
 
   const UpdateUserSchema = Yup.object().shape({
     displayName: Yup.string().required('Name is required'),
@@ -44,14 +44,14 @@ export default function AccountGeneral() {
   const defaultValues = {
     displayName: user?.displayName || '',
     email: user?.email || '',
-    photoURL: user?.photoURL || null,
-    phoneNumber: user?.phoneNumber || '',
-    country: user?.country || '',
-    address: user?.address || '',
-    state: user?.state || '',
-    city: user?.city || '',
-    zipCode: user?.zipCode || '',
-    about: user?.about || '',
+    photoURL: user?.profile.picture || null,
+    phoneNumber: user?.profile.phone || '',
+    country: user?.profile.country || '',
+    address: user?.profile.address || '',
+    state: user?.profile.state || '',
+    city: user?.profile.city || '',
+    zipCode: user?.profile.zipCode || '',
+    about: user?.profile.about || '',
     isPublic: user?.isPublic || false,
   };
 

@@ -86,7 +86,7 @@ export default function EcommerceProductDetailsPage() {
   return (
     <>
       <Helmet>
-        <title>{`Ecommerce: ${product?.name || ''} | Podasq`}</title>
+        <title>{`Ecommerce: ${product?.name || ''} | {process.env.REACT_APP_APP_NAME}`}</title>
       </Helmet>
 
       <Container maxWidth={themeStretch ? false : 'lg'}>

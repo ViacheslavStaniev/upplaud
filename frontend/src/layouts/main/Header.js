@@ -19,8 +19,6 @@ import navConfig from './nav/config-navigation';
 import NavMobile from './nav/mobile';
 import NavDesktop from './nav/desktop';
 
-// ----------------------------------------------------------------------
-
 export default function Header() {
   const carouselRef = useRef(null);
 

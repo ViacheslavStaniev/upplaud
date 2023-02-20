@@ -1,5 +1,4 @@
 import { Helmet } from 'react-helmet-async';
-// @mui
 import {
   Container,
   Typography,
@@ -11,7 +10,6 @@ import {
   FormControlLabel,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
-// import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 // form
 import * as Yup from 'yup';
@@ -22,7 +20,7 @@ import useResponsive from '../../hooks/useResponsive';
 
 // components
 import Iconify from '../../components/iconify';
-import FormProvider, { RHFTextField } from '../../components/hook-form';
+import FormProvider, { RHFTextField, RHFDateField } from '../../components/hook-form';
 import { useSettingsContext } from '../../components/settings';
 
 export default function AccountAdmin() {
@@ -55,7 +53,6 @@ export default function AccountAdmin() {
 
   const {
     reset,
-
     setError,
     handleSubmit,
     formState: { errors, isSubmitting, isSubmitSuccessful },
@@ -79,7 +76,7 @@ export default function AccountAdmin() {
   return (
     <>
       <Helmet>
-        <title> Add Guest | Podasq</title>
+        <title> Add Guest | {process.env.REACT_APP_APP_NAME}</title>
       </Helmet>
 
       <Container maxWidth={themeStretch ? false : 'xl'}>
@@ -118,25 +115,7 @@ export default function AccountAdmin() {
                 flexDirection,
               }}
             >
-              <RHFTextField name="recordingDate" label="Recording Date" />
-              {/* <Controller
-                name="recordingDate"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <DatePicker
-                    label="Recording Date"
-                    value={field.value}
-                    onChange={(newValue) => field.onChange(newValue)}
-                    renderInput={(params) => <RHFTextField {...params} fullWidth error={!!error} helperText={error?.message} />}
-                  />
-                )}
-              /> */}
-              {/* <DatePicker
-                label="Basic example"
-                value={null}
-                onChange={(newValue) => console.log(newValue)}
-                renderInput={(params) => <RHFTextField {...params} />}
-              /> */}
+              <RHFDateField name="recordingDate" label="Recording Date" />
               <RHFTextField name="jobTitle" label="Guest Job Title and Business" />
               <RHFTextField name="topic" label="Potential Topic (Optional)" />
             </Stack>
@@ -156,11 +135,15 @@ export default function AccountAdmin() {
             <LoadingButton
               size="large"
               type="submit"
+              shape="circular"
               variant="outlined"
-              style={{ borderRadius: 50 }}
               loading={isSubmitSuccessful || isSubmitting}
               endIcon={
-                <Tooltip title="Fill the Title" placement="top">
+                <Tooltip
+                  arrow
+                  placement="top"
+                  title="Upload a spreadsheet of guests. Each column should match above fields labels EXACTLY (case sensitive so copy/paste)."
+                >
                   <Iconify icon="mdi:question-mark-circle-outline" />
                 </Tooltip>
               }
@@ -168,13 +151,7 @@ export default function AccountAdmin() {
               UPLOAD CSV
             </LoadingButton>
 
-            <Button
-              size="large"
-              type="button"
-              variant="contained"
-              color="info"
-              style={{ borderRadius: 50 }}
-            >
+            <Button size="large" type="button" variant="contained" color="info" shape="circular">
               AUTOMATE GUEST
             </Button>
           </Stack>

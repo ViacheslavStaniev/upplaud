@@ -10,7 +10,7 @@ export default function FaqsPage() {
   return (
     <>
       <Helmet>
-        <title> Faqs | Podasq</title>
+        <title> Faqs | {process.env.REACT_APP_APP_NAME}</title>
       </Helmet>
 
       <FaqsHero />

@@ -49,7 +49,7 @@ export default function HomePage() {
   return (
     <>
       <Helmet>
-        <title> Home | Podasq</title>
+        <title> Home | {process.env.REACT_APP_APP_NAME}</title>
       </Helmet>
 
       {progress}

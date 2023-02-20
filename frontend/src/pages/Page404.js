@@ -14,7 +14,7 @@ export default function Page404() {
   return (
     <>
       <Helmet>
-        <title> 404 Page Not Found | Podasq</title>
+        <title> 404 Page Not Found | {process.env.REACT_APP_APP_NAME}</title>
       </Helmet>
 
       <MotionContainer>

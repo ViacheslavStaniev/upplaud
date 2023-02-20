@@ -4,7 +4,6 @@ import { useLocation, matchPath } from 'react-router-dom';
 
 export default function useActiveLink(path = '/', deep = true) {
   const { pathname } = useLocation();
-  console.log(path, pathname);
 
   const normalActive = path ? !!matchPath({ path, end: true }, pathname) : false;
 

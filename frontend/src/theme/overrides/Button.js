@@ -1,10 +1,8 @@
 import { alpha } from '@mui/material/styles';
 
-// ----------------------------------------------------------------------
-
 const COLORS = ['primary', 'secondary', 'info', 'success', 'warning', 'error'];
 
-export default function Button(theme) {
+export default function Button(theme, ...oth) {
   const isLight = theme.palette.mode === 'light';
 
   const rootStyle = (ownerState) => {
@@ -21,6 +19,8 @@ export default function Button(theme) {
     const smallSize = ownerState.size === 'small';
 
     const largeSize = ownerState.size === 'large';
+
+    const isCircular = ownerState?.shape === 'circular';
 
     const defaultStyle = {
       ...(inheritColor && {
@@ -102,7 +102,9 @@ export default function Button(theme) {
       }),
     };
 
-    return [...colorStyle, defaultStyle, disabledState, size];
+    const circular = { ...(isCircular && { borderRadius: 50 }) };
+
+    return [...colorStyle, defaultStyle, disabledState, size, circular];
   };
 
   return {

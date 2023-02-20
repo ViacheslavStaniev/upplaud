@@ -3,10 +3,7 @@ const Schema = mongoose.Schema;
 
 const ShowSchema = new Schema(
   {
-    name: {
-      type: String,
-      required: true,
-    },
+    name: String,
     logo: String,
     website: String,
     host: {

@@ -100,7 +100,7 @@ export default function KanbanPage() {
   return (
     <>
       <Helmet>
-        <title> Kanban | Podasq</title>
+        <title> Kanban | {process.env.REACT_APP_APP_NAME}</title>
       </Helmet>
 
       <Container maxWidth={false} sx={{ height: 1 }}>

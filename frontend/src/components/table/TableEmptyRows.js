@@ -1,8 +1,5 @@
 import PropTypes from 'prop-types';
-// @mui
 import { TableRow, TableCell } from '@mui/material';
-
-// ----------------------------------------------------------------------
 
 TableEmptyRows.propTypes = {
   height: PropTypes.number,
@@ -10,18 +7,10 @@ TableEmptyRows.propTypes = {
 };
 
 export default function TableEmptyRows({ emptyRows, height }) {
-  if (!emptyRows) {
-    return null;
-  }
+  if (!emptyRows) return null;
 
   return (
-    <TableRow
-      sx={{
-        ...(height && {
-          height: height * emptyRows,
-        }),
-      }}
-    >
+    <TableRow sx={{ ...(height && { height: height * emptyRows }) }}>
       <TableCell colSpan={9} />
     </TableRow>
   );

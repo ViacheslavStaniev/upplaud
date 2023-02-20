@@ -8,7 +8,7 @@ export default function MailPage() {
   return (
     <>
       <Helmet>
-        <title> Mail | Podasq</title>
+        <title> Mail | {process.env.REACT_APP_APP_NAME}</title>
       </Helmet>
 
       <Mail />

@@ -30,7 +30,7 @@ export default function ThemeProvider({ children }) {
     () => ({
       palette: palette(themeMode),
       typography,
-      shape: { borderRadius: 8 },
+      shape: { borderRadius: 6 },
       direction: themeDirection,
       shadows: shadows(themeMode),
       customShadows: customShadows(themeMode),

@@ -5,17 +5,17 @@ const AccountSchema = new Schema(
   {
     name: { type: String },
     socialAccounts: {
-      FACEBOOK: {
+      facebook: {
         profileLink: String,
         accessToken: Object,
         isConnected: { type: Boolean, default: false },
       },
-      LINKEDIN: {
+      linkedin: {
         profileLink: String,
         accessToken: Object,
         isConnected: { type: Boolean, default: false },
       },
-      INSTAGRAM: {
+      instagram: {
         profileLink: String,
         accessToken: Object,
         isConnected: { type: Boolean, default: false },

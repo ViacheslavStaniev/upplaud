@@ -13,7 +13,7 @@ export default function BlankPage() {
   return (
     <>
       <Helmet>
-        <title> Blank Page | Podasq</title>
+        <title> Blank Page | {process.env.REACT_APP_APP_NAME}</title>
       </Helmet>
 
       <Container maxWidth={themeStretch ? false : 'xl'}>

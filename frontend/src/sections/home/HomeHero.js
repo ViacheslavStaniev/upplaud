@@ -3,9 +3,9 @@ import { useEffect, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 // @mui
 import { styled, alpha, useTheme } from '@mui/material/styles';
-import { Button, Box, Link, Container, Typography, Stack, Grid, Rating } from '@mui/material';
+import { Button, Box, Container, Typography, Stack, Grid, Rating } from '@mui/material';
 // routes
-import { PATH_DASHBOARD, PATH_FIGMA_PREVIEW, PATH_FREE_VERSION } from '../../routes/paths';
+import { PATH_DASHBOARD, PATH_FIGMA_PREVIEW } from '../../routes/paths';
 // hooks
 import useResponsive from '../../hooks/useResponsive';
 // utils
@@ -143,7 +143,7 @@ function Description() {
       <m.div variants={varFade().in}>
         <Typography variant="h2" sx={{ textAlign: 'center' }}>
           Start a <br />
-          new project with
+          new podcast with
         </Typography>
       </m.div>
 
@@ -157,7 +157,7 @@ function Description() {
             repeat: Infinity,
           }}
         >
-          Minimal
+          PODASQ
         </StyledGradientText>
       </m.div>
 
@@ -206,18 +206,6 @@ function Description() {
             >
               Live Preview
             </Button>
-
-            <Link
-              color="inherit"
-              variant="caption"
-              target="_blank"
-              rel="noopener"
-              href={PATH_FREE_VERSION}
-              sx={{ textDecoration: 'underline', display: 'inline-flex', alignItems: 'center' }}
-            >
-              <Iconify icon="eva:external-link-fill" width={16} sx={{ mr: 0.5 }} />
-              Get Free Version
-            </Link>
           </Stack>
 
           <Button

@@ -17,7 +17,7 @@ export default function NewPasswordPage() {
   return (
     <>
       <Helmet>
-        <title> New Password | Podasq</title>
+        <title> New Password | {process.env.REACT_APP_APP_NAME}</title>
       </Helmet>
 
       <SentIcon sx={{ mb: 5, height: 96 }} />

@@ -12,7 +12,7 @@ export default function ContactPage() {
   return (
     <>
       <Helmet>
-        <title> Contact us | Podasq</title>
+        <title> Contact us | {process.env.REACT_APP_APP_NAME}</title>
       </Helmet>
 
       <ContactHero />

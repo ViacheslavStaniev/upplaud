@@ -9,7 +9,7 @@ export default function LoginPage() {
   return (
     <>
       <Helmet>
-        <title> Login | Podasq</title>
+        <title> Login | {process.env.REACT_APP_APP_NAME}</title>
       </Helmet>
 
       <Login />

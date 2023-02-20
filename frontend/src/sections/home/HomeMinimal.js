@@ -58,7 +58,7 @@ export default function HomeMinimal() {
         >
           <m.div variants={varFade().inUp}>
             <Typography component="div" variant="overline" sx={{ color: 'text.disabled' }}>
-              Podasq
+              {process.env.REACT_APP_APP_NAME}
             </Typography>
           </m.div>
 

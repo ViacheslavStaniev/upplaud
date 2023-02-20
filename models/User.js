@@ -40,12 +40,16 @@ const UserSchema = new Schema(
       required: true,
     },
     profile: {
-      dob: Date,
-      displayPic: String,
-      gender: {
-        type: Number,
-        default: GENDER_UNKNOWN,
-      },
+      dob: { type: Date, default: null },
+      about: { type: String, default: "" },
+      picture: { type: String, default: "" },
+      gender: { type: Number, default: GENDER_UNKNOWN },
+      phone: { type: String, default: "" },
+      address: { type: String, default: "" },
+      country: { type: String, default: "" },
+      state: { type: String, default: "" },
+      city: { type: String, default: "" },
+      zipCode: { type: Number, default: null },
     },
     username: {
       type: String,
@@ -59,7 +63,9 @@ const UserSchema = new Schema(
       type: Number,
       default: STATUS_ACTIVE,
     },
-    resetToken: "",
+    resetToken: {
+      type: String,
+    },
     isAdmin: {
       type: Number,
       default: IS_ADMIN_NO,
@@ -68,8 +74,25 @@ const UserSchema = new Schema(
       type: Boolean,
       default: true,
     },
-    account: {
-      ref: "Account",
+    socialAccounts: {
+      facebook: {
+        profileLink: { type: String, default: "" },
+        accessToken: { type: Object, default: null },
+        isConnected: { type: Boolean, default: false },
+      },
+      linkedin: {
+        profileLink: { type: String, default: "" },
+        accessToken: { type: Object, default: null },
+        isConnected: { type: Boolean, default: false },
+      },
+      instagram: {
+        profileLink: { type: String, default: "" },
+        accessToken: { type: Object, default: null },
+        isConnected: { type: Boolean, default: false },
+      },
+    },
+    show: {
+      ref: "Show",
       type: Schema.Types.ObjectId,
     },
   },

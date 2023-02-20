@@ -10,7 +10,10 @@ export default function RHFInputLabel({ label = '' }) {
   const { presetsColor } = useSettingsContext();
 
   return (
-    <InputLabel color="primary" style={{ color: presetsColor.main, textTransform: 'uppercase' }}>
+    <InputLabel
+      color="primary"
+      style={{ color: presetsColor.main, textTransform: 'uppercase', letterSpacing: 2 }}
+    >
       {label}
     </InputLabel>
   );

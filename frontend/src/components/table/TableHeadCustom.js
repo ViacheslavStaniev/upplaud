@@ -1,8 +1,5 @@
 import PropTypes from 'prop-types';
-// @mui
 import { Box, Checkbox, TableRow, TableCell, TableHead, TableSortLabel } from '@mui/material';
-
-// ----------------------------------------------------------------------
 
 const visuallyHidden = {
   border: 0,
@@ -15,8 +12,6 @@ const visuallyHidden = {
   whiteSpace: 'nowrap',
   clip: 'rect(0 0 0 0)',
 };
-
-// ----------------------------------------------------------------------
 
 TableHeadCustom.propTypes = {
   sx: PropTypes.object,

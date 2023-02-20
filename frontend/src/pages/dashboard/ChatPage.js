@@ -8,7 +8,7 @@ export default function ChatPage() {
   return (
     <>
       <Helmet>
-        <title> Chat | Podasq</title>
+        <title> Chat | {process.env.REACT_APP_APP_NAME}</title>
       </Helmet>
 
       <Chat />
