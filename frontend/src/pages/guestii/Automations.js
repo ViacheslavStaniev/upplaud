@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Helmet } from 'react-helmet-async';
 import { Box, Container, Typography, Stack, Button } from '@mui/material';
 import { useSettingsContext } from '../../components/settings';
 import CustomTable from '../../components/table/CustomTable';
+import AppTitle from '../../components/AppTitle';
 
 const automationData = [
   {
@@ -133,9 +133,7 @@ export default function Automations() {
 
   return (
     <>
-      <Helmet>
-        <title> Automations | {process.env.REACT_APP_APP_NAME}</title>
-      </Helmet>
+      <AppTitle title="Automations" />
 
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <Typography variant="h3" component="h1" paragraph>

@@ -1,8 +1,6 @@
-import { Helmet } from 'react-helmet-async';
 import { useState } from 'react';
 import sumBy from 'lodash/sumBy';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-// @mui
 import { useTheme } from '@mui/material/styles';
 import {
   Tab,
@@ -18,13 +16,9 @@ import {
   IconButton,
   TableContainer,
 } from '@mui/material';
-// routes
 import { PATH_DASHBOARD } from '../../routes/paths';
-// utils
 import { fTimestamp } from '../../utils/formatTime';
-// _mock_
 import { _invoices } from '../../_mock/arrays';
-// components
 import Label from '../../components/label';
 import Iconify from '../../components/iconify';
 import Scrollbar from '../../components/scrollbar';
@@ -41,11 +35,9 @@ import {
   TableSelectedAction,
   TablePaginationCustom,
 } from '../../components/table';
-// sections
 import InvoiceAnalytic from '../../sections/@dashboard/invoice/InvoiceAnalytic';
 import { InvoiceTableRow, InvoiceTableToolbar } from '../../sections/@dashboard/invoice/list';
-
-// ----------------------------------------------------------------------
+import AppTitle from '../../components/AppTitle';
 
 const SERVICE_OPTIONS = [
   'all',
@@ -65,8 +57,6 @@ const TABLE_HEAD = [
   { id: 'status', label: 'Status', align: 'left' },
   { id: '' },
 ];
-
-// ----------------------------------------------------------------------
 
 export default function InvoiceListPage() {
   const theme = useTheme();
@@ -223,9 +213,7 @@ export default function InvoiceListPage() {
 
   return (
     <>
-      <Helmet>
-        <title> Invoice: List | {process.env.REACT_APP_APP_NAME}</title>
-      </Helmet>
+      <AppTitle title="Invoice: List" />
 
       <Container maxWidth={themeStretch ? false : 'lg'}>
         <CustomBreadcrumbs

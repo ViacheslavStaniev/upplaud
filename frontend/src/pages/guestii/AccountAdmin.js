@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import { Helmet } from 'react-helmet-async';
 import { useDropzone } from 'react-dropzone';
-// @mui
 import {
   Container,
   Typography,
@@ -15,18 +13,15 @@ import {
   // Radio,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
-
-// form
 import * as Yup from 'yup';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useAuthContext } from '../../auth/useAuthContext';
 import useResponsive from '../../hooks/useResponsive';
-
-// components
 import Iconify from '../../components/iconify';
 import FormProvider, { RHFInputLabel, RHFTextField } from '../../components/hook-form';
 import { useSettingsContext } from '../../components/settings';
+import AppTitle from '../../components/AppTitle';
 
 export default function AccountAdmin() {
   const { user } = useAuthContext();
@@ -87,9 +82,7 @@ export default function AccountAdmin() {
 
   return (
     <>
-      <Helmet>
-        <title> Account Admin | {process.env.REACT_APP_APP_NAME}</title>
-      </Helmet>
+      <AppTitle title="Account Admin" />
 
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <Typography variant="h3" component="h1">

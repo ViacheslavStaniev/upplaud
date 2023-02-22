@@ -1,28 +1,19 @@
 import PropTypes from 'prop-types';
-import { Helmet } from 'react-helmet-async';
-// @mui
 import { alpha } from '@mui/material/styles';
 import { Box, Stack, Button, Typography, IconButton, InputAdornment } from '@mui/material';
-// hooks
 import useCountdown from '../hooks/useCountdown';
-// _mock
 import { _socials } from '../_mock/arrays';
-// components
 import Iconify from '../components/iconify';
 import { CustomTextField } from '../components/custom-input';
-// assets
 import { ComingSoonIllustration } from '../assets/illustrations';
-
-// ----------------------------------------------------------------------
+import AppTitle from '../components/AppTitle';
 
 export default function ComingSoonPage() {
   const { days, hours, minutes, seconds } = useCountdown(new Date('07/07/2024 21:30'));
 
   return (
     <>
-      <Helmet>
-        <title> Coming Soon | {process.env.REACT_APP_APP_NAME}</title>
-      </Helmet>
+      <AppTitle title="Coming Soon" />
 
       <Typography variant="h3" paragraph>
         Coming Soon!

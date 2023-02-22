@@ -1,26 +1,17 @@
-import { Helmet } from 'react-helmet-async';
-// @mui
 import { Container, Box } from '@mui/material';
-// routes
 import { PATH_DASHBOARD } from '../../routes/paths';
-// _mock_
 import { _userCards } from '../../_mock/arrays';
-// components
 import { useSettingsContext } from '../../components/settings';
 import CustomBreadcrumbs from '../../components/custom-breadcrumbs';
-// sections
 import { UserCard } from '../../sections/@dashboard/user/cards';
-
-// ----------------------------------------------------------------------
+import AppTitle from '../../components/AppTitle';
 
 export default function UserCardsPage() {
   const { themeStretch } = useSettingsContext();
 
   return (
     <>
-      <Helmet>
-        <title> User: Cards | {process.env.REACT_APP_APP_NAME}</title>
-      </Helmet>
+      <AppTitle title="User: Cards" />
 
       <Container maxWidth={themeStretch ? false : 'lg'}>
         <CustomBreadcrumbs

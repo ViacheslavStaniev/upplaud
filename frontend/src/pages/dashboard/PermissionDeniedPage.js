@@ -1,6 +1,4 @@
-import { Helmet } from 'react-helmet-async';
 import { useState } from 'react';
-// @mui
 import {
   Box,
   Card,
@@ -10,15 +8,11 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from '@mui/material';
-// routes
 import { PATH_DASHBOARD } from '../../routes/paths';
-// components
 import { useSettingsContext } from '../../components/settings';
 import CustomBreadcrumbs from '../../components/custom-breadcrumbs';
-// auth
 import RoleBasedGuard from '../../auth/RoleBasedGuard';
-
-// ----------------------------------------------------------------------
+import AppTitle from '../../components/AppTitle';
 
 export default function PermissionDeniedPage() {
   const { themeStretch } = useSettingsContext();
@@ -33,9 +27,7 @@ export default function PermissionDeniedPage() {
 
   return (
     <>
-      <Helmet>
-        <title> Other Cases: Permission Denied | {process.env.REACT_APP_APP_NAME}</title>
-      </Helmet>
+      <AppTitle title="Other Cases: Permission Denied |" />
 
       <Container maxWidth={themeStretch ? false : 'lg'}>
         <CustomBreadcrumbs

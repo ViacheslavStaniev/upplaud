@@ -1,22 +1,14 @@
-import { Helmet } from 'react-helmet-async';
 import { useEffect } from 'react';
-// @mui
 import { Container, Stack } from '@mui/material';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
-// redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getBoard, persistColumn, persistCard } from '../../redux/slices/kanban';
-// routes
 import { PATH_DASHBOARD } from '../../routes/paths';
-// utils
 import { hideScrollbarX } from '../../utils/cssStyles';
-// components
 import CustomBreadcrumbs from '../../components/custom-breadcrumbs';
 import { SkeletonKanbanColumn } from '../../components/skeleton';
-// sections
 import { KanbanColumn, KanbanColumnAdd } from '../../sections/@dashboard/kanban';
-
-// ----------------------------------------------------------------------
+import AppTitle from '../../components/AppTitle';
 
 export default function KanbanPage() {
   const dispatch = useDispatch();
@@ -99,9 +91,7 @@ export default function KanbanPage() {
 
   return (
     <>
-      <Helmet>
-        <title> Kanban | {process.env.REACT_APP_APP_NAME}</title>
-      </Helmet>
+      <AppTitle title="Kanban" />
 
       <Container maxWidth={false} sx={{ height: 1 }}>
         <CustomBreadcrumbs

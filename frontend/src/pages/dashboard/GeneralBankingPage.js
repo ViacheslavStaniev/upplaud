@@ -1,15 +1,11 @@
-import { Helmet } from 'react-helmet-async';
-// @mui
 import { useTheme } from '@mui/material/styles';
 import { Grid, Container, Stack } from '@mui/material';
-// _mock_
 import {
   _bankingContacts,
   _bankingCreditCard,
   _bankingRecentTransitions,
 } from '../../_mock/arrays';
 import { useSettingsContext } from '../../components/settings';
-// sections
 import {
   BankingContacts,
   BankingWidgetSummary,
@@ -20,8 +16,8 @@ import {
   BankingRecentTransitions,
   BankingExpensesCategories,
 } from '../../sections/@dashboard/general/banking';
+import AppTitle from '../../components/AppTitle';
 
-// ----------------------------------------------------------------------
 export default function GeneralBankingPage() {
   const theme = useTheme();
 
@@ -29,9 +25,7 @@ export default function GeneralBankingPage() {
 
   return (
     <>
-      <Helmet>
-        <title> General: Banking | {process.env.REACT_APP_APP_NAME}</title>
-      </Helmet>
+      <AppTitle title="General: Banking" />
 
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <Grid container spacing={3}>

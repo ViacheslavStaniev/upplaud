@@ -1,12 +1,9 @@
 import { m } from 'framer-motion';
-// @mui
 import { alpha, styled } from '@mui/material/styles';
 import { Box, Card, Container, Typography, Stack } from '@mui/material';
-// components
 import Image from '../../components/image';
 import { MotionViewport, varFade } from '../../components/animate';
-
-// ----------------------------------------------------------------------
+import AppTitle from '../../components/AppTitle';
 
 const CARDS = [
   {
@@ -43,22 +40,14 @@ const StyledCard = styled(Card)(({ theme }) => ({
   },
 }));
 
-// ----------------------------------------------------------------------
-
 export default function HomeMinimal() {
   return (
     <StyledRoot>
       <Container component={MotionViewport}>
-        <Stack
-          spacing={3}
-          sx={{
-            textAlign: 'center',
-            mb: { xs: 5, md: 10 },
-          }}
-        >
+        <Stack spacing={3} sx={{ textAlign: 'center', mb: { xs: 5, md: 10 } }}>
           <m.div variants={varFade().inUp}>
             <Typography component="div" variant="overline" sx={{ color: 'text.disabled' }}>
-              {process.env.REACT_APP_APP_NAME}
+              <AppTitle appNameOnly />
             </Typography>
           </m.div>
 
@@ -73,10 +62,7 @@ export default function HomeMinimal() {
           gap={{ xs: 3, lg: 10 }}
           display="grid"
           alignItems="center"
-          gridTemplateColumns={{
-            xs: 'repeat(1, 1fr)',
-            md: 'repeat(3, 1fr)',
-          }}
+          gridTemplateColumns={{ xs: 'repeat(1, 1fr)', md: 'repeat(3, 1fr)' }}
         >
           {CARDS.map((card, index) => (
             <m.div variants={varFade().inUp} key={card.title}>

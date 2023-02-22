@@ -8,6 +8,7 @@ import { _socials } from '../../_mock/arrays';
 // components
 import Logo from '../../components/logo';
 import Iconify from '../../components/iconify';
+import AppTitle from '../../components/AppTitle';
 
 // ----------------------------------------------------------------------
 
@@ -81,8 +82,8 @@ export default function Footer() {
 
           <Grid item xs={8} md={3}>
             <Typography variant="body2" sx={{ pr: { md: 5 } }}>
-              The starting point for your next project with {process.env.REACT_APP_APP_NAME}, built
-              on the newest version of Material-UI ©, ready to be customized to your style.
+              The starting point for your next project with <AppTitle appNameOnly />, built on the
+              newest version of Material-UI ©, ready to be customized to your style.
             </Typography>
 
             <Stack

@@ -1,21 +1,14 @@
 import { m } from 'framer-motion';
-import { Helmet } from 'react-helmet-async';
 import { Link as RouterLink } from 'react-router-dom';
-// @mui
 import { Button, Typography } from '@mui/material';
-// components
 import { MotionContainer, varBounce } from '../components/animate';
-// assets
 import { SeverErrorIllustration } from '../assets/illustrations';
-
-// ----------------------------------------------------------------------
+import AppTitle from '../components/AppTitle';
 
 export default function Page500() {
   return (
     <>
-      <Helmet>
-        <title> 500 Internal Server Error | {process.env.REACT_APP_APP_NAME}</title>
-      </Helmet>
+      <AppTitle title="500 Internal Server Error" />
 
       <MotionContainer>
         <m.div variants={varBounce().in}>

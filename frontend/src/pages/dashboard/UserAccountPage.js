@@ -1,16 +1,10 @@
-import { Helmet } from 'react-helmet-async';
 import { useState } from 'react';
-// @mui
 import { Container, Tab, Tabs, Box } from '@mui/material';
-// routes
 import { PATH_DASHBOARD } from '../../routes/paths';
-// _mock_
 import { _userPayment, _userAddressBook, _userInvoices, _userAbout } from '../../_mock/arrays';
-// components
 import Iconify from '../../components/iconify';
 import CustomBreadcrumbs from '../../components/custom-breadcrumbs';
 import { useSettingsContext } from '../../components/settings';
-// sections
 import {
   AccountGeneral,
   AccountBilling,
@@ -18,8 +12,7 @@ import {
   AccountNotifications,
   AccountChangePassword,
 } from '../../sections/@dashboard/user/account';
-
-// ----------------------------------------------------------------------
+import AppTitle from '../../components/AppTitle';
 
 export default function UserAccountPage() {
   const { themeStretch } = useSettingsContext();
@@ -67,9 +60,7 @@ export default function UserAccountPage() {
 
   return (
     <>
-      <Helmet>
-        <title> User: Account Settings | {process.env.REACT_APP_APP_NAME}</title>
-      </Helmet>
+      <AppTitle title="User: Account Settings" />
 
       <Container maxWidth={themeStretch ? false : 'lg'}>
         <CustomBreadcrumbs

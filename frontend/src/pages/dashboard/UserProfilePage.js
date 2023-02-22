@@ -1,12 +1,7 @@
-import { Helmet } from 'react-helmet-async';
 import { useState } from 'react';
-// @mui
 import { Tab, Card, Tabs, Container, Box } from '@mui/material';
-// routes
 import { PATH_DASHBOARD } from '../../routes/paths';
-// auth
 import { useAuthContext } from '../../auth/useAuthContext';
-// _mock_
 import {
   _userAbout,
   _userFeeds,
@@ -14,11 +9,9 @@ import {
   _userGallery,
   _userFollowers,
 } from '../../_mock/arrays';
-// components
 import Iconify from '../../components/iconify';
 import CustomBreadcrumbs from '../../components/custom-breadcrumbs';
 import { useSettingsContext } from '../../components/settings';
-// sections
 import {
   Profile,
   ProfileCover,
@@ -26,8 +19,7 @@ import {
   ProfileGallery,
   ProfileFollowers,
 } from '../../sections/@dashboard/user/profile';
-
-// ----------------------------------------------------------------------
+import AppTitle from '../../components/AppTitle';
 
 export default function UserProfilePage() {
   const { themeStretch } = useSettingsContext();
@@ -73,9 +65,7 @@ export default function UserProfilePage() {
 
   return (
     <>
-      <Helmet>
-        <title> User: Profile | {process.env.REACT_APP_APP_NAME}</title>
-      </Helmet>
+      <AppTitle title="User: Profile" />
 
       <Container maxWidth={themeStretch ? false : 'lg'}>
         <CustomBreadcrumbs

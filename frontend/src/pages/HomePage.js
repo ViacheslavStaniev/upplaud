@@ -1,9 +1,6 @@
-import { Helmet } from 'react-helmet-async';
 import { m, useScroll, useSpring } from 'framer-motion';
-// @mui
 import { useTheme } from '@mui/material/styles';
 import { Box } from '@mui/material';
-// sections
 import {
   HomeHero,
   HomeMinimal,
@@ -16,8 +13,7 @@ import {
   HomeCleanInterfaces,
   HomeHugePackElements,
 } from '../sections/home';
-
-// ----------------------------------------------------------------------
+import AppTitle from '../components/AppTitle';
 
 export default function HomePage() {
   const theme = useTheme();
@@ -48,9 +44,7 @@ export default function HomePage() {
 
   return (
     <>
-      <Helmet>
-        <title> Home | {process.env.REACT_APP_APP_NAME}</title>
-      </Helmet>
+      <AppTitle title="Home" />
 
       {progress}
 

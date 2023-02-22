@@ -1,24 +1,16 @@
-import { Helmet } from 'react-helmet-async';
-// @mui
 import { Container } from '@mui/material';
-// routes
 import { PATH_DASHBOARD } from '../../routes/paths';
-// components
 import { useSettingsContext } from '../../components/settings';
 import CustomBreadcrumbs from '../../components/custom-breadcrumbs';
-// sections
 import InvoiceNewEditForm from '../../sections/@dashboard/invoice/form';
-
-// ----------------------------------------------------------------------
+import AppTitle from '../../components/AppTitle';
 
 export default function InvoiceCreatePage() {
   const { themeStretch } = useSettingsContext();
 
   return (
     <>
-      <Helmet>
-        <title> Invoices: Create a new invoice | {process.env.REACT_APP_APP_NAME}</title>
-      </Helmet>
+      <AppTitle title="Invoices: Create a new invoice" />
 
       <Container maxWidth={themeStretch ? false : 'lg'}>
         <CustomBreadcrumbs

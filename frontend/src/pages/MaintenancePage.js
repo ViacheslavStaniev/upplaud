@@ -1,18 +1,12 @@
-import { Helmet } from 'react-helmet-async';
 import { Link as RouterLink } from 'react-router-dom';
-// @mui
 import { Button, Typography, Stack } from '@mui/material';
-// assets
 import { MaintenanceIllustration } from '../assets/illustrations';
-
-// ----------------------------------------------------------------------
+import AppTitle from '../components/AppTitle';
 
 export default function MaintenancePage() {
   return (
     <>
-      <Helmet>
-        <title> Maintenance | {process.env.REACT_APP_APP_NAME}</title>
-      </Helmet>
+      <AppTitle title="Maintenance" />
 
       <Stack sx={{ alignItems: 'center' }}>
         <Typography variant="h3" paragraph>

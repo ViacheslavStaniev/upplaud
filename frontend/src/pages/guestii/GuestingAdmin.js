@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Helmet } from 'react-helmet-async';
 import { Box, Container, Typography, Stack, Button } from '@mui/material';
 import { _userList } from '../../_mock/arrays';
 import { useSettingsContext } from '../../components/settings';
 import CustomTable from '../../components/table/CustomTable';
+import AppTitle from '../../components/AppTitle';
 
 export default function GuestingAdmin() {
   const { themeStretch } = useSettingsContext();
@@ -21,9 +21,7 @@ export default function GuestingAdmin() {
 
   return (
     <>
-      <Helmet>
-        <title> Guesting Admin | {process.env.REACT_APP_APP_NAME}</title>
-      </Helmet>
+      <AppTitle title="Guesting Admin" />
 
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <Typography variant="h3" component="h1" paragraph>

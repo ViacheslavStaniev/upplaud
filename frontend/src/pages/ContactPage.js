@@ -1,19 +1,12 @@
-import { Helmet } from 'react-helmet-async';
-// @mui
 import { Container, Box } from '@mui/material';
-// _mock
 import { _mapContact } from '../_mock/arrays';
-// sections
 import { ContactHero, ContactForm, ContactMap } from '../sections/contact';
-
-// ----------------------------------------------------------------------
+import AppTitle from '../components/AppTitle';
 
 export default function ContactPage() {
   return (
     <>
-      <Helmet>
-        <title> Contact us | {process.env.REACT_APP_APP_NAME}</title>
-      </Helmet>
+      <AppTitle title="Contact Us" />
 
       <ContactHero />
 

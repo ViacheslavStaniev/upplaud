@@ -5,8 +5,6 @@ function path(root, sublink) {
 const ROOTS_AUTH = '/auth';
 const ROOTS_DASHBOARD = '/dashboard';
 
-// ----------------------------------------------------------------------
-
 export const PATH_AUTH = {
   root: ROOTS_AUTH,
   login: path(ROOTS_AUTH, '/login'),
@@ -96,4 +94,4 @@ export const PATH_MINIMAL_ON_STORE = 'https://mui.com/store/items/minimal-dashbo
 export const PATH_FREE_VERSION = 'https://mui.com/store/items/minimal-dashboard-free/';
 
 export const PATH_FIGMA_PREVIEW =
-  'https://www.figma.com/proto/UzqNrZHkqxGTw2k6FCtUdT/{process.env.REACT_APP_APP_NAME}?node-id=226%3A1488&scaling=scale-down-width&page-id=191%3A1534&starting-point-node-id=212%3A185';
+  'https://www.figma.com/proto/UzqNrZHkqxGTw2k6FCtUdT/podasq?node-id=226%3A1488&scaling=scale-down-width&page-id=191%3A1534&starting-point-node-id=212%3A185';

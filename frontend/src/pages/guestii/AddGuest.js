@@ -1,4 +1,3 @@
-import { Helmet } from 'react-helmet-async';
 import {
   Container,
   Typography,
@@ -10,18 +9,14 @@ import {
   FormControlLabel,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
-
-// form
 import * as Yup from 'yup';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-
 import useResponsive from '../../hooks/useResponsive';
-
-// components
 import Iconify from '../../components/iconify';
 import FormProvider, { RHFTextField, RHFDateField } from '../../components/hook-form';
 import { useSettingsContext } from '../../components/settings';
+import AppTitle from '../../components/AppTitle';
 
 export default function AccountAdmin() {
   const { themeStretch } = useSettingsContext();
@@ -75,9 +70,7 @@ export default function AccountAdmin() {
 
   return (
     <>
-      <Helmet>
-        <title> Add Guest | {process.env.REACT_APP_APP_NAME}</title>
-      </Helmet>
+      <AppTitle title="Add Guest" />
 
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <Typography variant="h3" component="h1">

@@ -1,17 +1,11 @@
-import { Helmet } from 'react-helmet-async';
-// @mui
 import { Divider } from '@mui/material';
-// sections
+import AppTitle from '../components/AppTitle';
 import { AboutHero, AboutWhat, AboutTeam, AboutVision, AboutTestimonials } from '../sections/about';
-
-// ----------------------------------------------------------------------
 
 export default function AboutPage() {
   return (
     <>
-      <Helmet>
-        <title> About us | {process.env.REACT_APP_APP_NAME}</title>
-      </Helmet>
+      <AppTitle title="About Us" />
 
       <AboutHero />
 

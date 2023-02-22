@@ -1,17 +1,11 @@
-import { Helmet } from 'react-helmet-async';
-// @mui
 import { Box, Container, Typography } from '@mui/material';
-// sections
 import { FaqsHero, FaqsCategory, FaqsList, FaqsForm } from '../sections/faqs';
-
-// ----------------------------------------------------------------------
+import AppTitle from '../components/AppTitle';
 
 export default function FaqsPage() {
   return (
     <>
-      <Helmet>
-        <title> Faqs | {process.env.REACT_APP_APP_NAME}</title>
-      </Helmet>
+      <AppTitle title="Faqs" />
 
       <FaqsHero />
 
@@ -25,13 +19,9 @@ export default function FaqsPage() {
         <Box
           gap={10}
           display="grid"
-          gridTemplateColumns={{
-            xs: 'repeat(1, 1fr)',
-            md: 'repeat(2, 1fr)',
-          }}
+          gridTemplateColumns={{ xs: 'repeat(1, 1fr)', md: 'repeat(2, 1fr)' }}
         >
           <FaqsList />
-
           <FaqsForm />
         </Box>
       </Container>

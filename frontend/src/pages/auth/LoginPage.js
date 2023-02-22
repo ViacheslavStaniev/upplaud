@@ -1,16 +1,10 @@
-import { Helmet } from 'react-helmet-async';
-// sections
 import Login from '../../sections/auth/Login';
-// import Login from '../../sections/auth/LoginAuth0';
-
-// ----------------------------------------------------------------------
+import AppTitle from '../../components/AppTitle';
 
 export default function LoginPage() {
   return (
     <>
-      <Helmet>
-        <title> Login | {process.env.REACT_APP_APP_NAME}</title>
-      </Helmet>
+      <AppTitle title="Login" />
 
       <Login />
     </>

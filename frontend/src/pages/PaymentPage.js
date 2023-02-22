@@ -1,21 +1,14 @@
-import { Helmet } from 'react-helmet-async';
-// @mui
 import { Box, Grid, Container, Typography } from '@mui/material';
-// hooks
 import useResponsive from '../hooks/useResponsive';
-// sections
 import { PaymentSummary, PaymentMethods, PaymentBillingAddress } from '../sections/payment';
-
-// ----------------------------------------------------------------------
+import AppTitle from '../components/AppTitle';
 
 export default function PaymentPage() {
   const isDesktop = useResponsive('up', 'md');
 
   return (
     <>
-      <Helmet>
-        <title> Payment | {process.env.REACT_APP_APP_NAME}</title>
-      </Helmet>
+      <AppTitle title="Payment" />
 
       <Container
         sx={{

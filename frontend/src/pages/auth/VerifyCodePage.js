@@ -1,24 +1,15 @@
-import { Helmet } from 'react-helmet-async';
 import { Link as RouterLink } from 'react-router-dom';
-// @mui
 import { Link, Typography } from '@mui/material';
-// routes
 import { PATH_AUTH } from '../../routes/paths';
-// components
 import Iconify from '../../components/iconify';
-// sections
 import AuthVerifyCodeForm from '../../sections/auth/AuthVerifyCodeForm';
-// assets
 import { EmailInboxIcon } from '../../assets/icons';
-
-// ----------------------------------------------------------------------
+import AppTitle from '../../components/AppTitle';
 
 export default function VerifyCodePage() {
   return (
     <>
-      <Helmet>
-        <title> Verify Code | {process.env.REACT_APP_APP_NAME}</title>
-      </Helmet>
+      <AppTitle title="Verify Code" />
 
       <EmailInboxIcon sx={{ mb: 5, height: 96 }} />
 

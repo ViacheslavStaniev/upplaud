@@ -1,20 +1,14 @@
-import { Helmet } from 'react-helmet-async';
-// @mui
 import { alpha } from '@mui/material/styles';
 import { Container, Typography, Box } from '@mui/material';
-// components
 import { useSettingsContext } from '../../components/settings';
-
-// ----------------------------------------------------------------------
+import AppTitle from '../components/AppTitle';
 
 export default function BlankPage() {
   const { themeStretch } = useSettingsContext();
 
   return (
     <>
-      <Helmet>
-        <title> Blank Page | {process.env.REACT_APP_APP_NAME}</title>
-      </Helmet>
+      <AppTitle title="Blank Page" />
 
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <Typography variant="h4"> Blank </Typography>

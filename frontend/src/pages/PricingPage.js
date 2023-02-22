@@ -1,19 +1,12 @@
-import { Helmet } from 'react-helmet-async';
-// @mui
 import { Box, Switch, Container, Typography, Stack } from '@mui/material';
-// _mock_
 import { _pricingPlans } from '../_mock/arrays';
-// sections
 import { PricingPlanCard } from '../sections/pricing';
-
-// ----------------------------------------------------------------------
+import AppTitle from '../components/AppTitle';
 
 export default function PricingPage() {
   return (
     <>
-      <Helmet>
-        <title> Pricing | {process.env.REACT_APP_APP_NAME}</title>
-      </Helmet>
+      <AppTitle title="Pricing" />
 
       <Container
         sx={{

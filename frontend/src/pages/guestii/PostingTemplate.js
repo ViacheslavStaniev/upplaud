@@ -1,15 +1,13 @@
-import { Helmet } from 'react-helmet-async';
 import { Container, Card, Typography } from '@mui/material';
 import { useSettingsContext } from '../../components/settings';
+import AppTitle from '../../components/AppTitle';
 
 export default function PostingTemplate() {
   const { themeStretch } = useSettingsContext();
 
   return (
     <>
-      <Helmet>
-        <title> Posting Template | {process.env.REACT_APP_APP_NAME}</title>
-      </Helmet>
+      <AppTitle title="Posting Template" />
 
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <Typography variant="h3" component="h1" paragraph>

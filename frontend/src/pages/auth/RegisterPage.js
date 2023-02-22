@@ -1,15 +1,10 @@
-import { Helmet } from 'react-helmet-async';
-// sections
 import Register from '../../sections/auth/Register';
-
-// ----------------------------------------------------------------------
+import AppTitle from '../../components/AppTitle';
 
 export default function RegisterPage() {
   return (
     <>
-      <Helmet>
-        <title> Register | {process.env.REACT_APP_APP_NAME}</title>
-      </Helmet>
+      <AppTitle title="Register" />
 
       <Register />
     </>

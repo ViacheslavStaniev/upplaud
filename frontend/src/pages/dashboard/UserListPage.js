@@ -1,8 +1,6 @@
-import { Helmet } from 'react-helmet-async';
 import { paramCase } from 'change-case';
 import { useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-// @mui
 import {
   Tab,
   Tabs,
@@ -16,11 +14,8 @@ import {
   IconButton,
   TableContainer,
 } from '@mui/material';
-// routes
 import { PATH_DASHBOARD } from '../../routes/paths';
-// _mock_
 import { _userList } from '../../_mock/arrays';
-// components
 import Iconify from '../../components/iconify';
 import Scrollbar from '../../components/scrollbar';
 import ConfirmDialog from '../../components/confirm-dialog';
@@ -36,10 +31,8 @@ import {
   TableSelectedAction,
   TablePaginationCustom,
 } from '../../components/table';
-// sections
 import { UserTableToolbar, UserTableRow } from '../../sections/@dashboard/user/list';
-
-// ----------------------------------------------------------------------
+import AppTitle from '../../components/AppTitle';
 
 const STATUS_OPTIONS = ['all', 'active', 'banned'];
 
@@ -64,8 +57,6 @@ const TABLE_HEAD = [
   { id: 'status', label: 'Status', align: 'left' },
   { id: '' },
 ];
-
-// ----------------------------------------------------------------------
 
 export default function UserListPage() {
   const {
@@ -184,9 +175,7 @@ export default function UserListPage() {
 
   return (
     <>
-      <Helmet>
-        <title> User: List | {process.env.REACT_APP_APP_NAME}</title>
-      </Helmet>
+      <AppTitle title="User: List" />
 
       <Container maxWidth={themeStretch ? false : 'lg'}>
         <CustomBreadcrumbs
