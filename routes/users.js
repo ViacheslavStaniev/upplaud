@@ -2,17 +2,139 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 const { ServiceError } = require("./errors");
+const verifyAuth = require("../config/verifyAuth");
 const { createUsername } = require("../helpers/utills");
+const { check, validationResult } = require("express-validator");
 
 const router = express.Router();
+
+// @route   POST api/user
+// @desc    UPDATE current logged-in user
+// @access  Public
+router.put("/", [check("email", "Please enter a valid email address").isEmail()], verifyAuth, async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+    const user = await User.findById(req.userId);
+    if (!user) return res.status(400).json({ errors: ["User doesn't exists. Please login again."] });
+
+    const { firstName, lastName, email, userName } = req.body;
+
+    if (email) user.email = email;
+    if (firstName) user.firstName = firstName;
+    if (lastName) user.lastName = lastName;
+    if (userName) {
+      const isTaken = await isUserNameTaken(req.userId, req.body.userName);
+      if (isTaken) return res.status(400).json({ errors: ["Suffix already taken by another user. Please choose another one."] });
+
+      user.userName = userName;
+    }
+
+    await user.save();
+
+    res.json(user);
+  } catch (err) {
+    // throw err;
+    console.error({ msg: err.message });
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// @route   POST api/user/checksusername
+// @desc    checks is current username is taken by anyone or not
+// @access  Public
+router.post(
+  "/checksusername",
+  [check("userName", "Please enter a valid userName").exists().notEmpty()],
+  verifyAuth,
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+      const isTaken = await isUserNameTaken(req.userId, req.body.userName);
+
+      res.json({ isTaken });
+    } catch (err) {
+      // throw err;
+      console.error({ msg: err.message });
+      res.status(500).send("Internal Server Error");
+    }
+  }
+);
+
+// @route   POST api/users/changePassword
+// @desc    Changes user password
+// @access  Public
+router.post(
+  "/changePassword",
+  [
+    check("oldPassword", "Please enter your password with 6 or more characters").isLength({ min: 6 }),
+    check("newPassword", "Please enter your password with 6 or more characters").isLength({ min: 6 }),
+  ],
+  verifyAuth,
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+    const { oldPassword, newPassword } = req.body;
+
+    const session = await User.startSession();
+    const options = { session };
+    session.startTransaction();
+
+    try {
+      const user = User.findById(req.userId);
+      if (!user) return res.status(400).json([{ msg: "User doesn't exists." }]);
+
+      const salt = await bcrypt.genSalt(10);
+      const prePassword = await bcrypt.hash(oldPassword, salt);
+      if (user.password !== prePassword) return res.status(400).json([{ msg: "Please enter your corret old password." }]);
+
+      user.password = await bcrypt.hash(newPassword, salt);
+      user.save(options);
+
+      await session.commitTransaction();
+      session.endSession();
+
+      return res.status(200).json([{ msg: "Your password has been changed successfully." }]);
+    } catch (err) {
+      await session.abortTransaction();
+      session.endSession();
+
+      if (err.name === "ServiceError") return res.status(400).json({ errors: [{ msg: err.message }] });
+      else throw err;
+    }
+  }
+);
+
+async function isUserNameTaken(userId, userName) {
+  const user = await User.findOne({ userName: userName, _id: { $ne: userId } });
+  return user !== null;
+}
 
 async function getUserInfo(userId) {
   return await User.findById(userId).select("-password -resetToken").populate("show");
 }
 
-async function register(firstname, lastname, email, password, timezone) {
-  const name = { first: firstname, last: lastname };
-  const user = new User({ name, email, password, timezone });
+async function getBasicUserInfo(userId) {
+  return await User.findById(userId);
+}
+
+async function updateUserInfo(userId, info) {
+  return await User.findByIdAndUpdate(userId, info);
+}
+
+async function createOrUpdateGuestUser(firstName, lastName, email, password) {
+  const userExists = await User.findOne({ email });
+  if (userExists) return await updateUserInfo(userExists._id, { firstName, lastName });
+
+  return await register(firstName, lastName, email, password);
+}
+
+async function register(firstName, lastName, email, password, timezone = "") {
+  const user = new User({ firstName, lastName, email, password, timezone });
 
   const session = await User.startSession();
   const options = { session };
@@ -21,7 +143,7 @@ async function register(firstname, lastname, email, password, timezone) {
   try {
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(password, salt);
-    user.username = createUsername(name);
+    user.userName = createUsername({ firstName, lastName });
     await user.save(options);
 
     await session.commitTransaction();
@@ -45,3 +167,6 @@ async function register(firstname, lastname, email, password, timezone) {
 module.exports = router;
 module.exports.register = register;
 module.exports.getUserInfo = getUserInfo;
+module.exports.updateUserInfo = updateUserInfo;
+module.exports.getBasicUserInfo = getBasicUserInfo;
+module.exports.createOrUpdateGuestUser = createOrUpdateGuestUser;

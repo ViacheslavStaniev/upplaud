@@ -1,5 +1,6 @@
 export const AUTH_TYPE = {
   LOGIN: 'LOGIN',
+  UPDATE: 'UPDATE',
   LOGOUT: 'LOGOUT',
   INITIAL: 'INITIAL',
   REGISTER: 'REGISTER',

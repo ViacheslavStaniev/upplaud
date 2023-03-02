@@ -4,9 +4,9 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const verifyAuth = require("../config/verifyAuth");
 const { sendEmail } = require("../helpers/email");
-const { register, getUserInfo } = require("./users");
 const { OAuth2Client } = require("google-auth-library");
 const { check, validationResult } = require("express-validator");
+const { register, getUserInfo } = require("./users");
 const { randomString, getAuthResponse } = require("../helpers/utills");
 
 const router = express.Router();
@@ -100,7 +100,7 @@ router.post("/social_login", [check("token", "Invalid token. Please try again.")
 router.post(
   "/register",
   [
-    check("firstname", "First name is required").not().isEmpty(),
+    check("firstName", "First name is required").not().isEmpty(),
     check("email", "Please enter a valid email address").isEmail(),
     check("password", "Please enter with 6 or more characters").isLength({ min: 6 }),
   ],
@@ -108,10 +108,10 @@ router.post(
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-    const { firstname, lastname, email, password, timezone } = req.body;
+    const { firstName, lastName, email, password, timezone } = req.body;
 
     try {
-      const user = await register(firstname, lastname, email, password, timezone);
+      const user = await register(firstName, lastName, email, password, timezone);
 
       res.json(await getAuthResponse(user));
     } catch (err) {

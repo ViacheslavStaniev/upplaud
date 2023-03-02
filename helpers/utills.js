@@ -10,12 +10,12 @@ const generateAuthToken = (user, expiresIn = 7 * 24 * 60 * 60) => {
 
 const getAuthResponse = async (user) => ({ accessToken: await generateAuthToken(user), user });
 
-const createUsername = ({ first = "", last = "" }) => {
+const createUsername = ({ firstName = "", lastName = "" }) => {
   const cleanString = (str) => str.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
 
   let username = "";
-  if (first) username += cleanString(first);
-  if (last) username += "-" + cleanString(last);
+  if (firstName) username += cleanString(firstName);
+  if (lastName) username += "-" + cleanString(lastName);
 
   return `${username}-${randomString(8)}`;
 };

@@ -6,8 +6,6 @@ import { styled } from '@mui/material/styles';
 import { Box, Tab, Tabs, Stack, Button, Divider, Container, Typography } from '@mui/material';
 // hooks
 import useResponsive from '../../hooks/useResponsive';
-// routes
-import { PATH_MINIMAL_ON_STORE } from '../../routes/paths';
 // _mock_
 import { _homePlans } from '../../_mock/arrays';
 // components
@@ -260,19 +258,6 @@ function PlanCard({ plan, sx, ...other }) {
             </Stack>
           );
         })}
-      </Stack>
-
-      <Stack alignItems="flex-end">
-        <Button
-          color="inherit"
-          size="small"
-          target="_blank"
-          rel="noopener"
-          href={PATH_MINIMAL_ON_STORE}
-          endIcon={<Iconify icon="eva:chevron-right-fill" />}
-        >
-          Learn more
-        </Button>
       </Stack>
     </Stack>
   );

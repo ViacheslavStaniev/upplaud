@@ -1,17 +1,22 @@
 import {
-  Container,
-  Typography,
+  Chip,
   Alert,
   Stack,
   Button,
-  Tooltip,
   Switch,
+  Tooltip,
+  Container,
+  Typography,
+  InputAdornment,
   FormControlLabel,
 } from '@mui/material';
+import { useState } from 'react';
 import { LoadingButton } from '@mui/lab';
 import * as Yup from 'yup';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { useSnackbar } from 'notistack';
+import { addUpdateGuest } from '../../actions/guests';
 import useResponsive from '../../hooks/useResponsive';
 import Iconify from '../../components/iconify';
 import FormProvider, { RHFTextField, RHFDateField } from '../../components/hook-form';
@@ -19,6 +24,7 @@ import { useSettingsContext } from '../../components/settings';
 import AppTitle from '../../components/AppTitle';
 
 export default function AccountAdmin() {
+  const { enqueueSnackbar } = useSnackbar();
   const { themeStretch } = useSettingsContext();
 
   const isDesktop = useResponsive('up', 'lg');
@@ -26,20 +32,22 @@ export default function AccountAdmin() {
 
   const AccountSchema = Yup.object().shape({
     firstName: Yup.string().required('First name is Required'),
-    email: Yup.string().required('Email is required').email('Email must be a valid email address'),
-    password: Yup.string().required('Password is required'),
-    recordingDate: Yup.date().required('Please choose a recording date.'),
     jobTitle: Yup.string().required('Please fill the Job Title'),
+    recordingDate: Yup.date().required('Please choose a recording date.'),
+    email: Yup.string().required('Email is required').email('Email must be a valid email address'),
   });
 
   const defaultValues = {
     firstName: '',
     lastName: '',
     email: '',
-    recordingDate: '',
     jobTitle: '',
-    topic: '',
+    recordingDate: '',
+    startHostAutomation: false,
+    dummyTopic: '', // just to save the topics
   };
+
+  const [topics, setTopics] = useState([]);
 
   const methods = useForm({
     resolver: yupResolver(AccountSchema),
@@ -48,23 +56,28 @@ export default function AccountAdmin() {
 
   const {
     reset,
+    watch,
     setError,
+    setValue,
     handleSubmit,
-    formState: { errors, isSubmitting, isSubmitSuccessful },
+    formState: { errors, isSubmitting },
   } = methods;
 
   const onSubmit = async (data) => {
     try {
-      console.log(data);
+      await addUpdateGuest({ ...data, potentialTopics: topics });
+
+      setTopics([]);
+      reset(defaultValues);
+      enqueueSnackbar('Guest added successfully!', {
+        variant: 'success',
+        anchorOrigin: { vertical: 'top', horizontal: 'center' },
+      });
     } catch (error) {
       console.error(error);
 
       reset();
-
-      setError('afterSubmit', {
-        ...error,
-        message: error.message || error,
-      });
+      setError('afterSubmit', { ...error, message: error.message || error });
     }
   };
 
@@ -110,7 +123,44 @@ export default function AccountAdmin() {
             >
               <RHFDateField name="recordingDate" label="Recording Date" />
               <RHFTextField name="jobTitle" label="Guest Job Title and Business" />
-              <RHFTextField name="topic" label="Potential Topic (Optional)" />
+
+              <Stack width="100%" position="relative">
+                <RHFTextField
+                  name="dummyTopic"
+                  disabled={topics.length === 5}
+                  label="Potential Topic (Optional)"
+                  placeholder="Add your topic here..."
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <Button
+                          edge="end"
+                          aria-label="Add Topic"
+                          disabled={topics.length === 5}
+                          onClick={() => {
+                            setTopics((t) => [...t, watch('dummyTopic')]);
+                            setValue('dummyTopic', '');
+                          }}
+                        >
+                          Add Topic
+                        </Button>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+
+                <Stack gap={1} top={95} flexWrap="wrap" position="absolute" flexDirection="row">
+                  {topics.map((topic, key) => (
+                    <Chip
+                      key={key}
+                      label={topic}
+                      variant="outlined"
+                      sx={{ justifyContent: 'left', width: 'fit-content' }}
+                      onDelete={() => setTopics((t) => t.filter((_, i) => i !== key))}
+                    />
+                  ))}
+                </Stack>
+              </Stack>
             </Stack>
           </Stack>
 
@@ -119,8 +169,9 @@ export default function AccountAdmin() {
               Start Host Automation Now
             </Typography>
             <FormControlLabel
-              control={<Switch defaultChecked size="medium" />}
+              name="startHostAutomation"
               label="Start when guest starts"
+              control={<Switch size="medium" />}
             />
           </Stack>
 
@@ -130,7 +181,18 @@ export default function AccountAdmin() {
               type="submit"
               shape="circular"
               variant="outlined"
-              loading={isSubmitSuccessful || isSubmitting}
+              loading={isSubmitting}
+            >
+              Add Guest
+            </LoadingButton>
+
+            <Button
+              disabled
+              size="large"
+              type="button"
+              color="primary"
+              shape="circular"
+              variant="contained"
               endIcon={
                 <Tooltip
                   arrow
@@ -142,9 +204,16 @@ export default function AccountAdmin() {
               }
             >
               UPLOAD CSV
-            </LoadingButton>
+            </Button>
 
-            <Button size="large" type="button" variant="contained" color="info" shape="circular">
+            <Button
+              disabled
+              color="info"
+              size="large"
+              type="button"
+              shape="circular"
+              variant="contained"
+            >
               AUTOMATE GUEST
             </Button>
           </Stack>

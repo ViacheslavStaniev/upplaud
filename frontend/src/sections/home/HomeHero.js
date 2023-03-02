@@ -5,7 +5,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import { styled, alpha, useTheme } from '@mui/material/styles';
 import { Button, Box, Container, Typography, Stack, Grid, Rating } from '@mui/material';
 // routes
-import { PATH_DASHBOARD, PATH_FIGMA_PREVIEW } from '../../routes/paths';
+import { PATH_DASHBOARD } from '../../routes/paths';
 // hooks
 import useResponsive from '../../hooks/useResponsive';
 // utils
@@ -207,19 +207,6 @@ function Description() {
               Live Preview
             </Button>
           </Stack>
-
-          <Button
-            color="inherit"
-            size="large"
-            variant="outlined"
-            startIcon={<Iconify icon="eva:external-link-fill" width={24} />}
-            target="_blank"
-            rel="noopener"
-            href={PATH_FIGMA_PREVIEW}
-            sx={{ borderColor: 'text.primary' }}
-          >
-            Design Preview
-          </Button>
         </Stack>
       </m.div>
 

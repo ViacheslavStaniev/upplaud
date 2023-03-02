@@ -3,12 +3,11 @@ const Schema = mongoose.Schema;
 
 const GuestSchema = new Schema(
   {
-    asqs: String,
-    jobTitle: String,
-    taskTodo: String,
-    recordingDate: Date,
-    potentialTopics: Array,
-    user: {
+    potentialTopics: [{ type: String }],
+    jobTitle: { type: String, default: "" },
+    recordingDate: { type: Date, default: new Date() },
+    startHostAutomation: { type: Boolean, default: false },
+    guest: {
       ref: "User",
       type: Schema.Types.ObjectId,
     },

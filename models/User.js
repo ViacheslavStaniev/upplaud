@@ -17,12 +17,13 @@ const IS_ADMIN_YES = 1;
 
 const UserSchema = new Schema(
   {
-    name: {
-      first: {
-        type: String,
-        required: true,
-      },
-      last: String,
+    firstName: {
+      type: String,
+      required: true,
+    },
+    lastName: {
+      type: String,
+      default: "",
     },
     email: {
       type: String,
@@ -51,7 +52,7 @@ const UserSchema = new Schema(
       city: { type: String, default: "" },
       zipCode: { type: Number, default: null },
     },
-    username: {
+    userName: {
       type: String,
       default: "",
     },

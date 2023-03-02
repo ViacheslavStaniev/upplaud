@@ -48,15 +48,7 @@ import ScrollToTop from './components/scroll-to-top';
 import { MotionLazyContainer } from './components/animate';
 import { ThemeSettings, SettingsProvider } from './components/settings';
 
-// Check our docs
-// https://docs.minimals.cc/authentication/js-version
-
 import { AuthProvider } from './auth/JwtContext';
-// import { AuthProvider } from './auth/Auth0Context';
-// import { AuthProvider } from './auth/FirebaseContext';
-// import { AuthProvider } from './auth/AwsCognitoContext';
-
-// ----------------------------------------------------------------------
 
 export default function App() {
   return (

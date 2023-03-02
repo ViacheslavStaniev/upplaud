@@ -12,8 +12,6 @@ import { CustomAvatar } from '../../../components/custom-avatar';
 import { useSnackbar } from '../../../components/snackbar';
 import MenuPopover from '../../../components/menu-popover';
 
-// ----------------------------------------------------------------------
-
 const OPTIONS = [
   {
     label: 'Home',
@@ -28,8 +26,6 @@ const OPTIONS = [
     linkTo: PATH_DASHBOARD.user.account,
   },
 ];
-
-// ----------------------------------------------------------------------
 
 export default function AccountPopover() {
   const navigate = useNavigate();

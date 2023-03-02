@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, Container, Typography, Stack, Button } from '@mui/material';
+import { getGuestsList } from '../../actions/guests';
+import { useAuthContext } from '../../auth/useAuthContext';
 import { useSettingsContext } from '../../components/settings';
 import CustomTable from '../../components/table/CustomTable';
 import AppTitle from '../../components/AppTitle';
@@ -118,7 +120,19 @@ const automationData = [
 ];
 
 export default function Automations() {
+  const { user } = useAuthContext();
   const { themeStretch } = useSettingsContext();
+
+  const [guestList, setGuestList] = useState([]);
+
+  useEffect(() => {
+    (async () => {
+      const list = await getGuestsList(user.show?._id);
+      setGuestList(list);
+    })();
+  }, [user.show?._id]);
+
+  console.log(user, guestList);
 
   const [tableData, setTableData] = useState(automationData);
 

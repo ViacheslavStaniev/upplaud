@@ -10,8 +10,6 @@ import useResponsive from '../../hooks/useResponsive';
 import { bgBlur } from '../../utils/cssStyles';
 // config
 import { HEADER } from '../../config-global';
-// routes
-import { PATH_MINIMAL_ON_STORE } from '../../routes/paths';
 // components
 import Logo from '../../components/logo';
 //
@@ -50,10 +48,6 @@ export default function Header() {
           <Box sx={{ flexGrow: 1 }} />
 
           {isDesktop && <NavDesktop isOffset={isOffset} data={navConfig} />}
-
-          <Button variant="contained" target="_blank" rel="noopener" href={PATH_MINIMAL_ON_STORE}>
-            Purchase Now
-          </Button>
 
           {!isDesktop && <NavMobile isOffset={isOffset} data={navConfig} />}
         </Container>

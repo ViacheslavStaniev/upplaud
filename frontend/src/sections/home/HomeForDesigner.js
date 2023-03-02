@@ -5,10 +5,6 @@ import { styled, useTheme, alpha } from '@mui/material/styles';
 import { Box, Grid, Container, Typography, Button } from '@mui/material';
 // utils
 import { filterStyles, textGradient, bgGradient } from '../../utils/cssStyles';
-// routes
-import { PATH_FIGMA_PREVIEW } from '../../routes/paths';
-// components
-import Iconify from '../../components/iconify';
 import { MotionViewport, varFade } from '../../components/animate';
 
 // ----------------------------------------------------------------------
@@ -120,27 +116,6 @@ function Description() {
         >
           For Designer
         </Typography>
-      </m.div>
-
-      <m.div variants={varFade().inUp}>
-        <Button
-          color="inherit"
-          size="large"
-          variant="outlined"
-          endIcon={<Iconify icon="ic:round-arrow-right-alt" />}
-          target="_blank"
-          rel="noopener"
-          href={PATH_FIGMA_PREVIEW}
-          sx={{
-            bgcolor: 'text.primary',
-            color: theme.palette.mode === 'light' ? 'common.white' : 'grey.800',
-            '&:hover': {
-              bgcolor: 'text.primary',
-            },
-          }}
-        >
-          Go to Figma Workspace
-        </Button>
       </m.div>
     </StyledDescription>
   );

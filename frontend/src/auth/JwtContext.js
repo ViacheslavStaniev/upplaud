@@ -1,14 +1,9 @@
 import PropTypes from 'prop-types';
 import { createContext, useEffect, useReducer, useCallback, useMemo } from 'react';
-import { API_PATHS } from '../utils/apipaths';
 import axios from '../utils/axios';
 import localStorageAvailable from '../utils/localStorageAvailable';
 import { isValidToken, setSession } from './utils';
 import { AUTH_TYPE } from '../utils/types';
-
-// NOTE:
-// We only build demo at basic level.
-// Customer will need to do some extra handling yourself if you want to extend the logic and other features...
 
 const initialState = { user: null, isInitialized: false, isAuthenticated: false };
 
@@ -17,8 +12,8 @@ const reducer = (state, action) => {
 
   // add displayname attr
   if (payload && payload.user) {
-    const { name } = payload.user;
-    payload.user.displayName = `${name.first} ${name.last}`;
+    const { firstName, lastName = '' } = payload.user;
+    payload.user.displayName = `${firstName} ${lastName}`;
   }
 
   if (type === AUTH_TYPE.INITIAL) {
@@ -30,6 +25,8 @@ const reducer = (state, action) => {
   if (type === AUTH_TYPE.REGISTER) return { ...state, isAuthenticated: true, user: payload.user };
 
   if (type === AUTH_TYPE.LOGOUT) return { ...state, user: null, isAuthenticated: false };
+
+  if (type === AUTH_TYPE.UPDATE) return { ...state, user: { ...state.user, ...payload.user } };
 
   return state;
 };
@@ -43,14 +40,14 @@ export function AuthProvider({ children }) {
 
   const storageAvailable = localStorageAvailable();
 
-  const initialize = useCallback(async () => {
+  const fetchUser = useCallback(async () => {
     try {
       const accessToken = storageAvailable ? localStorage.getItem('accessToken') : '';
 
       if (accessToken && isValidToken(accessToken)) {
         setSession(accessToken);
 
-        const { data } = await axios.get(API_PATHS.auth.me);
+        const { data } = await axios.get('auth/me');
 
         dispatch({ type: AUTH_TYPE.INITIAL, payload: { isAuthenticated: true, user: data } });
       } else {
@@ -63,12 +60,12 @@ export function AuthProvider({ children }) {
   }, [storageAvailable]);
 
   useEffect(() => {
-    initialize();
-  }, [initialize]);
+    fetchUser();
+  }, [fetchUser]);
 
   // LOGIN
   const login = useCallback(async (email, password) => {
-    const response = await axios.post(API_PATHS.auth.login, { email, password });
+    const response = await axios.post('auth/login', { email, password });
 
     const { accessToken, user } = response.data;
 
@@ -79,7 +76,7 @@ export function AuthProvider({ children }) {
 
   // REGISTER
   const register = useCallback(async (email, password, firstName, lastName) => {
-    const response = await axios.post(API_PATHS.auth.register, {
+    const response = await axios.post('auth/register', {
       email,
       password,
       firstName,
@@ -99,6 +96,16 @@ export function AuthProvider({ children }) {
     dispatch({ type: AUTH_TYPE.LOGOUT });
   }, []);
 
+  // UPDATE
+  const updateUser = useCallback(async (userData) => {
+    try {
+      await axios.put('users', userData);
+      dispatch({ type: AUTH_TYPE.UPDATE, payload: { user: userData } });
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
+
   const memoizedValue = useMemo(
     () => ({
       isInitialized: state.isInitialized,
@@ -106,10 +113,21 @@ export function AuthProvider({ children }) {
       user: state.user,
       method: 'jwt',
       login,
-      register,
       logout,
+      register,
+      fetchUser,
+      updateUser,
     }),
-    [state.isAuthenticated, state.isInitialized, state.user, login, logout, register]
+    [
+      state.isAuthenticated,
+      state.isInitialized,
+      state.user,
+      login,
+      logout,
+      register,
+      fetchUser,
+      updateUser,
+    ]
   );
 
   return <AuthContext.Provider value={memoizedValue}>{children}</AuthContext.Provider>;
