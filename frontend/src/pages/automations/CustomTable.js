@@ -1,6 +1,4 @@
 import { useState } from 'react';
-import { paramCase } from 'change-case';
-import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import {
   Card,
@@ -12,13 +10,11 @@ import {
   TableContainer,
   TablePagination,
 } from '@mui/material';
-import { PATH_DASHBOARD } from '../../routes/paths';
-
-import Iconify from '../iconify';
-import Scrollbar from '../scrollbar';
-import ConfirmDialog from '../confirm-dialog';
 import CustomTableRow from './CustomTableRow';
-import { useTable, TableHeadCustom, TableSelectedAction } from './index';
+import Iconify from '../../components/iconify';
+import Scrollbar from '../../components/scrollbar';
+import ConfirmDialog from '../../components/confirm-dialog';
+import { useTable, TableHeadCustom, TableSelectedAction } from '../../components/table';
 
 CustomTable.propTypes = {
   setTableData: PropTypes.func,
@@ -39,10 +35,9 @@ export default function CustomTable({ tableData = [], tableHead = [], setTableDa
     onSelectRow,
     onChangePage,
     onSelectAllRows,
+    rowsPerPageOptions,
     onChangeRowsPerPage,
   } = useTable();
-
-  const navigate = useNavigate();
 
   const [openConfirm, setOpenConfirm] = useState(false);
 
@@ -50,13 +45,11 @@ export default function CustomTable({ tableData = [], tableHead = [], setTableDa
 
   const handleCloseConfirm = () => setOpenConfirm(false);
 
-  const handleEditRow = (id) => navigate(PATH_DASHBOARD.user.edit(paramCase(id)));
-
   const handleDeleteRow = (id) => {
     const deleteRow = tableData.filter((row) => row.id !== id);
 
     setSelected([]);
-    setTableData(deleteRow);
+    // setTableData(deleteRow);
 
     if (page > 0 && dataInPage.length < 2) setPage(page - 1);
   };
@@ -64,7 +57,7 @@ export default function CustomTable({ tableData = [], tableHead = [], setTableDa
   const handleDeleteRows = (selectedRows) => {
     const deleteRows = tableData.filter((row) => !selectedRows.includes(row.id));
     setSelected([]);
-    setTableData(deleteRows);
+    // setTableData(deleteRows);
 
     if (page > 0) {
       if (selectedRows.length === dataInPage.length) {
@@ -103,15 +96,15 @@ export default function CustomTable({ tableData = [], tableHead = [], setTableDa
           <Table sx={{ minWidth: 800 }}>
             <TableHeadCustom
               order={order}
+              onSort={onSort}
               orderBy={orderBy}
               headLabel={tableHead}
               rowCount={tableData.length}
               numSelected={selected.length}
-              onSort={onSort}
               onSelectAllRows={(checked) =>
                 onSelectAllRows(
                   checked,
-                  tableData.map((row) => row.id)
+                  tableData.map((row) => row._id)
                 )
               }
             />
@@ -120,11 +113,10 @@ export default function CustomTable({ tableData = [], tableHead = [], setTableDa
               {tableData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
                 <CustomTableRow
                   row={row}
-                  key={row.id}
-                  selected={selected.includes(row.id)}
-                  onSelectRow={() => onSelectRow(row.id)}
-                  onEditRow={() => handleEditRow(row.name)}
-                  onDeleteRow={() => handleDeleteRow(row.id)}
+                  key={row._id}
+                  selected={selected.includes(row._id)}
+                  onSelectRow={() => onSelectRow(row._id)}
+                  onDeleteRow={() => handleDeleteRow(row._id)}
                 />
               ))}
             </TableBody>
@@ -138,7 +130,7 @@ export default function CustomTable({ tableData = [], tableHead = [], setTableDa
         count={tableData.length}
         rowsPerPage={rowsPerPage}
         onPageChange={onChangePage}
-        rowsPerPageOptions={[7, 14, 21]}
+        rowsPerPageOptions={rowsPerPageOptions}
         onRowsPerPageChange={onChangeRowsPerPage}
       />
 

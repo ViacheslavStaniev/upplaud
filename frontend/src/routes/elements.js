@@ -16,8 +16,8 @@ export const NewPasswordPage = Loadable(lazy(() => import('../pages/auth/NewPass
 export const ResetPasswordPage = Loadable(lazy(() => import('../pages/auth/ResetPasswordPage')));
 
 // Guestii
+export const Automations = Loadable(lazy(() => import('../pages/automations')));
 export const AddGuest = Loadable(lazy(() => import('../pages/guestii/AddGuest')));
-export const Automations = Loadable(lazy(() => import('../pages/guestii/Automations')));
 export const AccountAdmin = Loadable(lazy(() => import('../pages/guestii/AccountAdmin')));
 export const GuestingAdmin = Loadable(lazy(() => import('../pages/guestii/GuestingAdmin')));
 export const EmailTemplates = Loadable(lazy(() => import('../pages/guestii/EmailTemplates')));

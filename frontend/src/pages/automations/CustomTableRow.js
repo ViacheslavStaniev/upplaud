@@ -10,20 +10,19 @@ import {
   IconButton,
   Typography,
 } from '@mui/material';
-import Label from '../label';
-import Iconify from '../iconify';
-import ConfirmDialog from '../confirm-dialog';
+import Label from '../../components/label';
+import Iconify from '../../components/iconify';
+import ConfirmDialog from '../../components/confirm-dialog';
 
 CustomTableRow.propTypes = {
   row: PropTypes.object,
   selected: PropTypes.bool,
-  onEditRow: PropTypes.func,
   onDeleteRow: PropTypes.func,
   onSelectRow: PropTypes.func,
 };
 
-export default function CustomTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow }) {
-  const { name, avatarUrl, recordingDate, status, asqs, todo } = row;
+export default function CustomTableRow({ row, selected, onSelectRow, onDeleteRow }) {
+  const { guest, recordingDate } = row;
 
   const [openConfirm, setOpenConfirm] = useState(false);
 
@@ -34,43 +33,30 @@ export default function CustomTableRow({ row, selected, onEditRow, onSelectRow, 
           <Checkbox checked={selected} onClick={onSelectRow} />
         </TableCell>
 
-        <TableCell>
+        <TableCell component="th" scope="row">
           <Stack direction="row" alignItems="center" spacing={2}>
-            <Avatar alt={name} src={avatarUrl} />
+            <Avatar alt={guest?.firstName} src={guest?.profile?.picture} />
 
             <Typography variant="subtitle2" noWrap>
-              {name}
+              {`${guest?.firstName} ${guest?.lastName}`}
             </Typography>
           </Stack>
         </TableCell>
-
-        <TableCell align="left">{recordingDate}</TableCell>
-
+        <TableCell align="left">{new Date(recordingDate).toDateString()}</TableCell>
         <TableCell align="center">
           <Stack sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            <Label color="success">
-              Guest {status.guest.posted} {status.guest.date}
-            </Label>
-            <Label color="info">
-              Host {status.host.posted} {status.host.date}
-            </Label>
+            <Label color="success">Guest Posting Info</Label>
+            <Label color="info">Host Posting Info</Label>
           </Stack>
         </TableCell>
-
         <TableCell align="center">
-          {asqs ? (
-            <Stack sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <Label color="success">G: {asqs.g}</Label>
-              <Label color="info">H: {asqs.h}</Label>
-              <Label>N: {asqs.n}</Label>
-            </Stack>
-          ) : (
-            ''
-          )}
+          <Stack sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Label color="success">G: 1</Label>
+            <Label color="info">H: 2</Label>
+            <Label>N: 3</Label>
+          </Stack>
         </TableCell>
-
-        <TableCell align="center">{todo}</TableCell>
-
+        <TableCell align="center">TASK TO DO</TableCell>
         <TableCell align="right">
           <IconButton>
             <Iconify icon="mdi:envelope" />

@@ -1,23 +1,9 @@
-import { useState } from 'react';
 import { Box, Container, Typography, Stack, Button } from '@mui/material';
-import { _userList } from '../../_mock/arrays';
 import { useSettingsContext } from '../../components/settings';
-import CustomTable from '../../components/table/CustomTable';
 import AppTitle from '../../components/AppTitle';
 
 export default function GuestingAdmin() {
   const { themeStretch } = useSettingsContext();
-
-  const [tableData, setTableData] = useState(_userList);
-
-  const tableHead = [
-    { id: 'name', label: 'SHOW NAME', align: 'left' },
-    { id: 'host', label: 'HOST', align: 'left' },
-    { id: 'status', label: 'STATUS', align: 'left' },
-    { id: 'date', label: 'DATE', align: 'center' },
-    { id: 'submission', label: 'SUBMISSION', align: 'left' },
-    { id: 'action', label: 'ACTIONS', align: 'right' },
-  ];
 
   return (
     <>
@@ -46,8 +32,6 @@ export default function GuestingAdmin() {
             </Button>
           </Box>
         </Stack>
-
-        <CustomTable tableData={tableData} tableHead={tableHead} setTableData={setTableData} />
       </Container>
     </>
   );
