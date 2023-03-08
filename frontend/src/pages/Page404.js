@@ -25,12 +25,7 @@ export default function Page404() {
         </m.div>
 
         <m.div variants={varBounce().in}>
-          <PageNotFoundIllustration
-            sx={{
-              height: 260,
-              my: { xs: 5, sm: 10 },
-            }}
-          />
+          <PageNotFoundIllustration sx={{ height: 260, my: { xs: 5, sm: 10 } }} />
         </m.div>
 
         <Button component={RouterLink} to="/" size="large" variant="contained">

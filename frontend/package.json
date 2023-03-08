@@ -2,6 +2,7 @@
   "name": "podasq",
   "author": "Vikram Rajan",
   "version": "0.0.1",
+  "homepage": "",
   "description": "An application to manage the podacasts.",
   "private": true,
   "scripts": {
