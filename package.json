@@ -8,7 +8,9 @@
     "server": "nodemon server",
     "frontend": "npm start --prefix frontend",
     "dev": "concurrently \"npm run server\" \"npm run frontend\"",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "frontend-build": "npm run build --prefix frontend",
+    "frontend-release": "rm -rf ../html/* && cp -r frontend/build/* ../html"
   },
   "repository": {
     "type": "git",
@@ -37,6 +39,7 @@
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^5.13.15",
     "nodemailer": "^6.8.0",
+    "querystring": "^0.2.1",
     "stripe": "^7.63.1"
   },
   "devDependencies": {
