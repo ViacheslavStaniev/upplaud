@@ -5,9 +5,7 @@ const { NODE_ENV, REACT_APP_HOST_API_KEY, REACT_APP_CLOUDFRONT_URL, REACT_APP_MA
 
 // API
 export const HOST_API_KEY =
-  NODE_ENV === 'production' ? `${window.location.origin}/` : REACT_APP_HOST_API_KEY || '';
-
-console.log('HOST_API_KEY', HOST_API_KEY, window.location.origin, REACT_APP_HOST_API_KEY);
+  NODE_ENV === 'production' ? `${window.location.origin}:5000/api/` : REACT_APP_HOST_API_KEY || '';
 
 // CloudFront
 export const CLOUDFRONT_URL = REACT_APP_CLOUDFRONT_URL || '';
