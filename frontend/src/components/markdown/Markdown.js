@@ -2,18 +2,12 @@ import PropTypes from 'prop-types';
 import '../../utils/highlight';
 import { Link as RouterLink } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
-// markdown plugins
 import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
-// @mui
 import { Link, Typography, Divider } from '@mui/material';
-//
 import Image from '../image';
-//
 import StyledMarkdown from './styles';
-
-// ----------------------------------------------------------------------
 
 Markdown.propTypes = {
   sx: PropTypes.object,
@@ -30,8 +24,6 @@ export default function Markdown({ sx, ...other }) {
     </StyledMarkdown>
   );
 }
-
-// ----------------------------------------------------------------------
 
 const components = {
   h1: ({ ...props }) => <Typography variant="h1" gutterBottom {...props} />,

@@ -2,7 +2,6 @@ import { useState, memo, useEffect } from 'react';
 import parse from 'autosuggest-highlight/parse';
 import match from 'autosuggest-highlight/match';
 import { useNavigate, useLocation } from 'react-router-dom';
-// @mui
 import { alpha, styled } from '@mui/material/styles';
 import {
   Box,
@@ -13,17 +12,12 @@ import {
   ClickAwayListener,
   Autocomplete,
 } from '@mui/material';
-// utils
+import { Search } from '@mui/icons-material';
 import { bgBlur } from '../../../utils/cssStyles';
 import flattenArray from '../../../utils/flattenArray';
-// components
-import Iconify from '../../../components/iconify';
 import { IconButtonAnimate } from '../../../components/animate';
 import SearchNotFound from '../../../components/search-not-found';
-//
 import NavConfig from '../nav/config-navigation';
-
-// ----------------------------------------------------------------------
 
 const APPBAR_MOBILE = 64;
 const APPBAR_DESKTOP = 92;
@@ -144,7 +138,7 @@ function Searchbar() {
       <div>
         {!open && (
           <IconButtonAnimate onClick={handleOpen}>
-            <Iconify icon="eva:search-fill" />
+            <Search />
           </IconButtonAnimate>
         )}
 
@@ -172,7 +166,7 @@ function Searchbar() {
                   onKeyUp={handleKeyUp}
                   startAdornment={
                     <InputAdornment position="start">
-                      <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
+                      <Search sx={{ color: 'text.disabled' }} />
                     </InputAdornment>
                   }
                   sx={{ height: 1, typography: 'h6' }}

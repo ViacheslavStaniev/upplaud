@@ -16,20 +16,20 @@ export const NewPasswordPage = Loadable(lazy(() => import('../pages/auth/NewPass
 export const ResetPasswordPage = Loadable(lazy(() => import('../pages/auth/ResetPasswordPage')));
 
 // Guestii
+export const AddGuest = Loadable(lazy(() => import('../pages/add-guest')));
 export const Automations = Loadable(lazy(() => import('../pages/automations')));
-export const AddGuest = Loadable(lazy(() => import('../pages/guestii/AddGuest')));
-export const AccountAdmin = Loadable(lazy(() => import('../pages/guestii/AccountAdmin')));
-export const GuestingAdmin = Loadable(lazy(() => import('../pages/guestii/GuestingAdmin')));
-export const EmailTemplates = Loadable(lazy(() => import('../pages/guestii/EmailTemplates')));
-export const PostingTemplate = Loadable(lazy(() => import('../pages/guestii/PostingTemplate')));
+export const AccountAdmin = Loadable(lazy(() => import('../pages/account-admin')));
+export const GuestingAdmin = Loadable(lazy(() => import('../pages/guesting-admin')));
+export const EmailTemplates = Loadable(lazy(() => import('../pages/email-templates')));
+export const PostingTemplate = Loadable(lazy(() => import('../pages/posting-templates')));
 
-// DASHBOARD: USER
-export const UserProfilePage = Loadable(lazy(() => import('../pages/dashboard/UserProfilePage')));
-export const UserCardsPage = Loadable(lazy(() => import('../pages/dashboard/UserCardsPage')));
-export const UserListPage = Loadable(lazy(() => import('../pages/dashboard/UserListPage')));
-export const UserAccountPage = Loadable(lazy(() => import('../pages/dashboard/UserAccountPage')));
-export const UserCreatePage = Loadable(lazy(() => import('../pages/dashboard/UserCreatePage')));
-export const UserEditPage = Loadable(lazy(() => import('../pages/dashboard/UserEditPage')));
+// USER
+export const UserProfilePage = Loadable(lazy(() => import('../pages/user/UserProfilePage')));
+export const UserCardsPage = Loadable(lazy(() => import('../pages/user/UserCardsPage')));
+export const UserListPage = Loadable(lazy(() => import('../pages/user/UserListPage')));
+export const UserAccountPage = Loadable(lazy(() => import('../pages/user/UserAccountPage')));
+export const UserCreatePage = Loadable(lazy(() => import('../pages/user/UserCreatePage')));
+export const UserEditPage = Loadable(lazy(() => import('../pages/user/UserEditPage')));
 
 // MAIN
 export const Page500 = Loadable(lazy(() => import('../pages/Page500')));

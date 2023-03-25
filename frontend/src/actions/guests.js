@@ -13,12 +13,3 @@ export const addUpdateGuest = async (info, guestId = null) => {
     return error;
   }
 };
-
-export const getGuestsList = async (showId) => {
-  try {
-    const { data } = await axios.get(`guests/list/${showId}`);
-    return data;
-  } catch (error) {
-    return error;
-  }
-};

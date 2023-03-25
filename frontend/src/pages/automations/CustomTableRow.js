@@ -10,8 +10,17 @@ import {
   IconButton,
   Typography,
 } from '@mui/material';
+import {
+  Edit,
+  Email,
+  Delete,
+  Settings,
+  Description,
+  CalendarToday,
+  PauseCircleOutline,
+  CloudDownloadOutlined,
+} from '@mui/icons-material';
 import Label from '../../components/label';
-import Iconify from '../../components/iconify';
 import ConfirmDialog from '../../components/confirm-dialog';
 
 CustomTableRow.propTypes = {
@@ -59,29 +68,29 @@ export default function CustomTableRow({ row, selected, onSelectRow, onDeleteRow
         <TableCell align="center">TASK TO DO</TableCell>
         <TableCell align="right">
           <IconButton>
-            <Iconify icon="mdi:envelope" />
+            <Email />
           </IconButton>
           <IconButton>
-            <Iconify icon="mdi:pencil" />
+            <Edit />
           </IconButton>
           <IconButton>
-            <Iconify icon="material-symbols:calendar-today-outline" />
+            <CalendarToday />
           </IconButton>
           <IconButton>
-            <Iconify icon="material-symbols:pause-circle-outline-rounded" />
+            <PauseCircleOutline />
           </IconButton>
           <br />
           <IconButton>
-            <Iconify icon="material-symbols:cloud-download-outline" />
+            <CloudDownloadOutlined />
           </IconButton>
           <IconButton>
-            <Iconify icon="mdi:gear" />
+            <Settings />
           </IconButton>
           <IconButton>
-            <Iconify icon="material-symbols:description" />
+            <Description />
           </IconButton>
           <IconButton onClick={() => setOpenConfirm(true)}>
-            <Iconify icon="bi:trash" />
+            <Delete />
           </IconButton>
         </TableCell>
       </TableRow>

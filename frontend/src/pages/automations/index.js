@@ -1,37 +1,14 @@
-import { useState, useEffect } from 'react';
 import { Box, Stack, Button, Container, Typography } from '@mui/material';
-import { getGuestsList } from '../../actions/guests';
-import { useAuthContext } from '../../auth/useAuthContext';
 import { useSettingsContext } from '../../components/settings';
-import AutomationsTable from './CustomTable';
+import AutomationsTable from './AutomationsTable';
 import AppTitle from '../../components/AppTitle';
+import { GuestsProvider } from './GuestsProvider';
 
 export default function Automations() {
-  const { user } = useAuthContext();
   const { themeStretch } = useSettingsContext();
 
-  const [guestList, setGuestList] = useState([]);
-
-  useEffect(() => {
-    (async () => {
-      const list = await getGuestsList(user.show?._id);
-      setGuestList(list);
-    })();
-  }, [user.show?._id]);
-
-  console.log(user, guestList);
-
-  const tableHead = [
-    { id: 'name', label: 'NAME', align: 'left' },
-    { id: 'recordingDate', label: 'RECORDING DATE', align: 'left' },
-    { id: 'status', label: 'STATUS', align: 'center' },
-    { id: 'asqs', label: 'ASQs', align: 'center' },
-    { id: 'todo', label: 'TASK TO DO', align: 'center' },
-    { id: 'action', label: 'ACTIONS', align: 'right' },
-  ];
-
   return (
-    <>
+    <GuestsProvider>
       <AppTitle title="Automations" />
 
       <Container maxWidth={themeStretch ? false : 'xl'}>
@@ -61,8 +38,8 @@ export default function Automations() {
           </Box>
         </Stack>
 
-        <AutomationsTable tableHead={tableHead} tableData={guestList} />
+        <AutomationsTable />
       </Container>
-    </>
+    </GuestsProvider>
   );
 }

@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import { m } from 'framer-motion';
 // @mui
 import { styled, useTheme, alpha } from '@mui/material/styles';
-import { Box, Grid, Container, Typography, Button } from '@mui/material';
+import { Box, Grid, Container, Typography } from '@mui/material';
 // utils
 import { filterStyles, textGradient, bgGradient } from '../../utils/cssStyles';
 import { MotionViewport, varFade } from '../../components/animate';

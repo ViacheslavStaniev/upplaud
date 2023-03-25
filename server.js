@@ -1,8 +1,11 @@
 require("dotenv").config();
 const cors = require("cors");
 const express = require("express");
+const passport = require("passport");
 const connectDB = require("./config/db");
 const bodyParser = require("body-parser");
+const session = require("express-session");
+const cookieParser = require("cookie-parser");
 
 const app = express();
 
@@ -27,6 +30,12 @@ const corsOptions = {
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
 
+// Passport Auth
+app.use(cookieParser());
+app.use(session({ secret: process.env.PASSPORT_SECERT, resave: true, saveUninitialized: true }));
+app.use(passport.initialize());
+app.use(passport.session());
+
 // Add headers
 app.use(cors(corsOptions));
 app.options("*", cors());
@@ -38,6 +47,7 @@ app.use("/api/auth", require("./routes/auth"));
 app.use("/api/show", require("./routes/show"));
 app.use("/api/users", require("./routes/users"));
 app.use("/api/guests", require("./routes/guests"));
+app.use("/api/login", require("./routes/social_auth"));
 
 const PORT = process.env.PORT || 5000;
 

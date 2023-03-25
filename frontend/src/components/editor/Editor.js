@@ -5,8 +5,6 @@ import ReactQuill from 'react-quill';
 import { StyledEditor } from './styles';
 import EditorToolbar, { formats } from './EditorToolbar';
 
-// ----------------------------------------------------------------------
-
 Editor.propTypes = {
   id: PropTypes.string,
   sx: PropTypes.object,

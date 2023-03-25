@@ -82,7 +82,7 @@ router.post(
   }
 );
 
-// @route   PUTT api/guests
+// @route   PUT api/guests
 // @desc    Updates a Guest
 // @access  Public
 router.put(
@@ -120,6 +120,54 @@ router.put(
     }
   }
 );
+
+// @route   DELETE api/guests
+// @desc    Deletes a Guest
+// @access  Public
+router.delete("/:guestId", verifyAuth, async (req, res) => {
+  const session = await Guest.startSession();
+  session.startTransaction();
+
+  try {
+    await Guest.findByIdAndDelete(req.params.guestId);
+
+    await session.commitTransaction();
+    session.endSession();
+
+    res.json({ msg: "Guest deleted successfully." });
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+
+    console.error(err.message);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// @route   POST api/guests/batch-delete
+// @desc    Batch Delete
+// @access  Public
+router.post("/batch-delete", verifyAuth, async (req, res) => {
+  const session = await Guest.startSession();
+  session.startTransaction();
+
+  const { ids } = req.body;
+
+  try {
+    await Guest.deleteMany({ _id: { $in: ids } });
+
+    await session.commitTransaction();
+    session.endSession();
+
+    res.json({ msg: "Guests deleted successfully." });
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+
+    console.error(err.message);
+    res.status(500).send("Internal Server Error");
+  }
+});
 
 // @route   GET api/guests/list/showId
 // @desc    gets list of all guests for a show

@@ -41,8 +41,6 @@ import {
   PostingTemplate,
 } from './elements';
 
-// ----------------------------------------------------------------------
-
 export default function Router() {
   return useRoutes([
     // Auth

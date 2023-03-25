@@ -7,9 +7,10 @@ RHFTextField.propTypes = {
   name: PropTypes.string,
   label: PropTypes.string,
   helperText: PropTypes.node,
+  placeholder: PropTypes.string,
 };
 
-export default function RHFTextField({ name, label, helperText, ...other }) {
+export default function RHFTextField({ name, label, placeholder, helperText, ...other }) {
   const { control } = useFormContext();
 
   return (
@@ -23,6 +24,7 @@ export default function RHFTextField({ name, label, helperText, ...other }) {
             {...field}
             fullWidth
             error={!!error}
+            placeholder={placeholder || label}
             value={typeof field.value === 'number' && field.value === 0 ? '' : field.value}
             helperText={error ? error?.message : helperText}
             {...other}

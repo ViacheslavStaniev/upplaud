@@ -1,11 +1,9 @@
 import { PATH_DASHBOARD } from './routes/paths';
 
-const { NODE_ENV, REACT_APP_HOST_API_KEY, REACT_APP_CLOUDFRONT_URL, REACT_APP_MAPBOX_API } =
-  process.env;
+const { REACT_APP_HOST_API_KEY, REACT_APP_CLOUDFRONT_URL, REACT_APP_MAPBOX_API } = process.env;
 
 // API
-export const HOST_API_KEY =
-  NODE_ENV === 'production' ? `${window.location.origin}:5000/api/` : REACT_APP_HOST_API_KEY || '';
+export const HOST_API_KEY = REACT_APP_HOST_API_KEY || '';
 
 // CloudFront
 export const CLOUDFRONT_URL = REACT_APP_CLOUDFRONT_URL || '';
@@ -17,7 +15,6 @@ export const MAP_API = REACT_APP_MAPBOX_API;
 export const PATH_AFTER_LOGIN = PATH_DASHBOARD.guestii.accountAdmin; // as '/dashboard/account-admin'
 
 // LAYOUT
-
 export const HEADER = {
   H_MOBILE: 64,
   H_MAIN_DESKTOP: 88,

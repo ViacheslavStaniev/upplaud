@@ -1,16 +1,12 @@
 import PropTypes from 'prop-types';
 import { useRef } from 'react';
 import { SnackbarProvider as NotistackProvider } from 'notistack';
-// @mui
 import { alpha } from '@mui/material/styles';
+import { Close } from '@mui/icons-material';
 import { Box, Collapse, IconButton } from '@mui/material';
-//
 import { useSettingsContext } from '../settings';
 import Iconify from '../iconify';
-//
 import StyledNotistack from './styles';
-
-// ----------------------------------------------------------------------
 
 SnackbarProvider.propTypes = {
   children: PropTypes.node,
@@ -23,9 +19,7 @@ export default function SnackbarProvider({ children }) {
 
   const notistackRef = useRef(null);
 
-  const onClose = (key) => () => {
-    notistackRef.current.closeSnackbar(key);
-  };
+  const onClose = (key) => () => notistackRef.current.closeSnackbar(key);
 
   return (
     <>
@@ -49,7 +43,7 @@ export default function SnackbarProvider({ children }) {
         // With close as default
         action={(key) => (
           <IconButton size="small" onClick={onClose(key)} sx={{ p: 0.5 }}>
-            <Iconify icon="eva:close-fill" />
+            <Close />
           </IconButton>
         )}
       >
@@ -58,8 +52,6 @@ export default function SnackbarProvider({ children }) {
     </>
   );
 }
-
-// ----------------------------------------------------------------------
 
 SnackbarIcon.propTypes = {
   icon: PropTypes.string,
