@@ -38,6 +38,7 @@ import {
   AccountAdmin,
   GuestingAdmin,
   EmailTemplates,
+  GuestAcceptance,
   PostingTemplate,
 } from './elements';
 
@@ -129,6 +130,7 @@ export default function Router() {
         { path: '403', element: <Page403 /> },
       ],
     },
+    { path: 'guest-acceptance/:userId', element: <GuestAcceptance /> },
     { path: '*', element: <Navigate to="/404" replace /> },
   ]);
 }

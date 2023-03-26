@@ -1,18 +1,19 @@
 import { LoadingButton } from '@mui/lab';
 import {
   Box,
-  Stack,
+  Card,
   Grid,
+  Stack,
   Alert,
   Button,
-  Container,
-  Card,
   Divider,
   MenuItem,
+  Container,
   Typography,
 } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import { useForm } from 'react-hook-form';
+import { ImageOutlined } from '@mui/icons-material';
 import { useSettingsContext } from '../../components/settings';
 import FormProvider, { RHFTextField, RHFSelect } from '../../components/hook-form';
 import AppTitle from '../../components/AppTitle';
@@ -47,11 +48,14 @@ export default function PostingTemplate() {
 
   const CURRENCIES = [
     { value: 'none', label: 'Please Select' },
-    { value: 'USD', label: '$' },
-    { value: 'EUR', label: '€' },
-    { value: 'BTC', label: '฿' },
-    { value: 'JPY', label: '¥' },
+    { value: 'post1', label: 'Postcard 1st' },
+    { value: 'post2', label: 'Postcard 2nd' },
+    { value: 'post3', label: 'Postcard 3rd' },
+    { value: 'post4', label: 'Postcard 4th' },
+    { value: 'post5', label: 'Postcard 5th' },
   ];
+
+  const disabled = watch('postcard') === 'none';
 
   return (
     <>
@@ -100,11 +104,22 @@ export default function PostingTemplate() {
 
               <RHFTextField
                 name="headline"
+                disabled={disabled}
                 label="Headline Text"
                 placeholder="Enter your headline text here"
               />
-              <RHFTextField name="textColor" label="Text Color" placeholder="e.g #000000" />
-              <RHFTextField name="bgColor" label="Background Color" placeholder="e.g #000000" />
+              <RHFTextField
+                name="textColor"
+                label="Text Color"
+                disabled={disabled}
+                placeholder="e.g #000000"
+              />
+              <RHFTextField
+                name="bgColor"
+                disabled={disabled}
+                label="Background Color"
+                placeholder="e.g #000000"
+              />
 
               <Box>
                 <LoadingButton
@@ -130,13 +145,30 @@ export default function PostingTemplate() {
               </Box>
             </Stack>
 
-            <Divider orientation="vertical" flexItem />
+            <Divider orientation="vertical" flexItem sx={{ ml: 5, mr: 5 }} />
 
             <Grid item flex={1}>
               <Typography variant="h4" component="h4" paragraph>
                 Postcard Preview
               </Typography>
-              <Box>Preview</Box>
+
+              <Stack
+                sx={{
+                  p: 2,
+                  width: 500,
+                  height: 500,
+                  borderRadius: 1.5,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '1px solid #00B8D9',
+                }}
+              >
+                <ImageOutlined sx={{ fontSize: 120, color: '#00B8D9' }} />
+                <Typography variant="h5" color="primary.main" gutterBottom>
+                  No preview available yet
+                </Typography>
+                <Typography>Please select the postcard first to get a preview</Typography>
+              </Stack>
             </Grid>
           </Grid>
         </FormProvider>

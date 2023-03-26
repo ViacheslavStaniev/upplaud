@@ -63,6 +63,8 @@ export default function AccountAdmin() {
     formState: { errors, isSubmitting },
   } = methods;
 
+  const dummyTopic = watch('dummyTopic');
+
   const onSubmit = async (data) => {
     try {
       await addUpdateGuest({ ...data, potentialTopics: topics });
@@ -133,9 +135,9 @@ export default function AccountAdmin() {
                         <Button
                           edge="end"
                           aria-label="Add Topic"
-                          disabled={topics.length === 5}
+                          disabled={topics.length === 5 || !dummyTopic}
                           onClick={() => {
-                            setTopics((t) => [...t, watch('dummyTopic')]);
+                            setTopics((t) => [...t, dummyTopic]);
                             setValue('dummyTopic', '');
                           }}
                         >

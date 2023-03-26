@@ -21,6 +21,7 @@ export const Automations = Loadable(lazy(() => import('../pages/automations')));
 export const AccountAdmin = Loadable(lazy(() => import('../pages/account-admin')));
 export const GuestingAdmin = Loadable(lazy(() => import('../pages/guesting-admin')));
 export const EmailTemplates = Loadable(lazy(() => import('../pages/email-templates')));
+export const GuestAcceptance = Loadable(lazy(() => import('../pages/guest-acceptance')));
 export const PostingTemplate = Loadable(lazy(() => import('../pages/posting-templates')));
 
 // USER

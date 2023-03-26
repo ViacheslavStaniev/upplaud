@@ -1,13 +1,4 @@
-import {
-  Alert,
-  Stack,
-  Button,
-  Divider,
-  Container,
-  Typography,
-  InputAdornment,
-} from '@mui/material';
-import { FacebookOutlined, LinkedIn, Instagram } from '@mui/icons-material';
+import { Alert, Stack, Divider, Container, Typography, InputAdornment } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import * as Yup from 'yup';
 import { useForm } from 'react-hook-form';
@@ -17,6 +8,7 @@ import useResponsive from '../../hooks/useResponsive';
 import FormProvider, { RHFTextField } from '../../components/hook-form';
 import { useSettingsContext } from '../../components/settings';
 import ShowInfo from './ShowInfo';
+import SocialConnect from './SocialConnect';
 import AppTitle from '../../components/AppTitle';
 
 export default function AccountAdmin() {
@@ -142,41 +134,7 @@ export default function AccountAdmin() {
           Connect with social media
         </Typography>
 
-        <Stack sx={{ gap: 3, mb: 5, flexDirection }}>
-          <Button
-            size="large"
-            type="button"
-            shape="circular"
-            variant="contained"
-            startIcon={<FacebookOutlined />}
-            style={{ background: '#1877F2' }}
-          >
-            Connect with Facebook
-          </Button>
-          <Button
-            size="large"
-            type="button"
-            shape="circular"
-            variant="contained"
-            startIcon={<Instagram />}
-            style={{
-              background:
-                'radial-gradient(128.57% 128.57% at 10.71% 105.36%, #FFCB52 0%, #E34677 56.25%, #C938AC 100%)',
-            }}
-          >
-            Connect with Instagram
-          </Button>
-          <Button
-            size="large"
-            type="button"
-            shape="circular"
-            variant="contained"
-            startIcon={<LinkedIn />}
-            style={{ background: '#0A66C2' }}
-          >
-            Connect with LinkedIn
-          </Button>
-        </Stack>
+        <SocialConnect />
       </Container>
     </>
   );
