@@ -14,7 +14,7 @@ export default function SocialConnect() {
         shape="circular"
         variant="contained"
         startIcon={<FacebookOutlined />}
-        style={{ background: '#1877F2' }}
+        style={{ color: 'white', background: '#1877F2' }}
       >
         Connect with Facebook
       </Button>
@@ -25,6 +25,7 @@ export default function SocialConnect() {
         variant="contained"
         startIcon={<Instagram />}
         style={{
+          color: 'white',
           background:
             'radial-gradient(128.57% 128.57% at 10.71% 105.36%, #FFCB52 0%, #E34677 56.25%, #C938AC 100%)',
         }}
@@ -37,7 +38,7 @@ export default function SocialConnect() {
         shape="circular"
         variant="contained"
         startIcon={<LinkedIn />}
-        style={{ background: '#0A66C2' }}
+        style={{ color: 'white', background: '#0A66C2' }}
       >
         Connect with LinkedIn
       </Button>

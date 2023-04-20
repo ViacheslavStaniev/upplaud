@@ -50,7 +50,7 @@ const StyledGradientText = styled(m.h1)(({ theme }) => ({
     `300deg, ${theme.palette.primary.main} 0%, ${theme.palette.warning.main} 25%, ${theme.palette.primary.main} 50%, ${theme.palette.warning.main} 75%, ${theme.palette.primary.main} 100%`
   ),
   backgroundSize: '400%',
-  fontFamily: "'Barlow', sans-serif",
+  fontFamily: "'Public Sans', sans-serif",
   fontSize: `${64 / 16}rem`,
   textAlign: 'center',
   lineHeight: 1,
