@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types';
 import { Navigate } from 'react-router-dom';
+import { useAuthContext } from './AuthProvider';
 import { PATH_DASHBOARD } from '../routes/paths';
-import { useAuthContext } from './useAuthContext';
-import LoadingScreen from '../components/loading-screen';
+import LoadingScreen from '../components/LoadingScreen';
 
 GuestGuard.propTypes = {
   children: PropTypes.node,
@@ -11,7 +11,7 @@ GuestGuard.propTypes = {
 export default function GuestGuard({ children }) {
   const { isAuthenticated, isInitialized } = useAuthContext();
 
-  if (isAuthenticated) return <Navigate to={PATH_DASHBOARD.guestii.accountAdmin} />;
+  if (isAuthenticated) return <Navigate to={PATH_DASHBOARD.root} />;
 
   if (!isInitialized) return <LoadingScreen />;
 

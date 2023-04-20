@@ -1,42 +1,27 @@
-import { Link as RouterLink } from 'react-router-dom';
-import { Link, Typography } from '@mui/material';
-import { PATH_AUTH } from '../../routes/paths';
-import Iconify from '../../components/iconify';
-import AuthResetPasswordForm from '../../sections/auth/AuthResetPasswordForm';
-import { PasswordIcon } from '../../assets/icons';
-import AppTitle from '../../components/AppTitle';
+import { Typography } from "antd";
+import { Link } from "react-router-dom";
+import { PATH_AUTH } from "../../routes/paths";
+import AppTitle from "../../components/AppTitle";
 
 export default function ResetPasswordPage() {
+  const { Paragraph } = Typography;
+
   return (
     <>
-      <AppTitle title="Reset Password" />
+      <AppTitle title='Reset Password' />
 
-      <PasswordIcon sx={{ mb: 5, height: 96 }} />
+      {/* <PasswordIcon sx={{ mb: 5, height: 96 }} /> */}
 
-      <Typography variant="h3" paragraph>
-        Forgot your password?
-      </Typography>
+      <Paragraph>Forgot your password?</Paragraph>
 
-      <Typography sx={{ color: 'text.secondary', mb: 5 }}>
-        Please enter the email address associated with your account and We will email you a link to
-        reset your password.
-      </Typography>
+      <Paragraph color='secondary'>
+        Please enter the email address associated with your account and We will email you a link to reset your password.
+      </Paragraph>
 
-      <AuthResetPasswordForm />
+      <h2>AuthResetPasswordForm</h2>
 
-      <Link
-        component={RouterLink}
-        to={PATH_AUTH.login}
-        color="inherit"
-        variant="subtitle2"
-        sx={{
-          mt: 3,
-          mx: 'auto',
-          alignItems: 'center',
-          display: 'inline-flex',
-        }}
-      >
-        <Iconify icon="eva:chevron-left-fill" width={16} />
+      <Link to={PATH_AUTH.login}>
+        {/* <Iconify icon="eva:chevron-left-fill" width={16} /> */}
         Return to sign in
       </Link>
     </>

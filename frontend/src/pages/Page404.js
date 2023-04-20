@@ -1,37 +1,21 @@
-import { m } from 'framer-motion';
-import { Link as RouterLink } from 'react-router-dom';
-import { Button, Typography } from '@mui/material';
-import { MotionContainer, varBounce } from '../components/animate';
-import { PageNotFoundIllustration } from '../assets/illustrations';
-import AppTitle from '../components/AppTitle';
+import { Button, Result } from "antd";
+import AppTitle from "../components/AppTitle";
 
 export default function Page404() {
   return (
     <>
-      <AppTitle title="404 Page Not Found" />
+      <AppTitle title='404 Page Not Found' />
 
-      <MotionContainer>
-        <m.div variants={varBounce().in}>
-          <Typography variant="h3" paragraph>
-            Sorry, page not found!
-          </Typography>
-        </m.div>
-
-        <m.div variants={varBounce().in}>
-          <Typography sx={{ color: 'text.secondary' }}>
-            Sorry, we couldn’t find the page you’re looking for. Perhaps you’ve mistyped the URL? Be
-            sure to check your spelling.
-          </Typography>
-        </m.div>
-
-        <m.div variants={varBounce().in}>
-          <PageNotFoundIllustration sx={{ height: 260, my: { xs: 5, sm: 10 } }} />
-        </m.div>
-
-        <Button component={RouterLink} to="/" size="large" variant="contained">
-          Go to Home
-        </Button>
-      </MotionContainer>
+      <Result
+        title='404'
+        status='404'
+        subTitle='Sorry, the page you visited does not exist.'
+        extra={
+          <Button href='/' type='primary'>
+            Back Home
+          </Button>
+        }
+      />
     </>
   );
 }

@@ -1,9 +1,9 @@
-import PropTypes from 'prop-types';
 import { useState } from 'react';
+import { useAuthContext } from './AuthProvider';
 import { Navigate, useLocation } from 'react-router-dom';
-import LoadingScreen from '../components/loading-screen';
-import Login from '../pages/auth/LoginPage';
-import { useAuthContext } from './useAuthContext';
+import PropTypes from 'prop-types';
+import LoginPage from '../pages/auth/LoginPage';
+import LoadingScreen from '../components/LoadingScreen';
 
 AuthGuard.propTypes = {
   children: PropTypes.node,
@@ -11,7 +11,6 @@ AuthGuard.propTypes = {
 
 export default function AuthGuard({ children }) {
   const { pathname } = useLocation();
-
   const { isAuthenticated, isInitialized } = useAuthContext();
 
   const [requestedLocation, setRequestedLocation] = useState(null);
@@ -21,7 +20,7 @@ export default function AuthGuard({ children }) {
   if (!isAuthenticated) {
     if (pathname !== requestedLocation) setRequestedLocation(pathname);
 
-    return <Login />;
+    return <LoginPage />;
   }
 
   if (requestedLocation && pathname !== requestedLocation) {

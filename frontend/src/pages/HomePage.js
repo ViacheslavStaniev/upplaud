@@ -1,74 +1,11 @@
-import { m, useScroll, useSpring } from 'framer-motion';
-import { useTheme } from '@mui/material/styles';
-import { Box } from '@mui/material';
-import {
-  HomeHero,
-  HomeMinimal,
-  HomeDarkMode,
-  HomeLookingFor,
-  HomeForDesigner,
-  HomeColorPresets,
-  HomePricingPlans,
-  HomeAdvertisement,
-  HomeCleanInterfaces,
-  HomeHugePackElements,
-} from '../sections/home';
-import AppTitle from '../components/AppTitle';
+import AppTitle from "../components/AppTitle";
 
 export default function HomePage() {
-  const theme = useTheme();
-
-  const { scrollYProgress } = useScroll();
-
-  const scaleX = useSpring(scrollYProgress, {
-    stiffness: 100,
-    damping: 30,
-    restDelta: 0.001,
-  });
-
-  const progress = (
-    <m.div
-      style={{
-        top: 0,
-        left: 0,
-        right: 0,
-        height: 3,
-        zIndex: 1999,
-        position: 'fixed',
-        transformOrigin: '0%',
-        backgroundColor: theme.palette.primary.main,
-        scaleX,
-      }}
-    />
-  );
-
   return (
     <>
-      <AppTitle title="Home" />
+      <AppTitle title='Home' />
 
-      {progress}
-
-      <HomeHero />
-
-      <Box sx={{ overflow: 'hidden', position: 'relative', bgcolor: 'background.default' }}>
-        <HomeMinimal />
-
-        <HomeHugePackElements />
-
-        <HomeForDesigner />
-
-        <HomeDarkMode />
-
-        <HomeColorPresets />
-
-        <HomeCleanInterfaces />
-
-        <HomePricingPlans />
-
-        <HomeLookingFor />
-
-        <HomeAdvertisement />
-      </Box>
+      <h2>This is HomePage</h2>
     </>
   );
 }
