@@ -1,5 +1,5 @@
-import { Button, Space, Typography } from "antd";
-import CustomIcon from "../../components/CustomIcon";
+import { Button, Space, Typography } from 'antd';
+import CustomIcon from '../../components/CustomIcon';
 
 const { Title } = Typography;
 
@@ -9,13 +9,15 @@ export default function SocialMediaConnect({ showTitle = true }) {
       {showTitle && <Title level={3}>Connect with social media</Title>}
 
       <Space size={16}>
-        <Button type='primary' shape='round' size='large' icon={<CustomIcon name='facebook' />} className='bg-1877F2 border-0'>
+        <Button size="large" shape="round" type="facebook" icon={<CustomIcon name="facebook" />}>
           Connect with Facebook
         </Button>
-        <Button type='primary' shape='round' size='large' icon={<CustomIcon name='instagram' />} className='bg-instagram border-0'>
+
+        {/* <Button hidden size="large" shape="round" type="instagram" icon={<CustomIcon name="instagram" />}>
           Connect with Instagram
-        </Button>
-        <Button type='primary' shape='round' size='large' icon={<CustomIcon name='linkedin' />} className='bg-0A66C2 border-0'>
+        </Button> */}
+
+        <Button size="large" shape="round" type="linkedin" icon={<CustomIcon name="linkedin" />}>
           Connect with LinkedIn
         </Button>
       </Space>

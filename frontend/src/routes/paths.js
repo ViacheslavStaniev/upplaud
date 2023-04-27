@@ -26,10 +26,10 @@ export const PATH_DASHBOARD = {
   root: path(ROOTS_DASHBOARD, '/'),
   permissionDenied: path(ROOTS_DASHBOARD, '/permission-denied'),
   dashboard: {
-    addGuest: path(ROOTS_DASHBOARD, '/add-guest'),
     automations: path(ROOTS_DASHBOARD, '/automations'),
     accountAdmin: path(ROOTS_DASHBOARD, '/account-admin'),
     guestingAdmin: path(ROOTS_DASHBOARD, '/guesting-admin'),
+    newAutomation: path(ROOTS_DASHBOARD, '/new-automation'),
     emailTemplates: path(ROOTS_DASHBOARD, '/email-templates'),
     postingTemplate: path(ROOTS_DASHBOARD, '/posting-template'),
   },

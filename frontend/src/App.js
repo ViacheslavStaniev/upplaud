@@ -1,10 +1,10 @@
 import store from './store';
 import Router from './routes';
-import { ConfigProvider } from 'antd';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthProvider';
 import { HelmetProvider } from 'react-helmet-async';
+import { App as AntApp, ConfigProvider } from 'antd';
 
 const App = () => {
   return (
@@ -28,11 +28,13 @@ const App = () => {
         }}
       >
         <Provider store={store}>
-          <AuthProvider>
-            <BrowserRouter>
-              <Router />
-            </BrowserRouter>
-          </AuthProvider>
+          <AntApp>
+            <AuthProvider>
+              <BrowserRouter>
+                <Router />
+              </BrowserRouter>
+            </AuthProvider>
+          </AntApp>
         </Provider>
       </ConfigProvider>
     </HelmetProvider>

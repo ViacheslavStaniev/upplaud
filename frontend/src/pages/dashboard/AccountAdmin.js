@@ -1,63 +1,81 @@
-import ShowInfo from "./ShowInfo";
-import AppTitle from "../../components/AppTitle";
-import SocialMediaConnect from "./SocialMediaConnect";
-// import { useAuthContext } from "../../auth/useAuthContext";
-import { Form, Input, Button, Divider, Typography } from "antd";
+import ShowInfo from './ShowInfo';
+import AppTitle from '../../components/AppTitle';
+import SocialMediaConnect from './SocialMediaConnect';
+import { useAuthContext } from '../../auth/AuthProvider';
+import { Form, Input, Button, Divider, Typography, Space } from 'antd';
+
+const { Text, Title, Paragraph } = Typography;
 
 export default function AccountAdmin() {
   const [form] = Form.useForm();
-  // const { user } = useAuthContext();
-
-  const { Title } = Typography;
-
-  const onSubmit = async (data) => {
-    try {
-      console.log(data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const { user, isLoading, updateUser } = useAuthContext();
+  const { firstName, lastName, email, userName } = user;
 
   return (
     <>
-      <AppTitle title='Account Admin' />
+      <AppTitle title="Account Admin" />
 
-      <div className='account-admin'>
-        <Title className='m-0 mb-1'>Account Admin</Title>
+      <div className="account-admin">
+        <Title className="m-0 mb-1">Account Admin</Title>
 
-        <Title level={5} className='m-0 mb-4 fw-400 color-45485C'>
+        <Title level={5} className="m-0 mb-4 fw-400 color-45485C">
           Here you can track the automation of your guests:
         </Title>
 
         <Form
           form={form}
-          size='large'
-          className='w-80 '
-          layout='vertical'
-          onFinish={onSubmit}
-          initialValues={{ firstName: "", lastName: "", emain: "", userName: "" }}
+          size="large"
+          className="w-80 "
+          layout="vertical"
+          onFinish={updateUser}
+          initialValues={{ firstName, lastName, email }}
         >
-          <div className='flex-item gap-2'>
-            <Form.Item name='firstName' label='FIRST NAME' className='flex-1'>
-              <Input placeholder='FIRST NAME' />
+          <div className="flex-item gap-2">
+            <Form.Item
+              name="firstName"
+              label="FIRST NAME"
+              className="flex-1"
+              rules={[{ required: true, message: 'First Name is required.' }]}
+            >
+              <Input placeholder="FIRST NAME" />
             </Form.Item>
-            <Form.Item name='lastName' label='LAST NAME' className='flex-1'>
-              <Input placeholder='LAST NAME' />
+            <Form.Item name="lastName" label="LAST NAME" className="flex-1">
+              <Input placeholder="LAST NAME" />
+            </Form.Item>
+            <Form.Item
+              name="email"
+              label="EMAIL"
+              className="flex-1"
+              rules={[
+                { required: true, message: 'Email is required.' },
+                { type: 'email', message: 'Please enter a valid email.' },
+              ]}
+            >
+              <Input placeholder="EMAIL" />
             </Form.Item>
           </div>
 
-          <div className='flex-item gap-2'>
-            <Form.Item name='email' label='EMAIL' className='flex-1'>
-              <Input placeholder='EMAIL' />
-            </Form.Item>
-            <Form.Item name='userName' label='Guestii Prefix' className='flex-1'>
-              <Input placeholder='SUFFIX' prefix={`${window.location.hostname.toUpperCase()}/`} />
-            </Form.Item>
-          </div>
+          <Space size={24}>
+            <Button
+              shape="round"
+              htmlType="submit"
+              loading={isLoading}
+              className="minw-110px primary-outlined"
+            >
+              SAVE
+            </Button>
 
-          <Button shape='round' className='minw-110px primary-outlined' loading={false}>
-            SAVE
-          </Button>
+            {userName && (
+              <Paragraph className="m-0">
+                YOUR {window.location.hostname.toUpperCase()} SHOW URL is{' '}
+                <Text
+                  strong
+                  copyable
+                  className="text-underline"
+                >{`${window.location.origin}/show/${userName}`}</Text>
+              </Paragraph>
+            )}
+          </Space>
         </Form>
 
         <Divider />

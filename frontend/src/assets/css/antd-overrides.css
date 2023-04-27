@@ -14,8 +14,10 @@
 .ant-btn.ant-btn-info {
   color: white;
   background-color: rgb(0, 184, 217);
-  transition: background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,
-    border-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  transition: background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,
+    box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,
+    border-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,
+    color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
 }
 .ant-btn.ant-btn-info:hover {
   background-color: rgb(0, 108, 156);
@@ -27,6 +29,33 @@ button.ant-btn.primary-outlined {
 }
 button.ant-btn.primary-outlined:hover {
   background-color: #f3e5f5 !important;
+}
+button.ant-btn.ant-btn-facebook {
+  color: white;
+  background-color: #1877f2;
+}
+button.ant-btn.ant-btn-facebook:hover {
+  background-color: #2e89ff;
+}
+button.ant-btn.ant-btn-linkedin {
+  color: white;
+  background-color: #0a66c2;
+}
+button.ant-btn.ant-btn-linkedin:hover {
+  background-color: #1e8eff;
+}
+button.ant-btn.ant-btn-instagram {
+  border: 0;
+  color: white;
+  background: radial-gradient(
+    128.57% 128.57% at 10.71% 105.36%,
+    #ffcb52 0%,
+    #e34677 56.25%,
+    #c938ac 100%
+  );
+}
+button.ant-btn.ant-btn-instagram:hover {
+  opacity: 0.75;
 }
 
 .form-label,
@@ -69,13 +98,21 @@ span.ant-tag {
 .email-template .ant-collapse > .ant-collapse-item > .ant-collapse-header {
   padding: 1rem !important;
 }
-.email-template .ant-collapse > .ant-collapse-item > .ant-collapse-header .ant-collapse-header-text {
+.email-template
+  .ant-collapse
+  > .ant-collapse-item
+  > .ant-collapse-header
+  .ant-collapse-header-text {
   font-size: 20px !important;
 }
 .email-template .ant-collapse-item.ant-collapse-item-active {
   background: #ffffff !important;
   border: 1px solid #893da0 !important;
 }
-.email-template .ant-collapse > .ant-collapse-item.ant-collapse-item-active > .ant-collapse-header .ant-collapse-header-text {
+.email-template
+  .ant-collapse
+  > .ant-collapse-item.ant-collapse-item-active
+  > .ant-collapse-header
+  .ant-collapse-header-text {
   color: #893da0 !important;
 }

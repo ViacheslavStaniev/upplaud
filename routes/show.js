@@ -74,14 +74,14 @@ router.put(
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-    const { name, website, logo, upload = false } = req.body;
+    const { name, website, logo } = req.body;
 
     const session = await Show.startSession();
     session.startTransaction();
 
     try {
       const info = { name, website };
-      if (logo && upload === true) info.logo = await uploadImage(logo, `${req.userId}/logos`); // Upload Logo
+      if (logo && logo.startsWith("data")) info.logo = await uploadImage(logo, `${req.userId}/logos`); // Upload Logo
 
       const show = await Show.findByIdAndUpdate(req.params.showId, info);
 

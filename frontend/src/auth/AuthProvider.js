@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import axios from '../utils/axios';
+import { App } from 'antd';
 import { isValidToken, setSession } from './utils';
 import { useSelector, useDispatch } from 'react-redux';
 import { initialize, saveUser, logoutUser, updateState } from '../reducers/userSlice';
@@ -22,6 +23,9 @@ AuthProvider.propTypes = { children: PropTypes.node };
 export function AuthProvider({ children }) {
   const dispatch = useDispatch();
   const state = useSelector((state) => state.user);
+  const { user } = state;
+
+  const { message } = App.useApp();
 
   const onInitialize = useCallback(async () => {
     try {
@@ -89,24 +93,72 @@ export function AuthProvider({ children }) {
   // UPDATE
   const update = useCallback((data) => dispatch(updateState(data)), [dispatch]);
 
+  // UPDATE USER
+  const updateUser = useCallback(
+    async (userData) => {
+      try {
+        update({ isLoading: true });
+
+        await axios.put('users', userData);
+
+        message.success('User info updated successfully.');
+        dispatch(updateState({ user: { ...user, ...userData }, isLoading: false }));
+      } catch (error) {
+        console.log(error);
+        update({ isLoading: false });
+        message.error('An error occurred. Please try again.');
+      }
+    },
+    [dispatch, update, user, message]
+  );
+
+  // Update Show
+  const addUpdateShow = useCallback(
+    async (showData, showId) => {
+      try {
+        update({ isLoading: true });
+        if (showId) {
+          const { data } = await axios.put(`show/${showId}`, showData);
+
+          message.success('Data updated successfully.');
+          dispatch(updateState({ user: { ...user, show: data.show }, isLoading: false }));
+        } else {
+          const { data } = await axios.post('show', showData);
+
+          message.success('Data updated successfully.');
+          dispatch(updateState({ user: { ...user, show: data.show }, isLoading: false }));
+        }
+      } catch (error) {
+        console.log(error);
+        update({ isLoading: false });
+        message.error('An error occurred. Please try again.');
+      }
+    },
+    [dispatch, user, message]
+  );
+
   const memoizedValue = useMemo(
     () => ({
+      user,
       login,
       logout,
       update,
       register,
-      user: state.user,
+      updateUser,
+      addUpdateShow,
       errors: state.errors,
       isLoading: state.isLoading,
       isInitialized: state.isInitialized,
       isAuthenticated: state.isAuthenticated,
     }),
     [
+      user,
       login,
       logout,
       update,
       register,
-      state.user,
+      updateUser,
+      addUpdateShow,
       state.errors,
       state.isLoading,
       state.isInitialized,

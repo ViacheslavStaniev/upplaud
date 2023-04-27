@@ -35,7 +35,7 @@ export default function LoginPage() {
         size="large"
         layout="vertical"
         onFinish={login}
-        initialValues={{ email: '', password: '' }}
+        initialValues={{ email: 'tcmhack@gmail.com', password: '12345678' }}
       >
         <Form.Item
           name="email"
@@ -56,9 +56,9 @@ export default function LoginPage() {
           <Input.Password placeholder="Password" />
         </Form.Item>
 
-        <div className="text-right p-1 mb-1">
-          <Link>Forget Password</Link>
-        </div>
+        <Paragraph className="text-right">
+          <Link href="/auth/forgot-password">Forgot Password?</Link>
+        </Paragraph>
 
         <Button block type="primary" htmlType="submit" loading={isLoading}>
           Login

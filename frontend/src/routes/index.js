@@ -1,10 +1,10 @@
-import AuthGuard from "../auth/AuthGuard";
-import GuestGuard from "../auth/GuestGuard";
+import AuthGuard from '../auth/AuthGuard';
+import GuestGuard from '../auth/GuestGuard';
 // import MainLayout from "../layouts/MainLayout";
-import CompactLayout from "../layouts/CompactLayout";
-import DashboardLayout from "../layouts/DashboardLayout";
+import CompactLayout from '../layouts/CompactLayout';
+import DashboardLayout from '../layouts/DashboardLayout';
 // import { PATH_AFTER_LOGIN } from "../config-global";
-import { Navigate, useRoutes } from "react-router-dom";
+import { Navigate, useRoutes } from 'react-router-dom';
 
 import {
   // Error
@@ -23,22 +23,22 @@ import {
   NewPasswordPage,
   ResetPasswordPage,
   // Dashboard
-  AddGuest,
+  NewAutomation,
   Automations,
   AccountAdmin,
   GuestingAdmin,
   EmailTemplates,
   PostingTemplate,
   GuestAcceptance,
-} from "./elements";
+} from './elements';
 
 export default function Router() {
   return useRoutes([
     {
-      path: "auth",
+      path: 'auth',
       children: [
         {
-          path: "login",
+          path: 'login',
           element: (
             <GuestGuard>
               <LoginPage />
@@ -46,7 +46,7 @@ export default function Router() {
           ),
         },
         {
-          path: "register",
+          path: 'register',
           element: (
             <GuestGuard>
               <RegisterPage />
@@ -56,9 +56,9 @@ export default function Router() {
         {
           element: <CompactLayout />,
           children: [
-            { path: "verify", element: <VerifyCodePage /> },
-            { path: "new-password", element: <NewPasswordPage /> },
-            { path: "reset-password", element: <ResetPasswordPage /> },
+            { path: 'verify', element: <VerifyCodePage /> },
+            { path: 'new-password', element: <NewPasswordPage /> },
+            { path: 'reset-password', element: <ResetPasswordPage /> },
           ],
         },
       ],
@@ -72,11 +72,12 @@ export default function Router() {
       children: [
         { element: <AccountAdmin />, index: true },
         // { path: "account-admin", element: <AccountAdmin /> },
-        { path: "add-guest", element: <AddGuest /> },
-        { path: "automations", element: <Automations /> },
-        { path: "guesting-admin", element: <GuestingAdmin /> },
-        { path: "email-templates", element: <EmailTemplates /> },
-        { path: "posting-template", element: <PostingTemplate /> },
+        { path: 'automations', element: <Automations /> },
+        { path: 'new-automation', element: <NewAutomation /> },
+        { path: 'new-automation/:id', element: <NewAutomation /> },
+        { path: 'guesting-admin', element: <GuestingAdmin /> },
+        { path: 'email-templates', element: <EmailTemplates /> },
+        { path: 'posting-template', element: <PostingTemplate /> },
         // {
         //   path: "user",
         //   children: [
@@ -103,12 +104,12 @@ export default function Router() {
     {
       element: <CompactLayout />,
       children: [
-        { path: "500", element: <Page500 /> },
-        { path: "404", element: <Page404 /> },
-        { path: "403", element: <Page403 /> },
+        { path: '500', element: <Page500 /> },
+        { path: '404', element: <Page404 /> },
+        { path: '403', element: <Page403 /> },
       ],
     },
-    { path: "guest-acceptance/:guestId", element: <GuestAcceptance /> },
-    { path: "*", element: <Navigate to='/404' replace /> },
+    { path: 'guest-acceptance/:guestId', element: <GuestAcceptance /> },
+    { path: '*', element: <Navigate to="/404" replace /> },
   ]);
 }
