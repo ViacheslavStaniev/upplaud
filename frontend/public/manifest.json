@@ -2,7 +2,7 @@
   "name": "Podasq",
   "short_name": "Podasq",
   "display": "standalone",
-  "start_url": "/",
+  "start_url": ".",
   "theme_color": "#000000",
   "background_color": "#ffffff",
   "icons": [

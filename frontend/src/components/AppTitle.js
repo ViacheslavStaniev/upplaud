@@ -7,7 +7,7 @@ AppTitle.propTypes = {
 };
 
 export default function AppTitle({ title = '', appNameOnly = false }) {
-  const APP_NAME = 'Podasq';
+  const APP_NAME = 'micvote';
 
   if (appNameOnly) return APP_NAME;
 

@@ -4,7 +4,8 @@ const Schema = mongoose.Schema;
 const GuestSchema = new Schema(
   {
     potentialTopics: [{ type: String }],
-    jobTitle: { type: String, default: "" },
+    freebieUrl: { type: String, default: "" },
+    withGuest: { type: Boolean, default: true },
     recordingDate: { type: Date, default: new Date() },
     startHostAutomation: { type: Boolean, default: false },
     guest: {

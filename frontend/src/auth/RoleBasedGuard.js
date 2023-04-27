@@ -1,9 +1,13 @@
-import PropTypes from 'prop-types';
-import { m } from 'framer-motion';
-import { Container, Typography } from '@mui/material';
-import { MotionContainer, varBounce } from '../components/animate';
-import { ForbiddenIllustration } from '../assets/illustrations';
-import { useAuthContext } from './useAuthContext';
+import PropTypes from "prop-types";
+import { m } from "framer-motion";
+// @mui
+import { Container, Typography } from "@mui/material";
+// components
+import { MotionContainer, varBounce } from "../components/animate";
+// assets
+import { ForbiddenIllustration } from "../assets/illustrations";
+//
+import { useAuthContext } from "./useAuthContext";
 
 RoleBasedGuard.propTypes = {
   children: PropTypes.node,
@@ -18,19 +22,17 @@ export default function RoleBasedGuard({ hasContent, roles, children }) {
   // const currentRole = 'user';
   const currentRole = user?.role; // admin;
 
-  if (typeof roles !== 'undefined' && !roles.includes(currentRole)) {
+  if (typeof roles !== "undefined" && !roles.includes(currentRole)) {
     return hasContent ? (
-      <Container component={MotionContainer} sx={{ textAlign: 'center' }}>
+      <Container component={MotionContainer} sx={{ textAlign: "center" }}>
         <m.div variants={varBounce().in}>
-          <Typography variant="h3" paragraph>
+          <Typography variant='h3' paragraph>
             Permission Denied
           </Typography>
         </m.div>
 
         <m.div variants={varBounce().in}>
-          <Typography sx={{ color: 'text.secondary' }}>
-            You do not have permission to access this page
-          </Typography>
+          <Typography sx={{ color: "text.secondary" }}>You do not have permission to access this page</Typography>
         </m.div>
 
         <m.div variants={varBounce().in}>

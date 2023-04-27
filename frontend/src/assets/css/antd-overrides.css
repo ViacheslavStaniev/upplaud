@@ -1,0 +1,118 @@
+.ant-layout .ant-layout-header.sticky-header {
+  top: 0;
+  height: auto;
+  position: sticky;
+  line-height: 90px;
+  background: white;
+  padding-inline: 20px;
+  /* border-bottom: 1px solid rgb(0 0 0 / 10%); */
+}
+
+.ant-btn {
+  font-weight: 600;
+}
+.ant-btn.ant-btn-info {
+  color: white;
+  background-color: rgb(0, 184, 217);
+  transition: background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,
+    box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,
+    border-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,
+    color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+}
+.ant-btn.ant-btn-info:hover {
+  background-color: rgb(0, 108, 156);
+  box-shadow: rgba(0, 184, 217, 0.24) 0px 8px 16px 0px;
+}
+button.ant-btn.primary-outlined {
+  color: #54006e !important;
+  border: 1px solid !important;
+}
+button.ant-btn.primary-outlined:hover {
+  background-color: #f3e5f5 !important;
+}
+button.ant-btn.ant-btn-facebook {
+  color: white;
+  background-color: #1877f2;
+}
+button.ant-btn.ant-btn-facebook:hover {
+  background-color: #2e89ff;
+}
+button.ant-btn.ant-btn-linkedin {
+  color: white;
+  background-color: #0a66c2;
+}
+button.ant-btn.ant-btn-linkedin:hover {
+  background-color: #1e8eff;
+}
+button.ant-btn.ant-btn-instagram {
+  border: 0;
+  color: white;
+  background: radial-gradient(
+    128.57% 128.57% at 10.71% 105.36%,
+    #ffcb52 0%,
+    #e34677 56.25%,
+    #c938ac 100%
+  );
+}
+button.ant-btn.ant-btn-instagram:hover {
+  opacity: 0.75;
+}
+
+.form-label,
+.ant-form-item .ant-form-item-label > label {
+  height: auto !important;
+  color: #6b0d88;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.ant-table-title {
+  padding: 0 !important;
+}
+span.ant-tag {
+  border: 0;
+  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: 20px;
+}
+
+.ant-spin.loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  gap: 1rem;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  background: white;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.email-template .ant-collapse-item {
+  border-radius: 8px !important;
+  border: 1px solid transparent;
+  margin-bottom: 1rem !important;
+  background: #faf5fc !important;
+}
+.email-template .ant-collapse > .ant-collapse-item > .ant-collapse-header {
+  padding: 1rem !important;
+}
+.email-template
+  .ant-collapse
+  > .ant-collapse-item
+  > .ant-collapse-header
+  .ant-collapse-header-text {
+  font-size: 20px !important;
+}
+.email-template .ant-collapse-item.ant-collapse-item-active {
+  background: #ffffff !important;
+  border: 1px solid #893da0 !important;
+}
+.email-template
+  .ant-collapse
+  > .ant-collapse-item.ant-collapse-item-active
+  > .ant-collapse-header
+  .ant-collapse-header-text {
+  color: #893da0 !important;
+}

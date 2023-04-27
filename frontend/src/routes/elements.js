@@ -1,5 +1,5 @@
 import { Suspense, lazy } from 'react';
-import LoadingScreen from '../components/loading-screen';
+import LoadingScreen from '../components/LoadingScreen';
 
 const Loadable = (Component) => (props) =>
   (
@@ -15,30 +15,28 @@ export const VerifyCodePage = Loadable(lazy(() => import('../pages/auth/VerifyCo
 export const NewPasswordPage = Loadable(lazy(() => import('../pages/auth/NewPasswordPage')));
 export const ResetPasswordPage = Loadable(lazy(() => import('../pages/auth/ResetPasswordPage')));
 
-// Guestii
-export const AddGuest = Loadable(lazy(() => import('../pages/add-guest')));
-export const Automations = Loadable(lazy(() => import('../pages/automations')));
-export const AccountAdmin = Loadable(lazy(() => import('../pages/account-admin')));
-export const GuestingAdmin = Loadable(lazy(() => import('../pages/guesting-admin')));
-export const EmailTemplates = Loadable(lazy(() => import('../pages/email-templates')));
-export const GuestAcceptance = Loadable(lazy(() => import('../pages/guest-acceptance')));
-export const PostingTemplate = Loadable(lazy(() => import('../pages/posting-templates')));
+// DASHBOARD
+export const Automations = Loadable(lazy(() => import('../pages/dashboard/Automations')));
+export const AccountAdmin = Loadable(lazy(() => import('../pages/dashboard/AccountAdmin')));
+export const NewAutomation = Loadable(lazy(() => import('../pages/dashboard/NewAutomation')));
+export const GuestingAdmin = Loadable(lazy(() => import('../pages/dashboard/GuestingAdmin')));
+export const EmailTemplates = Loadable(lazy(() => import('../pages/dashboard/EmailTemplates')));
+export const PostingTemplate = Loadable(lazy(() => import('../pages/dashboard/PostingTemplate')));
+export const GuestAcceptance = Loadable(lazy(() => import('../pages/dashboard/GuestAcceptance')));
 
-// USER
-export const UserProfilePage = Loadable(lazy(() => import('../pages/user/UserProfilePage')));
-export const UserCardsPage = Loadable(lazy(() => import('../pages/user/UserCardsPage')));
-export const UserListPage = Loadable(lazy(() => import('../pages/user/UserListPage')));
-export const UserAccountPage = Loadable(lazy(() => import('../pages/user/UserAccountPage')));
-export const UserCreatePage = Loadable(lazy(() => import('../pages/user/UserCreatePage')));
-export const UserEditPage = Loadable(lazy(() => import('../pages/user/UserEditPage')));
+// USERS
+// export const UserProfilePage = Loadable(lazy(() => import("../pages/users/UserProfilePage")));
+// export const UserCardsPage = Loadable(lazy(() => import("../pages/users/UserCardsPage")));
+// export const UserListPage = Loadable(lazy(() => import("../pages/users/UserListPage")));
+// export const UserAccountPage = Loadable(lazy(() => import("../pages/users/UserAccountPage")));
+// export const UserCreatePage = Loadable(lazy(() => import("../pages/users/UserCreatePage")));
+// export const UserEditPage = Loadable(lazy(() => import("../pages/users/UserEditPage")));
 
 // MAIN
 export const Page500 = Loadable(lazy(() => import('../pages/Page500')));
 export const Page403 = Loadable(lazy(() => import('../pages/Page403')));
 export const Page404 = Loadable(lazy(() => import('../pages/Page404')));
 export const HomePage = Loadable(lazy(() => import('../pages/HomePage')));
-export const FaqsPage = Loadable(lazy(() => import('../pages/FaqsPage')));
-export const AboutPage = Loadable(lazy(() => import('../pages/AboutPage')));
-export const Contact = Loadable(lazy(() => import('../pages/ContactPage')));
-export const PricingPage = Loadable(lazy(() => import('../pages/PricingPage')));
-export const PaymentPage = Loadable(lazy(() => import('../pages/PaymentPage')));
+// export const FaqsPage = Loadable(lazy(() => import("../pages/FaqsPage")));
+// export const AboutPage = Loadable(lazy(() => import("../pages/AboutPage")));
+// export const ContactPage = Loadable(lazy(() => import("../pages/ContactPage")));
