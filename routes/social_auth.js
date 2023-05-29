@@ -1,16 +1,12 @@
 const express = require("express");
 const passport = require("passport");
-// const querystring = require("querystring");
 const FacebookStrategy = require("passport-facebook").Strategy;
 const InstagramStrategy = require("passport-instagram").Strategy;
 const LinkedInStrategy = require("passport-linkedin-oauth2").Strategy;
-// const User = require("../models/User");
 // const verifyAuth = require("../config/verifyAuth");
 // const { sendEmail } = require("../helpers/email");
-// const { OAuth2Client } = require("google-auth-library");
-// const { check, validationResult } = require("express-validator");
-// const { register, getUserInfo } = require("./users");
-// const { randomString, getAuthResponse } = require("../helpers/utills");
+const { randomString, getAuthResponse } = require("../helpers/utills");
+const { createOrUpdateGuestUser, updateUserInfo } = require("./users");
 
 const router = express.Router();
 
@@ -28,16 +24,38 @@ const AuthOptions = { failureRedirect: "/auth/error", failureFlash: false, sessi
 const getAuthCallbackURL = (req, urlFor) => {
   const hostname = req.protocol + "://" + req.headers.host;
 
-  return `${hostname}/api/login/${urlFor}/callback`;
+  return `${hostname}/auth/login/${urlFor}/callback`;
 };
 
 const redirectToWebapp = (req, res) => res.redirect(REACT_APP_URL);
 
 const responseBackToWebapp = (req, res) => {
-  res.json({ user: req.user });
-  // const { token, email } = req.user;
-  // const params = token ? `#auth_token=${token}&email=${email}` : `#error=true&error_description=Invalid Response. Please try agian.`;
-  // res.redirect(REACT_APP_URL + params);
+  const { accessToken } = req.user;
+  const params = accessToken
+    ? `#auth_token=${accessToken}`
+    : `#error=true&error_description=This social media login might not be working right now. Please use another way to login. 
+  `;
+  res.redirect(REACT_APP_URL + params);
+};
+
+const getUser = async (profile) => {
+  const { name, photos, emails } = profile;
+
+  if (emails && emails[0]?.value) {
+    const email = emails[0]?.value;
+    const firstName = name?.givenName;
+    const lastName = name?.familyName || "";
+    const picture = photos[0]?.value || "";
+
+    const userObj = await createOrUpdateGuestUser(firstName, lastName, email, randomString(8)); // new user - register first, otherwise fetch user
+
+    // update user picture
+    await updateUserInfo(userObj._id, { email, lastName, firstName, profile: { ...userObj.profile, picture } });
+
+    return await getAuthResponse(userObj);
+  }
+
+  return null;
 };
 
 const setFacebookStrategy = async (req, res, next) => {
@@ -47,18 +65,11 @@ const setFacebookStrategy = async (req, res, next) => {
         clientID: FACEBOOK_APP_ID,
         clientSecret: FACEBOOK_APP_SECRET,
         callbackURL: getAuthCallbackURL(req, "facebook"),
-        profileFields: ["id", "displayName", "email", "first_name", "last_name", "middle_name", "picture", "gender"],
+        profileFields: ["id", "emails", "name", "picture", "gender"],
       },
-      (accessToken, refreshToken, profile, done) => {
-        // Here, you can check if the user exists in your database
-        // If not, you can create a new user with the profile data
-        // and then call the done() function with the user object
-        // For example:
-        // const user = {
-        //   id: profile.id,
-        //   displayName: profile.displayName,
-        //   email: profile.emails[0].value,
-        // };
+      async (accessToken, refreshToken, profile, done) => {
+        console.log(await getUser(profile));
+
         done(null, profile);
       }
     )
@@ -76,13 +87,7 @@ const setLinkedinStrategy = async (req, res, next) => {
         callbackURL: getAuthCallbackURL(req, "linkedin"),
         scope: ["r_emailaddress", "r_liteprofile"],
       },
-      (accessToken, refreshToken, profile, done) => {
-        // Here, you can check if the user exists in your database
-        // If not, you can create a new user with the profile data
-        // and then call the done() function with the user object
-        // For example:
-        done(null, profile);
-      }
+      async (accessToken, refreshToken, profile, done) => done(null, await getUser(profile))
     )
   );
 
@@ -110,32 +115,32 @@ const setInstagramStrategy = async (req, res, next) => {
   next();
 };
 
-// @route   GET api/login/facebook
+// @route   GET auth/login/facebook
 // @desc    Login user via facebook
 // @access  Public
 router.get("/facebook", setFacebookStrategy, passport.authenticate("facebook"), redirectToWebapp);
 
-// @route   GET api/login/facebook/callback
+// @route   GET auth/login/facebook/callback
 // @desc    Handle response from facebook
 // @access  Public
 router.get("/facebook/callback", passport.authenticate("facebook", AuthOptions), responseBackToWebapp);
 
-// @route   GET api/login/linkedin
+// @route   GET auth/login/linkedin
 // @desc    Login user via linkedin
 // @access  Public
 router.get("/linkedin", setLinkedinStrategy, passport.authenticate("linkedin"), redirectToWebapp);
 
-// @route   GET api/login/linkedin/callback
+// @route   GET auth/login/linkedin/callback
 // @desc    Handle response from linkedin
 // @access  Public
 router.get("/linkedin/callback", passport.authenticate("linkedin", AuthOptions), responseBackToWebapp);
 
-// @route   GET api/login/instagram
+// @route   GET auth/login/instagram
 // @desc    Login user via instagram
 // @access  Public
 router.get("/instagram", setInstagramStrategy, passport.authenticate("instagram"), redirectToWebapp);
 
-// @route   GET api/login/instagram/callback
+// @route   GET auth/login/instagram/callback
 // @desc    Handle response from instagram
 // @access  Public
 router.get("/instagram/callback", passport.authenticate("instagram", AuthOptions), responseBackToWebapp);

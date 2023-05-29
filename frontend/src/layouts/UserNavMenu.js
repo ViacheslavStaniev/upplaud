@@ -31,9 +31,11 @@ export default function UserNavMenu() {
     <Dropdown menu={{ items }} trigger={['click']}>
       <div className="flex-item pointer">
         <Avatar size="small" style={{ background: '#0AB6B6' }}>
-          T
+          {user?.firstName.charAt(0)}
         </Avatar>
-        <Text strong>{userName}</Text>
+        <Text strong ellipsis className="maxw-140px">
+          {userName}
+        </Text>
         <CustomIcon name="chev_down" />
       </div>
     </Dropdown>

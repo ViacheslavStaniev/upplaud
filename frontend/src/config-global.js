@@ -1,9 +1,9 @@
 import { PATH_DASHBOARD } from './routes/paths';
 
-const { REACT_APP_API_BASEURL, REACT_APP_CLOUDFRONT_URL } = process.env;
+const { REACT_APP_BASEURL, REACT_APP_CLOUDFRONT_URL } = process.env;
 
 // API
-export const API_BASEURL = REACT_APP_API_BASEURL || '';
+export const APP_BASEURL = REACT_APP_BASEURL || '';
 
 // CloudFront
 export const CLOUDFRONT_URL = REACT_APP_CLOUDFRONT_URL || '';

@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import Simplebar from 'simplebar-react';
 import Logo from '../../components/Logo';
-import NewAutomation from './NewAutomation';
+// import NewAutomation from './NewAutomation';
 import AppTitle from '../../components/AppTitle';
 import CustomIcon from '../../components/CustomIcon';
 import SocialMediaConnect from './SocialMediaConnect';
@@ -9,23 +9,27 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { CalendarOutlined, MinusCircleOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import {
+  List,
   Card,
   Form,
+  Input,
   Button,
   Row,
   Col,
   Divider,
+  Checkbox,
   Typography,
-  Steps,
   Modal,
   DatePicker,
-  Input,
   Collapse,
   Calendar,
+  Space,
+  ConfigProvider,
+  Switch,
 } from 'antd';
 
 const { Panel } = Collapse;
-const { Link, Title, Paragraph } = Typography;
+const { Text, Link, Title, Paragraph } = Typography;
 
 export default function GuestAcceptance() {
   const params = useParams();
@@ -33,34 +37,40 @@ export default function GuestAcceptance() {
 
   const [currentStep, setCurrentStep] = useState(1);
 
+  const listItems = [
+    '- Make them feel part of us',
+    '- Give them what they want.',
+    '- They’ll share us more:',
+    '- We grow our reach & impact',
+    '- We do business better!',
+  ];
+
   return (
-    <>
+    <ConfigProvider theme={{ token: { fontSize: 16 } }}>
       <AppTitle title="Guest Acceptance" />
 
       <Row className="h-100vh guest-acceptance">
         <Col span={6} className="p-4 leftbg">
           <Logo />
 
-          <Title className="fw-300" style={{ marginTop: 50, fontSize: 54 }}>
-            Build interest in your episode...
-          </Title>
-          <Title level={4} className="color-6b0d88">
-            Even before it's recorded!
-          </Title>
+          <div style={{ marginTop: 50 }} className="bg-white p-2 br-8px">
+            <Title level={3} className="text-center">
+              Why does polling grow our audience?
+            </Title>
+            <Title level={5}>It’s proven that when we ask others for input, we get to:</Title>
+            <List
+              size="small"
+              className="mb-4"
+              dataSource={listItems}
+              renderItem={(item) => <List.Item className="border-0">{item}</List.Item>}
+            />
 
-          <Paragraph style={{ marginTop: 60, marginBottom: 25 }}>
-            Automate your episode promotion in just 2 quick steps
-          </Paragraph>
-
-          <Steps
-            direction="vertical"
-            current={currentStep}
-            items={[
-              { title: 'Click' },
-              { title: 'Connect Socials' },
-              { title: 'Confirm Schedule' },
-            ]}
-          />
+            <Paragraph>
+              Mic.vote makes polling & voting fast and easy, pulling together votes from multiple
+              sources. We’re also able to capture referrals, email addresses, and offer gifts &
+              rewards to voters.
+            </Paragraph>
+          </div>
         </Col>
 
         <Col span={18} className="p-50px">
@@ -69,31 +79,52 @@ export default function GuestAcceptance() {
           {currentStep === 2 && <ConfirmScheduleInfo onClickPrev={() => setCurrentStep(1)} />}
         </Col>
       </Row>
-    </>
+    </ConfigProvider>
   );
 }
 
 function ConnectSocialsInfo({ onClickNext }) {
   return (
     <>
-      <Title className="color-6b0d88 fw-400" style={{ marginBottom: 35 }}>
-        First, confirm your info. Then connect your social media.
+      <Title className="color-6b0d88 fw-600 m-0 mb-2">
+        Hi Mark, <strong>thank you</strong> for being our guest!
       </Title>
 
-      <NewAutomation isGuestAcceptance />
+      <Title className="m-0 mb-2">Let’s grow the biggest audience for you...</Title>
 
-      <Title level={3} className="fw-400" style={{ marginTop: 25, marginBottom: 35 }}>
-        We'll gather questions from your connections that you and the host can answer during your
-        recording. You can connect any or all of your social media:
+      <Title level={2} className="m-0 mb-3">
+        by asking our connections to vote on our topics.
       </Title>
 
-      <SocialMediaConnect showTitle={false} />
+      <Paragraph italic>
+        Optional: Watch our mic.vote <Link href="#">tutorial video</Link>
+      </Paragraph>
 
-      <Divider style={{ marginTop: 40, marginBottom: 40 }} />
+      {/* <NewAutomation isGuestAcceptance /> */}
 
-      <Button type="info" shape="round" size="large" onClick={onClickNext}>
-        NEXT: CONFIRM POSTING SCHEDULE
-      </Button>
+      <Title level={3} className="fw-400">
+        Start polling each other’s social media:
+      </Title>
+
+      <SocialMediaConnect showTitle={false} className="mb-2 mt-2" />
+
+      <Space className="d-flex mb-4">
+        <Text>Offer a free gift to voters</Text>
+        <Divider type="vertical" className="border-000000" />
+        <Text>See our poll page & add topics</Text>
+        <Divider type="vertical" className="border-000000" />
+        <Text>Preview posts</Text>
+      </Space>
+
+      <Paragraph className="m-0">
+        To reach the most people, we'll repeat our mic.vote until June 15, 2023:
+      </Paragraph>
+      <Paragraph strong>
+        Re-post the poll _4_ times every 30 days.{' '}
+        <Button className="primary-outlined" onClick={onClickNext}>
+          SAVE
+        </Button>
+      </Paragraph>
     </>
   );
 }
@@ -119,17 +150,43 @@ function ConfirmScheduleInfo({ onClickPrev }) {
     }
   };
 
-  const getDateString = (timestamp) => new Date(timestamp).toDateString();
-  const randomDate = () => new Date(new Date() - Math.random() * 1e12).getTime();
-  const postings = Array(5)
-    .fill(0)
-    .map((_, i) => ({ key: i, date: randomDate() }));
-
   return (
     <>
-      <Title className="color-6b0d88 fw-400" style={{ marginBottom: 35 }}>
-        Confirm automatic posting schedule
+      <Title className="color-6b0d88 fw-600 m-0 mb-4">Thank you for voting & sharing!</Title>
+      <Paragraph italic>
+        Optional: Watch our mic.vote <Link href="#">welcome video</Link>
+      </Paragraph>
+
+      <Title level={2} className="mt-2">
+        To access gifts & goodies from us, please sign your vote:
       </Title>
+
+      <Form size="large" layout="vertical" onFinish={console.log}>
+        <Form.Item name="name" label="First Name" className="mb-1">
+          <Input placeholder="First Name" />
+        </Form.Item>
+        <Form.Item name="email" label="Email" className="mb-1">
+          <Input placeholder="Email" />
+        </Form.Item>
+        <Form.Item name="zipCode" label="Zip Code" className="mb-1">
+          <Input placeholder="Zip Code" />
+        </Form.Item>
+
+        <Form.Item name="knowHost" className="m-0">
+          <Checkbox>I know Mark Bullock, the host</Checkbox>
+        </Form.Item>
+        <Form.Item name="knowGuest">
+          <Checkbox>I know Ada Hasloecher, the guest</Checkbox>
+        </Form.Item>
+      </Form>
+
+      <Paragraph strong>Yes, I'm happy to share this poll on my social media:</Paragraph>
+      <SocialMediaConnect showTitle={false} className="mb-4" />
+
+      <Paragraph>
+        <Switch /> To reach more of my connections, re-post until June 15, 2023: _3_ times every 30
+        days.
+      </Paragraph>
 
       <Button
         type="info"
@@ -138,65 +195,7 @@ function ConfirmScheduleInfo({ onClickPrev }) {
         className="uppercase"
         onClick={() => setOpenModal(true)}
       >
-        Click to Start Your Pre Episode Promotion
-      </Button>
-
-      <Title level={4} className="fw-400" style={{ marginTop: 25, marginBottom: 35 }}>
-        Click <CalendarOutlined /> to edit dates.{' '}
-        <Link onClick={onClickPrev} className="font-inherit">
-          Click here
-        </Link>{' '}
-        to go back and edit your job title and business.
-      </Title>
-
-      <Simplebar style={{ maxHeight: 'calc(100vh - 370px)', paddingRight: 10 }}>
-        <Collapse
-          bordered={false}
-          className="mb-2"
-          defaultActiveKey={[0]}
-          expandIconPosition="end"
-          expandIcon={({ isActive }) =>
-            isActive ? (
-              <MinusCircleOutlined className="font-20px color-5D0578" />
-            ) : (
-              <PlusCircleOutlined className="font-20px color-5D0578" />
-            )
-          }
-        >
-          {postings.map(({ key, date }) => (
-            <Panel
-              header={
-                <Title level={3}>
-                  Posting {key + 1}: {getDateString(date)}
-                </Title>
-              }
-              key={key}
-            >
-              <div className="flex-item gap-2">
-                <Card style={{ height: 322 }} className="flex-1">
-                  Hello World
-                </Card>
-
-                <Calendar
-                  value={dayjs(date)}
-                  className="flex-1"
-                  fullscreen={false}
-                  onPanelChange={console.log}
-                />
-              </div>
-            </Panel>
-          ))}
-        </Collapse>
-      </Simplebar>
-
-      <Button
-        type="info"
-        shape="round"
-        size="large"
-        className="uppercase"
-        onClick={() => setOpenModal(true)}
-      >
-        Click to Start Your Pre Episode Promotion
+        SAVE VOTE
       </Button>
 
       <Modal
@@ -215,9 +214,7 @@ function ConfirmScheduleInfo({ onClickPrev }) {
         <Divider />
 
         <Title level={2}>Going to be a guest on other shows?</Title>
-        <Paragraph className="font-16px">
-          Invite those hosts to use Podasq to automate your episode promotion:
-        </Paragraph>
+        <Paragraph>Invite those hosts to use Podasq to automate your episode promotion:</Paragraph>
 
         <Form
           form={form}

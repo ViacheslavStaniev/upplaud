@@ -3,9 +3,9 @@ import CustomIcon from '../../components/CustomIcon';
 
 const { Title } = Typography;
 
-export default function SocialMediaConnect({ showTitle = true }) {
+export default function SocialMediaConnect({ showTitle = true, className = '' }) {
   return (
-    <>
+    <div className={`social-media ${className}`}>
       {showTitle && <Title level={3}>Connect with social media</Title>}
 
       <Space size={16}>
@@ -21,6 +21,6 @@ export default function SocialMediaConnect({ showTitle = true }) {
           Connect with LinkedIn
         </Button>
       </Space>
-    </>
+    </div>
   );
 }

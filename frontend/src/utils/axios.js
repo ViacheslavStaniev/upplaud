@@ -1,7 +1,7 @@
 import axios from 'axios';
-import { API_BASEURL } from '../config-global';
+import { APP_BASEURL } from '../config-global';
 
-const axiosInstance = axios.create({ baseURL: API_BASEURL });
+const axiosInstance = axios.create({ baseURL: `${APP_BASEURL}/api` });
 
 axiosInstance.interceptors.response.use(
   (response) => response,

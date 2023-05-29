@@ -22,8 +22,9 @@ AuthProvider.propTypes = { children: PropTypes.node };
 
 export function AuthProvider({ children }) {
   const dispatch = useDispatch();
-  const state = useSelector((state) => state.user);
-  const { user } = state;
+  const { user, errors, isLoading, isInitialized, isAuthenticated } = useSelector(
+    (state) => state.user
+  );
 
   const { message } = App.useApp();
 
@@ -134,7 +135,16 @@ export function AuthProvider({ children }) {
         message.error('An error occurred. Please try again.');
       }
     },
-    [dispatch, user, message]
+    [dispatch, update, user, message]
+  );
+
+  // Social Login - Login via AuthToken
+  const loginViaToken = useCallback(
+    (accessToken) => {
+      setSession(accessToken);
+      onInitialize();
+    },
+    [onInitialize]
   );
 
   const memoizedValue = useMemo(
@@ -143,26 +153,28 @@ export function AuthProvider({ children }) {
       login,
       logout,
       update,
+      errors,
       register,
+      isLoading,
       updateUser,
+      loginViaToken,
       addUpdateShow,
-      errors: state.errors,
-      isLoading: state.isLoading,
-      isInitialized: state.isInitialized,
-      isAuthenticated: state.isAuthenticated,
+      isInitialized,
+      isAuthenticated,
     }),
     [
       user,
       login,
       logout,
       update,
+      errors,
       register,
+      isLoading,
       updateUser,
+      loginViaToken,
       addUpdateShow,
-      state.errors,
-      state.isLoading,
-      state.isInitialized,
-      state.isAuthenticated,
+      isInitialized,
+      isAuthenticated,
     ]
   );
 

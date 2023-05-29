@@ -74,7 +74,7 @@ export default function RegisterPage() {
       </Form>
 
       <Paragraph>
-        By signing up, I agree to <Link href="/tos">Terms of Service</Link> and
+        By signing up, I agree to <Link href="/tos">Terms of Service</Link> and{' '}
         <Link href="/privacy">Privacy Policy</Link>.
       </Paragraph>
 

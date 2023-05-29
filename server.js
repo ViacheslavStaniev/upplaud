@@ -47,7 +47,7 @@ app.use("/api/auth", require("./routes/auth"));
 app.use("/api/show", require("./routes/show"));
 app.use("/api/users", require("./routes/users"));
 app.use("/api/guests", require("./routes/guests"));
-app.use("/api/login", require("./routes/social_auth"));
+app.use("/auth/login", require("./routes/social_auth"));
 
 const PORT = process.env.PORT || 5000;
 

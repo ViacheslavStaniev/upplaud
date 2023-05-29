@@ -91,6 +91,9 @@
 .maxw-125px {
   max-width: 125px !important;
 }
+.maxw-140px {
+  max-width: 140px !important;
+}
 .w-25 {
   width: 25%;
 }
@@ -208,6 +211,12 @@
 .bg-8F24B2-10 {
   background-color: rgb(143 36 178 / 10%);
 }
+.color-facebook {
+  color: #1877f2;
+}
+.color-linkedin {
+  color: #0a66c2;
+}
 .color-white {
   color: white !important;
 }
@@ -225,6 +234,9 @@
 }
 .border-E0E0E0 {
   border: 1px solid #e0e0e0;
+}
+.border-000000 {
+  border: 1px solid #000000;
 }
 .font-inherit {
   font-size: inherit !important;
@@ -269,6 +281,10 @@
   opacity: 0.5;
   pointer-events: none;
 }
+.vl-textbottom {
+  vertical-align: text-bottom;
+}
+
 .ant-layout-sider.main-menu,
 .ant-layout-sider.main-menu .ant-menu-light {
   color: white;
@@ -320,7 +336,7 @@
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
-  background-color: rgb(143 36 178 / 02%);
+  background-color: rgb(143 36 178 / 6%);
 }
 
 /* Color Picker Styles */

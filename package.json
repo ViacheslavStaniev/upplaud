@@ -44,7 +44,6 @@
     "passport-facebook": "^3.0.0",
     "passport-instagram": "^1.0.0",
     "passport-linkedin-oauth2": "^2.0.0",
-    "querystring": "^0.2.1",
     "stripe": "^7.63.1"
   },
   "devDependencies": {
