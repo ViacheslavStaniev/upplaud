@@ -256,6 +256,9 @@
 .uppercase {
   text-transform: uppercase !important;
 }
+.capitalize {
+  text-transform: capitalize !important;
+}
 .position-absolute {
   position: absolute !important;
 }
@@ -280,6 +283,9 @@
 .disabled {
   opacity: 0.5;
   pointer-events: none;
+}
+.opacity-85 {
+  opacity: 0.85;
 }
 .vl-textbottom {
   vertical-align: text-bottom;

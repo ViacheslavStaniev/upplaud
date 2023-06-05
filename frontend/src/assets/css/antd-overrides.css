@@ -23,28 +23,28 @@
   background-color: rgb(0, 108, 156);
   box-shadow: rgba(0, 184, 217, 0.24) 0px 8px 16px 0px;
 }
-button.ant-btn.primary-outlined {
+.ant-btn.primary-outlined {
   color: #54006e !important;
   border: 1px solid !important;
 }
-button.ant-btn.primary-outlined:hover {
+.ant-btn.primary-outlined:hover {
   background-color: #f3e5f5 !important;
 }
-button.ant-btn.ant-btn-facebook {
+.ant-btn.ant-btn-facebook {
   color: white;
   background-color: #1877f2;
 }
-button.ant-btn.ant-btn-facebook:hover {
+.ant-btn.ant-btn-facebook:hover {
   background-color: #2e89ff;
 }
-button.ant-btn.ant-btn-linkedin {
+.ant-btn.ant-btn-linkedin {
   color: white;
   background-color: #0a66c2;
 }
-button.ant-btn.ant-btn-linkedin:hover {
+.ant-btn.ant-btn-linkedin:hover {
   background-color: #1e8eff;
 }
-button.ant-btn.ant-btn-instagram {
+.ant-btn.ant-btn-instagram {
   border: 0;
   color: white;
   background: radial-gradient(
@@ -54,7 +54,7 @@ button.ant-btn.ant-btn-instagram {
     #c938ac 100%
   );
 }
-button.ant-btn.ant-btn-instagram:hover {
+.ant-btn.ant-btn-instagram:hover {
   opacity: 0.75;
 }
 

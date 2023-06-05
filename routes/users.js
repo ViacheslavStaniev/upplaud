@@ -5,6 +5,7 @@ const { ServiceError } = require("./errors");
 const verifyAuth = require("../config/verifyAuth");
 const { createUsername } = require("../helpers/utills");
 const { check, validationResult } = require("express-validator");
+const { initLinkedInPosting } = require("./social_connect");
 
 const router = express.Router();
 
@@ -109,13 +110,33 @@ router.post(
   }
 );
 
+router.post(
+  "/samplepost",
+  verifyAuth,
+  async (req, res, next) => {
+    try {
+      let user = await getUserInfo(req.userId);
+
+      req.user = user;
+
+      // await initLinkedInPosting(user);
+      next();
+    } catch (err) {
+      // throw err;
+      console.error({ msg: err.message });
+      res.status(500).send("Internal Server Error");
+    }
+  },
+  initLinkedInPosting
+);
+
 async function isUserNameTaken(userId, userName) {
   const user = await User.findOne({ userName: userName, _id: { $ne: userId } });
   return user !== null;
 }
 
 async function getUserInfo(userId) {
-  return await User.findById(userId).select("-password -resetToken").populate("show");
+  return await User.findById(userId).select("-password -resetToken").populate("show").populate("socialAccounts");
 }
 
 async function getBasicUserInfo(userId) {

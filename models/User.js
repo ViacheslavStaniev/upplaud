@@ -75,23 +75,7 @@ const UserSchema = new Schema(
       type: Boolean,
       default: true,
     },
-    socialAccounts: {
-      facebook: {
-        profileLink: { type: String, default: "" },
-        accessToken: { type: Object, default: null },
-        isConnected: { type: Boolean, default: false },
-      },
-      linkedin: {
-        profileLink: { type: String, default: "" },
-        accessToken: { type: Object, default: null },
-        isConnected: { type: Boolean, default: false },
-      },
-      instagram: {
-        profileLink: { type: String, default: "" },
-        accessToken: { type: Object, default: null },
-        isConnected: { type: Boolean, default: false },
-      },
-    },
+    socialAccounts: [{ ref: "SocialAccount", type: Schema.Types.ObjectId }],
     show: {
       ref: "Show",
       type: Schema.Types.ObjectId,
