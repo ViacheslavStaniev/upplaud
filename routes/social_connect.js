@@ -7,26 +7,27 @@ const LinkedInStrategy = require("passport-linkedin-oauth2").Strategy;
 // const { sendEmail } = require("../helpers/email");
 const User = require("../models/User");
 const SocialAccount = require("./../models/SocialAccount");
-const { RestliClient } = require("linkedin-api-client");
+const { AuthClient, RestliClient } = require("linkedin-api-client");
 const { SOCIAL_TYPE_FACEBOOK, SOCIAL_TYPE_LINKEDIN } = require("./../models/SocialAccount");
 // const { updateUserInfo } = require("./users");
 
 const router = express.Router();
 
 // const LINKEDIN_API_URL = "https://api.linkedin.com/rest/";
-const { REACT_APP_URL, FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, LINKEDIN_APP_ID, LINKEDIN_APP_SECRET } = process.env;
-const AuthOptions = { failureRedirect: "/auth/error", failureFlash: false, session: false, failureMessage: true };
+const { REACT_APP_URL, FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, LINKEDIN_APP_ID, LINKEDIN_APP_SECRET, LINKEDIN_VERSION } = process.env;
+const AuthOptions = { failureRedirect: "/auth/error", failureFlash: false, session: true, failureMessage: true };
 
 const getAuthCallbackURL = (req, urlFor) => {
   const hostname = req.protocol + "://" + req.headers.host;
 
-  return `${hostname}/auth/login/${urlFor}/callback`;
+  return `${hostname}/auth/connect/${urlFor}-callback`;
 };
 
 const redirectToWebapp = (req, res) => res.redirect(REACT_APP_URL);
 
-const responseBackToWebapp2 = (req, res) => {
-  console.log(req.user);
+const responseBackToWebapp = (req, res) => {
+  console.log("rsp2", req.session);
+  res.json({ session: req.session, user: req.user });
   //   const { accessToken } = req.user;
   //   const params = accessToken
   //     ? `#auth_token=${accessToken}`
@@ -35,7 +36,30 @@ const responseBackToWebapp2 = (req, res) => {
   //   res.redirect(REACT_APP_URL + params);
 };
 
-const getExppireTime = () => new Date(new Date().getTime() + 50 * 24 * 60 * 60 * 1000);
+const saveUserAccessTokens = async (user, type, connectType, info, publicUrl = "") => {
+  // find social account
+  let isNew = false;
+  let socialAccount = await SocialAccount.findOne({ user: user._id });
+  if (!socialAccount) {
+    isNew = true;
+    socialAccount = new SocialAccount({ user: user._id, type });
+  }
+
+  // update connect info
+  socialAccount[connectType] = { ...socialAccount[connectType], ...info };
+
+  // Public URL
+  if (publicUrl !== "") socialAccount.publicUrl = publicUrl;
+
+  await socialAccount.save();
+
+  if (isNew) user.socialAccounts = [...user.socialAccounts, socialAccount._id];
+  else user.socialAccounts = user.socialAccounts.map((sacc) => (sacc.type === type ? socialAccount : sacc));
+
+  await user.save();
+
+  return user;
+};
 
 const saveAccessTokens = async (profile, type, connectType, accessToken, refreshToken) => {
   try {
@@ -44,58 +68,21 @@ const saveAccessTokens = async (profile, type, connectType, accessToken, refresh
     if (emails && emails[0]?.value) {
       const email = emails[0]?.value;
       const user = await User.findOne({ email }).populate("socialAccounts");
-      console.log(user, type, connectType, accessToken, refreshToken, profile);
-
       if (user) {
-        // find social account
-        let isNew = false;
-        let socialAccount = await SocialAccount.findOne({ user: user._id });
-        if (!socialAccount) {
-          isNew = true;
-          socialAccount = new SocialAccount({ user: user._id, type });
-        }
-
-        // update connect info
-        socialAccount[connectType] = {
+        // Social Params
+        const info = {
           socialId: id,
           accessToken,
           refreshToken,
-          expires: getExppireTime(),
+          expiresInSeconds: 0,
           isConnected: connectType === "profile",
         };
 
-        if (type === SOCIAL_TYPE_LINKEDIN) {
-          // Save Public URL
-          if (_json && _json.vanityName) socialAccount.publicUrl = `www.linkedin.com/in/${_json.vanityName}`;
+        // Save Public URL
+        const publicUrl = type === SOCIAL_TYPE_LINKEDIN && _json && _json.vanityName ? `www.linkedin.com/in/${_json.vanityName}` : "";
 
-          // Fetch Pages if exists
-          // if (connectType === "page") {
-          //   const res2 = await axios.post(
-          //     `${LINKEDIN_API_URL}organizationAcls?q=roleAssignee&role=ADMINISTRATOR&projection=(elements*(*,organization~(localizedName)))`,
-          //     {
-          //       headers: {
-          //         "LinkedIn-Version": "202301",
-          //         "Content-Type": "application/json",
-          //         "X-Restli-Protocol-Version": "2.0.0",
-          //         Authorization: `Bearer ${accessToken}`,
-          //       },
-          //     }
-          //   );
-          //   console.log(res2?.response?.data);
-          // }
-        }
-
-        await socialAccount.save();
-
-        if (isNew) user.socialAccounts = [...user.socialAccounts, socialAccount._id];
-        else user.socialAccounts = user.socialAccounts.map((sacc) => (sacc.type === type ? socialAccount : sacc));
-
-        await user.save();
-
-        return user;
+        return await saveUserAccessTokens(user, type, connectType, info, publicUrl);
       }
-
-      return null;
     }
 
     return null;
@@ -138,7 +125,53 @@ const setLinkedinStrategy = async (req, res, next) => {
         scope: ["r_emailaddress", "r_basicprofile", ...additionalScopes],
       },
       async (accessToken, refreshToken, profile, done) => {
-        done(null, await saveAccessTokens(profile, SOCIAL_TYPE_LINKEDIN, connectType, accessToken, refreshToken));
+        try {
+          const updatedUser = await saveAccessTokens(profile, SOCIAL_TYPE_LINKEDIN, connectType, accessToken, refreshToken);
+
+          // Fetch Pages if exists
+          if (updatedUser && connectType === "page") {
+            const restliClient = new RestliClient();
+            restliClient.setDebugParams({ enabled: true });
+
+            const result = await restliClient.finder({
+              accessToken,
+              finderName: "search",
+              versionString: LINKEDIN_VERSION,
+              resourcePath: "/organizationAcls",
+              queryParams: { q: "roleAssignee", state: "APPROVED", role: "ADMINISTRATOR" },
+            });
+
+            // Fetch Organisation
+            const organizations = await Promise.all(
+              result.data.elements.map(async ({ organization }) => {
+                const orgId = Number(organization.split("urn:li:organization:")[1]);
+                const result = await restliClient.get({
+                  accessToken,
+                  versionString: LINKEDIN_VERSION,
+                  resourcePath: `/organizations/${orgId}`,
+                });
+
+                return result.data;
+              })
+            );
+
+            console.log(organizations);
+
+            req.session.linkedinPages = organizations.map(({ id, localizedName, localizedWebsite, localizedDescription }) => ({
+              id,
+              name: localizedName,
+              website: localizedWebsite,
+              description: localizedDescription,
+            }));
+
+            req.session.save(console.log);
+          }
+
+          done(null, updatedUser);
+        } catch (error) {
+          console.log(error);
+          done(null, null);
+        }
       }
     )
   );
@@ -151,47 +184,48 @@ const setLinkedinStrategy = async (req, res, next) => {
 // @access  Public
 router.get("/facebook/:connectType", setFacebookStrategy, passport.authenticate("facebook"), redirectToWebapp);
 
-// @route   GET auth/connect/facebook/callback
+// @route   GET auth/connect/facebook-callback
 // @desc    Handle response from facebook
 // @access  Public
-router.get("/facebook/callback", passport.authenticate("facebook", AuthOptions), responseBackToWebapp2);
+router.get("/facebook-callback", passport.authenticate("facebook", AuthOptions), responseBackToWebapp);
 
 // @route   GET auth/connect/linkedin/:connectType
 // @desc    Connect user with linkedin account
 // @access  Public
 router.get("/linkedin/:connectType", setLinkedinStrategy, passport.authenticate("linkedin"), redirectToWebapp);
 
-// @route   GET auth/connect/linkedin/callback
+// @route   GET auth/connect/linkedin-callback
 // @desc    Handle response from linkedin
 // @access  Public
-router.get("/linkedin/callback", passport.authenticate("linkedin", AuthOptions), responseBackToWebapp2);
+router.get("/linkedin-callback", passport.authenticate("linkedin", AuthOptions), responseBackToWebapp);
 
 async function initLinkedInPosting(req, res) {
   const { profile } = req.user.socialAccounts.find((s) => s.type === "LN");
 
+  const authClient = new AuthClient({
+    clientId: LINKEDIN_APP_ID,
+    clientSecret: LINKEDIN_APP_SECRET,
+    redirectUrl: getAuthCallbackURL(req, "linkedin"),
+  });
   const restliClient = new RestliClient();
   restliClient.setDebugParams({ enabled: true });
 
-  const { accessToken } = profile;
+  const timestamp = new Date().getTime();
 
   const post = {
     author: `urn:li:person:${profile?.socialId}`,
     lifecycleState: "PUBLISHED",
     specificContent: {
       "com.linkedin.ugc.ShareContent": {
-        shareCommentary: {
-          text: "Learning more about LinkedIn by reading the LinkedIn Blog!",
-        },
         shareMediaCategory: "ARTICLE",
+        shareCommentary: { text: `Western Australia - ${timestamp}` },
         media: [
           {
             status: "READY",
+            title: { text: "Western Australia" },
+            originalUrl: "https://likenoother.wa.gov.au/",
             description: {
-              text: "Official LinkedIn Blog - Your source for insights and information about LinkedIn.",
-            },
-            originalUrl: "https://blog.linkedin.com/",
-            title: {
-              text: "Official LinkedIn Blog",
+              text: "Western Australia is an ancient, energetic land, brimming with opportunity ready for you to discover.",
             },
           },
         ],
@@ -203,6 +237,21 @@ async function initLinkedInPosting(req, res) {
   };
 
   try {
+    // fetch new access token
+    const tokenObj = await authClient.exchangeRefreshTokenForAccessToken(profile?.refreshToken);
+    const accessToken = tokenObj?.access_token;
+
+    // SAVE ACCESS_TOKEN
+    const connectType = "profile";
+    const info = {
+      accessToken: tokenObj.access_token,
+      refreshToken: tokenObj.refresh_token,
+      isConnected: connectType === "profile",
+      expiresInSeconds: tokenObj.refresh_token_expires_in,
+    };
+
+    await saveUserAccessTokens(req.user, SOCIAL_TYPE_LINKEDIN, connectType, info);
+
     // const res = await axios.post("https://api.linkedin.com/v2/ugcPosts", { headers }, post);
     await restliClient.create({ resourcePath: "/ugcPosts", entity: post, accessToken });
     // console.log(res, res?.createdEntityId);

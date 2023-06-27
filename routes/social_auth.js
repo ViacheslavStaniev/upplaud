@@ -24,7 +24,7 @@ const AuthOptions = { failureRedirect: "/auth/error", failureFlash: false, sessi
 const getAuthCallbackURL = (req, urlFor) => {
   const hostname = req.protocol + "://" + req.headers.host;
 
-  return `${hostname}/auth/login/${urlFor}/callback`;
+  return `${hostname}/auth/login/${urlFor}-callback`;
 };
 
 const redirectToWebapp = (req, res) => res.redirect(REACT_APP_URL);
@@ -120,20 +120,20 @@ const setInstagramStrategy = async (req, res, next) => {
 // @access  Public
 router.get("/facebook", setFacebookStrategy, passport.authenticate("facebook"), redirectToWebapp);
 
-// @route   GET auth/login/facebook/callback
+// @route   GET auth/login/facebook-callback
 // @desc    Handle response from facebook
 // @access  Public
-router.get("/facebook/callback", passport.authenticate("facebook", AuthOptions), responseBackToWebapp);
+router.get("/facebook-callback", passport.authenticate("facebook", AuthOptions), responseBackToWebapp);
 
 // @route   GET auth/login/linkedin
 // @desc    Login user via linkedin
 // @access  Public
 router.get("/linkedin", setLinkedinStrategy, passport.authenticate("linkedin"), redirectToWebapp);
 
-// @route   GET auth/login/linkedin/callback
+// @route   GET auth/login/linkedin-callback
 // @desc    Handle response from linkedin
 // @access  Public
-router.get("/linkedin/callback", passport.authenticate("linkedin", AuthOptions), responseBackToWebapp);
+router.get("/linkedin-callback", passport.authenticate("linkedin", AuthOptions), responseBackToWebapp);
 
 // @route   GET auth/login/instagram
 // @desc    Login user via instagram

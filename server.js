@@ -36,6 +36,10 @@ app.use(session({ secret: process.env.PASSPORT_SECERT, resave: true, saveUniniti
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Passport serializeUser/deserializeUser
+passport.serializeUser((user, done) => done(null, user));
+passport.deserializeUser((user, done) => done(null, user));
+
 // Add headers
 app.use(cors(corsOptions));
 app.options("*", cors());

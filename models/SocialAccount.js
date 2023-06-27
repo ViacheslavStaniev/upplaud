@@ -6,7 +6,7 @@ const TYPE_FACEBOOK = "FB";
 const TYPE_LINKEDIN = "LN";
 const TYPE_INSTAGRAM = "IN";
 
-const subDefaultObj = { socialId: "", accessToken: null, refreshToken: null, expires: null, isConnected: false };
+const subDefaultObj = { socialId: "", accessToken: null, refreshToken: null, expiresInSeconds: null, isConnected: false };
 
 const SocialAccountSchema = new Schema(
   {

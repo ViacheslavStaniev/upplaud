@@ -1,16 +1,11 @@
-import dayjs from 'dayjs';
-import Simplebar from 'simplebar-react';
 import Logo from '../../components/Logo';
-// import NewAutomation from './NewAutomation';
 import AppTitle from '../../components/AppTitle';
 import CustomIcon from '../../components/CustomIcon';
 import SocialMediaConnect from './SocialMediaConnect';
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { CalendarOutlined, MinusCircleOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import {
   List,
-  Card,
   Form,
   Input,
   Button,
@@ -21,14 +16,12 @@ import {
   Typography,
   Modal,
   DatePicker,
-  Collapse,
-  Calendar,
   Space,
   ConfigProvider,
   Switch,
+  Select,
 } from 'antd';
 
-const { Panel } = Collapse;
 const { Text, Link, Title, Paragraph } = Typography;
 
 export default function GuestAcceptance() {
@@ -120,7 +113,7 @@ function ConnectSocialsInfo({ onClickNext }) {
         To reach the most people, we'll repeat our mic.vote until June 15, 2023:
       </Paragraph>
       <Paragraph strong>
-        Re-post the poll _4_ times every 30 days.{' '}
+        Re-post the poll <RepostSchedule />.{' '}
         <Button className="primary-outlined" onClick={onClickNext}>
           SAVE
         </Button>
@@ -257,5 +250,21 @@ function ConfirmScheduleInfo({ onClickPrev }) {
         </Form>
       </Modal>
     </>
+  );
+}
+
+function RepostSchedule() {
+  const getOptions = (size) =>
+    Array(size)
+      .fill(0)
+      .map((_, i) => ({ label: i + 1, value: i + 1 }));
+
+  return (
+    <Text style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+      <Select defaultValue={3} options={getOptions(4)} style={{ minWidth: 30 }} />
+      times every
+      <Select showSearch defaultValue={30} options={getOptions(31)} style={{ minWidth: 30 }} />
+      days
+    </Text>
   );
 }

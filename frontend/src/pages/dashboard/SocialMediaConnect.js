@@ -1,10 +1,10 @@
 import React from 'react';
 import axios from '../../utils/axios';
+import CustomIcon from '../../components/CustomIcon';
 import { APP_BASEURL } from '../../config-global';
+import { CheckCircleFilled } from '@ant-design/icons';
 import { useAuthContext } from '../../auth/AuthProvider';
 import { Button, Space, Typography, Dropdown, notification } from 'antd';
-import { CheckCircleFilled } from '@ant-design/icons';
-import CustomIcon from '../../components/CustomIcon';
 
 const { Title, Link, Text } = Typography;
 
@@ -15,7 +15,7 @@ const SocialTitles = { [FACEBOOK]: 'Facebook', [LINKEDIN]: 'LinkedIn', [INSTAGRA
 
 export default function SocialMediaConnect({ showTitle = true, className = '' }) {
   const { user } = useAuthContext();
-  const { socialAccounts } = user;
+  const socialAccounts = user?.socialAccounts || [];
   const getItem = (type) => socialAccounts.find((item) => item.type === type);
 
   const isSocialConnected = (type) => {
