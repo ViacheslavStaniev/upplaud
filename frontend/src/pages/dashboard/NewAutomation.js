@@ -17,7 +17,10 @@ import {
   Collapse,
   Select,
   Divider,
+  Switch,
+  ColorPicker,
 } from 'antd';
+import '../../assets/css/new-automation.css';
 
 const { Title } = Typography;
 const { Panel } = Collapse;
@@ -85,6 +88,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
   }, [guest, form]);
 
   const initialValues = {
+    sessionType: 'HOST_A_GUEST',
     withGuest,
     freebieUrl,
     potentialTopics,
@@ -95,6 +99,16 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
     firstName: guestUser?.firstName,
     cellPhone: guestUser ? guestUser.profile?.phone : '',
     linkedinUrl: guestUser ? guestUser.socialAccounts?.linkedin.profileLink : '',
+  };
+
+  const [sessionValue, setSessionValue] = useState('HOST_A_GUEST');
+  const onSessionTypeChange = (e) => {
+    setSessionValue(e.target.value);
+  };
+
+  const toggleAccordion = (accordionIndex, setIsOpen) => () => {
+    if (accordionIndex === 1) setIsAcc1Open(!isAcc1Open);
+    if (accordionIndex === 2) setIsAcc2Open(!isAcc2Open);
   };
 
   return (
@@ -125,7 +139,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
         }}
       >
         <Form.Item name="sessionType">
-          <Radio.Group>
+          <Radio.Group onChange={onSessionTypeChange} value={sessionValue}>
             <Radio value="HOST_A_GUEST">HOST A GUEST</Radio>
             <Radio value="SOLO_SESSION">SOLO SESSION</Radio>
             <Radio value="GUEST_SPEAKER">I'M A GUEST SPEAKER</Radio>
@@ -135,13 +149,12 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
         <Form.Item
           name="recordingDate"
           label={
-            <div style={{ paddingTop: '10px' }}>
+            <div className="label">
               Poll End Date: <CalendarOutlined />
             </div>
           }
-          // rules={[{ required: true, message: 'Please fill the Recording Date.' }]}
         >
-          <DatePicker style={{ visibility: 'hidden' }} />
+          <DatePicker className="hidden-date-picker" />
         </Form.Item>
 
         <div className="flex-item gap-2">
@@ -157,7 +170,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
               <Form.Item
                 key={fieldName}
                 name={fieldName}
-                label={<div style={{ paddingTop: '10px' }}>{fieldName.toUpperCase()}:</div>}
+                label={<div className="label">{fieldName.toUpperCase()}:</div>}
               >
                 <Input placeholder={fieldName.toUpperCase()} />
               </Form.Item>
@@ -173,7 +186,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
                 <Form.Item
                   key={fieldName}
                   name={fieldName}
-                  label={<div style={{ paddingTop: '10px' }}>{fieldName.toUpperCase()}:</div>}
+                  label={<div className="label">{fieldName.toUpperCase()}:</div>}
                 >
                   <Input placeholder={fieldName.toUpperCase()} />
                 </Form.Item>
@@ -186,8 +199,8 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
           bordered={false}
           expandIconPosition="right"
           defaultActiveKey={['1']}
-          style={{ marginBottom: '25px' }}
-          onChange={() => setIsAcc1Open(!isAcc1Open)}
+          className="collapse-container"
+          onChange={toggleAccordion(1, setIsAcc1Open)}
         >
           <Panel
             header={
@@ -198,13 +211,13 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
             key="1"
             showArrow={false}
           >
-            <table style={{ width: '100%' }}>
+            <table className="config-table">
               <tbody>
                 {tableConfig.map((config, index) => (
                   <tr key={index}>
-                    <td style={{ paddingBottom: '10px' }}>{config.label}</td>
-                    <td style={{ paddingBottom: '10px' }}>
-                      <Select style={{ width: '100%', minWidth: '150px' }}>
+                    <td>{config.label}</td>
+                    <td>
+                      <Select className="select-dropdown">
                         {config.selectOptions.map((option) => (
                           <Option key={option.value} value={option.value}>
                             {option.label}
@@ -212,48 +225,38 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
                         ))}
                       </Select>
                     </td>
-                    <td style={{ paddingBottom: '10px' }}>
-                      <Button
-                        type="link"
-                        icon={config.buttonIcon}
-                        style={{ width: '100%', textAlign: 'left' }}
-                      >
+                    <td>
+                      <Button type="link" icon={config.buttonIcon} className="link-button">
                         {config.buttonLabel}
                       </Button>
                     </td>
-                    <td style={{ paddingBottom: '10px' }}>
+                    <td>
                       <Divider type="vertical" />
                     </td>
                     {config.previewLabel && (
-                      <td style={{ paddingBottom: '10px' }}>
-                        <Button type="link" style={{ width: '100%', textAlign: 'left' }}>
+                      <td>
+                        <Button type="link" className="link-button">
                           {config.previewLabel}
                         </Button>
                       </td>
                     )}
                     {config.colorLabel && (
                       <>
-                        <td style={{ paddingBottom: '10px' }}>
-                          <span style={{ marginLeft: '15px' }}>{config.colorLabel}:</span>
+                        <td>
+                          <span className="color-label">{config.colorLabel}:</span>
                         </td>
-                        <td style={{ paddingBottom: '10px' }}>
-                          <Radio value={config.colorLabel}></Radio>
-                        </td>
-                        <td style={{ paddingBottom: '10px' }}>
-                          <Input placeholder="#123456" style={{ width: '100%' }} />
+                        <td>
+                          <ColorPicker showText className="color-picker" />
                         </td>
                       </>
                     )}
                     {config.textColorLabel && (
                       <>
-                        <td style={{ paddingBottom: '10px' }}>
-                          <span style={{ marginLeft: '15px' }}>{config.textColorLabel}:</span>
+                        <td>
+                          <span className="color-label">{config.textColorLabel}:</span>
                         </td>
-                        <td style={{ paddingBottom: '10px' }}>
-                          <Radio value={config.textColorLabel}></Radio>
-                        </td>
-                        <td style={{ paddingBottom: '10px' }}>
-                          <Input placeholder="#123456" style={{ width: '100%' }} />
+                        <td>
+                          <ColorPicker showText className="color-picker" />
                         </td>
                       </>
                     )}
@@ -261,7 +264,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
                 ))}
               </tbody>
             </table>
-            <Space size={30} style={{ margin: '30px 0 10px 0' }}>
+            <Space size={30} className="button-space">
               <Button type="primary" danger>
                 GENERAL POLL SHARING IMAGE
               </Button>
@@ -274,8 +277,8 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
           bordered={false}
           expandIconPosition="right"
           defaultActiveKey={['2']}
-          style={{ marginBottom: '25px' }}
-          onChange={() => setIsAcc2Open(!isAcc2Open)}
+          className="collapse-container"
+          onChange={toggleAccordion(2, setIsAcc2Open)}
         >
           <Panel
             header={
@@ -287,52 +290,85 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
             key="2"
             showArrow={false}
           >
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <Checkbox style={{ marginRight: '10px' }}>YOUR FACEBOOK PROFILE</Checkbox>
-              <span>Post [4x] monthly | INTRO TEXT:</span>
-              <Input
-                placeholder="Enter intro text"
-                style={{ marginLeft: '10px', maxWidth: '250px' }}
+            <div className="social-item">
+              <Checkbox className="checkbox">YOUR FACEBOOK PROFILE</Checkbox>
+              <span className="frequency-label">Post [4x] monthly | INTRO TEXT:</span>
+              <Select
+                className="frequency-select"
+                placeholder="Select"
+                options={[
+                  {
+                    value: 'Once a month',
+                    label: 'Once a month',
+                  },
+                  {
+                    value: 'lucy',
+                    label: 'Lucy',
+                  },
+                  {
+                    value: 'tom',
+                    label: 'Tom',
+                  },
+                ]}
               />
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
-              <Checkbox style={{ marginRight: '10px' }}>
-                YOUR FACEBOOK GROUP: This is the group name
-              </Checkbox>
-              <span>Post [4x] monthly | INTRO TEXT:</span>
-              <Input
-                placeholder="Enter intro text"
-                style={{ marginLeft: '10px', maxWidth: '250px' }}
+            <div className="social-item">
+              <Checkbox className="checkbox">YOUR FACEBOOK GROUP: This is the group name</Checkbox>
+              <span className="frequency-label">Post [4x] monthly | INTRO TEXT:</span>
+              <Select
+                className="frequency-select"
+                placeholder="Select"
+                options={[
+                  {
+                    value: 'Once a month',
+                    label: 'Once a month',
+                  },
+                  {
+                    value: 'lucy',
+                    label: 'Lucy',
+                  },
+                  {
+                    value: 'tom',
+                    label: 'Tom',
+                  },
+                ]}
               />
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
-              <Checkbox style={{ marginRight: '10px' }}>YOUR LINKEDIN PROFILE</Checkbox>
-              <span>Post [4x] monthly | INTRO TEXT:</span>
-              <Input
-                placeholder="Enter intro text"
-                style={{ marginLeft: '10px', maxWidth: '250px' }}
+            <div className="social-item">
+              <Checkbox className="checkbox">YOUR LINKEDIN PROFILE</Checkbox>
+              <span className="frequency-label">Post [4x] monthly | INTRO TEXT:</span>
+              <Select
+                className="frequency-select"
+                placeholder="Select"
+                options={[
+                  {
+                    value: 'Once a month',
+                    label: 'Once a month',
+                  },
+                  {
+                    value: 'lucy',
+                    label: 'Lucy',
+                  },
+                  {
+                    value: 'tom',
+                    label: 'Tom',
+                  },
+                ]}
               />
             </div>
-            <div style={{ marginTop: '10px' }}>Connect more social media in Account Admin.</div>
-            <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
-              <Radio.Group>
-                <Radio value="now">POSTING STARTS NOW</Radio>
-                <Radio value="guest">Start when guest starts</Radio>
-              </Radio.Group>
+            <div className="posting-start">
+              <span className="frequency-label">POSTING STARTS NOW</span>
+              <Switch />
+              <span>Start when guest starts</span>
             </div>
-            <Space size={30} style={{ margin: '30px 0 10px 0' }}>
+            <Space size={30} className="button-space">
               <Button type="primary">SAVE DRAFT</Button>
               <Button type="primary">LAUNCH POLL AUTOMATION</Button>
             </Space>
           </Panel>
         </Collapse>
 
-        <Button
-          shape="round"
-          htmlType="submit"
-          loading={isLoading}
-          className="minw-110px primary-outlined"
-        >
+        <Button shape="round" htmlType="submit" loading={isLoading} className="submit-button">
           {isNew ? 'ADD TO' : 'UPDATE'} AUTOMATE
         </Button>
       </Form>

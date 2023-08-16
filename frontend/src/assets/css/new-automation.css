@@ -1,0 +1,65 @@
+.hidden-date-picker {
+  visibility: hidden;
+}
+
+.label {
+  padding-top: 10px;
+}
+
+.config-table {
+  width: 100%;
+}
+
+.select-dropdown {
+  width: 100%;
+  min-width: 150px;
+}
+
+.link-button {
+  width: 100%;
+  text-align: left;
+}
+
+.color-label {
+  margin-left: 15px;
+}
+
+.color-picker {
+  width: 130px;
+  min-width: 60px;
+}
+
+.button-space {
+  margin: 30px 0 10px 0;
+}
+
+.collapse-container {
+  margin-bottom: 25px;
+}
+
+.social-item {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.frequency-label {
+  margin: 0 5px 0 0;
+}
+
+.frequency-select {
+  width: 100%;
+  min-width: 150px;
+  max-width: 200px;
+  margin-left: 5px;
+}
+
+.posting-start {
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.submit-button {
+  min-width: 110px;
+}
