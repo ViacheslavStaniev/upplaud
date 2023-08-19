@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 import AppTitle from '../../components/AppTitle';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { GUEST_TYPE } from '../../utils/types';
 import { useSelector, useDispatch } from 'react-redux';
 import { CalendarOutlined, MinusOutlined, PlusOutlined } from '@ant-design/icons';
 import { addGuest, fetchGuest, updateGuest, updateState } from '../../reducers/guestsSlice';
@@ -25,6 +26,8 @@ import '../../assets/css/new-automation.css';
 const { Title } = Typography;
 const { Panel } = Collapse;
 const { Option } = Select;
+
+const { HOST_GUEST, SOLO_SESSION, GUEST_SPEAKER } = GUEST_TYPE;
 
 const tableConfig = [
   {
@@ -88,22 +91,17 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
   }, [guest, form]);
 
   const initialValues = {
-    sessionType: 'HOST_A_GUEST',
     withGuest,
     freebieUrl,
     potentialTopics,
     startHostAutomation,
-    recordingDate: recordingDate ? dayjs(recordingDate, 'YYYY/MM/DD') : null,
+    guestType: HOST_GUEST,
     email: guestUser?.email,
     lastName: guestUser?.lastName,
     firstName: guestUser?.firstName,
     cellPhone: guestUser ? guestUser.profile?.phone : '',
     linkedinUrl: guestUser ? guestUser.socialAccounts?.linkedin.profileLink : '',
-  };
-
-  const [sessionValue, setSessionValue] = useState('HOST_A_GUEST');
-  const onSessionTypeChange = (e) => {
-    setSessionValue(e.target.value);
+    recordingDate: recordingDate ? dayjs(recordingDate, 'YYYY/MM/DD') : null,
   };
 
   const toggleAccordion = (accordionIndex, setIsOpen) => () => {
@@ -111,24 +109,31 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
     if (accordionIndex === 2) setIsAcc2Open(!isAcc2Open);
   };
 
+  const guestTypeOptions = [
+    { key: HOST_GUEST, value: HOST_GUEST, label: 'HOST A GUEST' },
+    { key: SOLO_SESSION, value: SOLO_SESSION, label: 'SOLO SESSION' },
+    { key: GUEST_SPEAKER, value: GUEST_SPEAKER, label: "I'M A GUEST SPEAKER" },
+  ];
+
   return (
     <>
       {!isGuestAcceptance && <AppTitle title={`${isNew ? 'New' : 'Update'} Automation`} />}
+
       <div className="add-guest">
-        <Title>AUTOMATE POLL SHARING</Title>
-        <Title level={5} className="m-0 mb-4 fw-400 color-45485C">
+        <Title className="m-0">AUTOMATE POLL SHARING</Title>
+        <Title level={5} className="fw-400" type="secondary">
           Pull in more interest when your upplaud poll is posted automatically.
         </Title>
       </div>
+
       <Form
         form={form}
         size="large"
-        layout="horizontal"
-        labelCol={{ span: 6 }}
-        labelAlign="left"
-        labelWrap
         colon={false}
-        wrapperCol={{ span: 10 }}
+        labelAlign="left"
+        layout="horizontal"
+        labelCol={{ span: 8 }}
+        wrapperCol={{ span: 15 }}
         initialValues={initialValues}
         onFinish={(data) => {
           if (isNew) {
@@ -138,12 +143,8 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
           }
         }}
       >
-        <Form.Item name="sessionType">
-          <Radio.Group onChange={onSessionTypeChange} value={sessionValue}>
-            <Radio value="HOST_A_GUEST">HOST A GUEST</Radio>
-            <Radio value="SOLO_SESSION">SOLO SESSION</Radio>
-            <Radio value="GUEST_SPEAKER">I'M A GUEST SPEAKER</Radio>
-          </Radio.Group>
+        <Form.Item name="guestType">
+          <Radio.Group options={guestTypeOptions} />
         </Form.Item>
 
         <Form.Item
@@ -361,16 +362,17 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
               <Switch />
               <span>Start when guest starts</span>
             </div>
+
             <Space size={30} className="button-space">
-              <Button type="primary">SAVE DRAFT</Button>
+              <Button>SAVE DRAFT</Button>
               <Button type="primary">LAUNCH POLL AUTOMATION</Button>
             </Space>
           </Panel>
         </Collapse>
 
-        <Button shape="round" htmlType="submit" loading={isLoading} className="submit-button">
+        {/* <Button shape="round" htmlType="submit" loading={isLoading} className="submit-button">
           {isNew ? 'ADD TO' : 'UPDATE'} AUTOMATE
-        </Button>
+        </Button> */}
       </Form>
     </>
   );

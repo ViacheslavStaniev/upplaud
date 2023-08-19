@@ -1,6 +1,9 @@
 const express = require("express");
 const Guest = require("../models/Guest");
+const Image = require("../models/Image");
+const PollImage = require("../models/PollImage");
 const verifyAuth = require("../config/verifyAuth");
+const { uploadImage } = require("../helpers/s3Helper");
 const { randomString } = require("../helpers/utills");
 const { createOrUpdateGuestUser, getBasicUserInfo, updateUserInfo } = require("./users");
 
@@ -30,11 +33,14 @@ router.post("/", verifyAuth, async (req, res) => {
     firstName,
     lastName,
     email,
+    about = "",
     cellPhone,
     linkedinUrl,
-    freebieUrl,
+    headshotUrl = "",
     potentialTopics,
-    withGuest,
+    guestType,
+    hostOfferUrl = "",
+    guestOfferUrl = "",
     startHostAutomation,
   } = req.body;
 
@@ -51,30 +57,28 @@ router.post("/", verifyAuth, async (req, res) => {
     }
 
     // Create Guest User && update it
-    let guestUser;
-    if (withGuest) {
-      guestUser = await createOrUpdateGuestUser(firstName, lastName, email, randomString(12));
-      if (guestUser) {
-        const updateInfo = {
-          profile: { ...guestUser.profile, phone: cellPhone },
-          socialAccounts: {
-            ...guestUser.socialAccounts,
-            linkedin: { ...guestUser.socialAccounts.linkedin, profileLink: linkedinUrl },
-          },
-        };
-        await updateUserInfo(guestUser._id, updateInfo);
-      }
+    const guestUser = await createOrUpdateGuestUser(firstName, lastName, email, randomString(12));
+    if (guestUser) {
+      const updateInfo = {
+        profile: { ...guestUser.profile, phone: cellPhone, about, headshotUrl },
+        socialAccounts: {
+          ...guestUser.socialAccounts,
+          linkedin: { ...guestUser.socialAccounts.linkedin, profileLink: linkedinUrl },
+        },
+      };
+      await updateUserInfo(guestUser._id, updateInfo);
     }
 
     // Create Guest
     const guest = new Guest({
-      withGuest,
-      freebieUrl,
+      guestType,
       recordingDate,
+      hostOfferUrl,
+      guestOfferUrl,
       potentialTopics,
       startHostAutomation,
       show: adminUser.show,
-      guest: withGuest ? guestUser._id : null,
+      guest: guestUser._id,
     });
 
     await guest.save(options);
@@ -102,11 +106,14 @@ router.put("/:guestId", verifyAuth, async (req, res) => {
     firstName,
     lastName,
     email,
+    about = "",
     cellPhone,
     linkedinUrl,
-    freebieUrl,
+    headshotUrl = "",
     potentialTopics,
-    withGuest,
+    guestType,
+    hostOfferUrl = "",
+    guestOfferUrl = "",
     startHostAutomation,
   } = req.body;
 
@@ -121,12 +128,12 @@ router.put("/:guestId", verifyAuth, async (req, res) => {
 
     // update guest user
     const guestUser = guestData?.guest;
-    if (withGuest && guestUser) {
+    if (guestUser) {
       const updateInfo = {
         email,
         lastName,
         firstName,
-        profile: { ...guestUser.profile, phone: cellPhone },
+        profile: { ...guestUser.profile, phone: cellPhone, about, headshotUrl },
         socialAccounts: {
           ...guestUser.socialAccounts,
           linkedin: { ...guestUser.socialAccounts.linkedin, profileLink: linkedinUrl },
@@ -136,12 +143,14 @@ router.put("/:guestId", verifyAuth, async (req, res) => {
     }
 
     const info = {
-      withGuest,
-      freebieUrl,
+      guestType,
       recordingDate,
+      hostOfferUrl,
+      guestOfferUrl,
       potentialTopics,
       startHostAutomation,
-      guest: withGuest ? guestUser._id : null,
+      show: adminUser.show,
+      guest: guestUser._id,
     };
 
     const guest = await Guest.findByIdAndUpdate(req.params.guestId, info);
@@ -230,6 +239,55 @@ router.get("/list/:userId", verifyAuth, async (req, res) => {
     const guestList = await Guest.find({ guest: req.params.showId }).populate("guest").populate("show");
 
     res.json(guestList);
+  } catch (err) {
+    // throw err;
+    console.error({ msg: err.message });
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// @route   GET api/guests/images/:guestId
+// @desc    gets guest images
+// @access  Public
+router.get("/images/:guestId", verifyAuth, async (req, res) => {
+  try {
+    const images = await Image.find({ guest: req.params.guestId });
+    res.json(images);
+  } catch (err) {
+    // throw err;
+    console.error({ msg: err.message });
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// @route   POST api/guests/images/:guestId
+// @desc    creates guest images
+// @access  Public
+router.post("/images/:guestId", verifyAuth, async (req, res) => {
+  const { name, imageData } = req.body;
+
+  try {
+    const image = new Image({ name, guest: req.params.guestId });
+
+    if (imageData) image.s3Path = await uploadImage(imageData, `${req.params.guestId}/images`);
+
+    await image.save();
+
+    res.json(image);
+  } catch (err) {
+    // throw err;
+    console.error({ msg: err.message });
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// @route   GET api/guests/poll-images/:guestId
+// @desc    gets guest poll images
+// @access  Public
+router.get("/poll-images/:guestId", verifyAuth, async (req, res) => {
+  try {
+    const images = await PollImage.find({ guest: req.params.guestId });
+    res.json(images);
   } catch (err) {
     // throw err;
     console.error({ msg: err.message });

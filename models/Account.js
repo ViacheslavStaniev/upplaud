@@ -3,21 +3,21 @@ const Schema = mongoose.Schema;
 
 const AccountSchema = new Schema(
   {
-    name: { type: String },
+    name: { type: String, default: "" },
     socialAccounts: {
       facebook: {
-        profileLink: String,
-        accessToken: Object,
+        profileLink: { type: String, default: "" },
+        accessToken: { type: Object, default: {} },
         isConnected: { type: Boolean, default: false },
       },
       linkedin: {
-        profileLink: String,
-        accessToken: Object,
+        profileLink: { type: String, default: "" },
+        accessToken: { type: Object, default: {} },
         isConnected: { type: Boolean, default: false },
       },
       instagram: {
-        profileLink: String,
-        accessToken: Object,
+        profileLink: { type: String, default: "" },
+        accessToken: { type: Object, default: {} },
         isConnected: { type: Boolean, default: false },
       },
     },

@@ -1,4 +1,4 @@
-import { CLOUDFRONT_URL } from '../../config-global';
+import { getFullS3Url } from '../../config-global';
 import { useAuthContext } from '../../auth/AuthProvider';
 import { Form, Image, Input, Upload, Button, Typography } from 'antd';
 
@@ -42,7 +42,7 @@ export default function ShowInfo() {
         initialValues={{
           name: show?.name,
           website: show?.website,
-          logo: show && show.logo ? CLOUDFRONT_URL + show.logo : '',
+          logo: show && show.logo ? getFullS3Url(show.logo) : '',
         }}
       >
         <div className="flex-item gap-2">
