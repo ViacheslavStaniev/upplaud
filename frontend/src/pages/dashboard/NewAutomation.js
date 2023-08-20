@@ -1,5 +1,4 @@
 import dayjs from 'dayjs';
-import AppTitle from '../../components/AppTitle';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { GUEST_TYPE } from '../../utils/types';
@@ -13,7 +12,6 @@ import {
   Button,
   DatePicker,
   Typography,
-  Checkbox,
   Radio,
   Collapse,
   Select,
@@ -21,11 +19,14 @@ import {
   Switch,
   ColorPicker,
 } from 'antd';
+import AppTitle from '../../components/AppTitle';
+import SocialPostingItem from './SocialPostingItem';
+
 import '../../assets/css/new-automation.css';
 
-const { Title } = Typography;
 const { Panel } = Collapse;
 const { Option } = Select;
+const { Text, Title } = Typography;
 
 const { HOST_GUEST, SOLO_SESSION, GUEST_SPEAKER } = GUEST_TYPE;
 
@@ -274,101 +275,18 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
           </Panel>
         </Collapse>
 
-        <Collapse
-          bordered={false}
-          expandIconPosition="right"
-          defaultActiveKey={['2']}
-          className="collapse-container"
-          onChange={toggleAccordion(2, setIsAcc2Open)}
-        >
-          <Panel
-            header={
-              <h3>
-                {isAcc2Open ? <PlusOutlined /> : <MinusOutlined />} Confirm socials & posting
-                frequency
-              </h3>
-            }
-            key="2"
-            showArrow={false}
-          >
-            <div className="social-item">
-              <Checkbox className="checkbox">YOUR FACEBOOK PROFILE</Checkbox>
-              <span className="frequency-label">Post [4x] monthly | INTRO TEXT:</span>
-              <Select
-                className="frequency-select"
-                placeholder="Select"
-                options={[
-                  {
-                    value: 'Once a month',
-                    label: 'Once a month',
-                  },
-                  {
-                    value: 'lucy',
-                    label: 'Lucy',
-                  },
-                  {
-                    value: 'tom',
-                    label: 'Tom',
-                  },
-                ]}
-              />
-            </div>
-            <div className="social-item">
-              <Checkbox className="checkbox">YOUR FACEBOOK GROUP: This is the group name</Checkbox>
-              <span className="frequency-label">Post [4x] monthly | INTRO TEXT:</span>
-              <Select
-                className="frequency-select"
-                placeholder="Select"
-                options={[
-                  {
-                    value: 'Once a month',
-                    label: 'Once a month',
-                  },
-                  {
-                    value: 'lucy',
-                    label: 'Lucy',
-                  },
-                  {
-                    value: 'tom',
-                    label: 'Tom',
-                  },
-                ]}
-              />
-            </div>
-            <div className="social-item">
-              <Checkbox className="checkbox">YOUR LINKEDIN PROFILE</Checkbox>
-              <span className="frequency-label">Post [4x] monthly | INTRO TEXT:</span>
-              <Select
-                className="frequency-select"
-                placeholder="Select"
-                options={[
-                  {
-                    value: 'Once a month',
-                    label: 'Once a month',
-                  },
-                  {
-                    value: 'lucy',
-                    label: 'Lucy',
-                  },
-                  {
-                    value: 'tom',
-                    label: 'Tom',
-                  },
-                ]}
-              />
-            </div>
-            <div className="posting-start">
-              <span className="frequency-label">POSTING STARTS NOW</span>
-              <Switch />
-              <span>Start when guest starts</span>
-            </div>
+        <SocialPostingItem />
 
-            <Space size={30} className="button-space">
-              <Button>SAVE DRAFT</Button>
-              <Button type="primary">LAUNCH POLL AUTOMATION</Button>
-            </Space>
-          </Panel>
-        </Collapse>
+        <div className="flex-item gap-1">
+          <Text strong>POSTING STARTS NOW</Text>
+          <Switch />
+          <Text type="secondary">Start when guest starts</Text>
+        </div>
+
+        <Space size={30} className="button-space">
+          <Button>SAVE DRAFT</Button>
+          <Button type="primary">LAUNCH POLL AUTOMATION</Button>
+        </Space>
 
         {/* <Button shape="round" htmlType="submit" loading={isLoading} className="submit-button">
           {isNew ? 'ADD TO' : 'UPDATE'} AUTOMATE

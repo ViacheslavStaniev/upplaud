@@ -1,10 +1,12 @@
 const express = require("express");
+const User = require("../models/User");
 const Guest = require("../models/Guest");
 const Image = require("../models/Image");
 const PollImage = require("../models/PollImage");
 const verifyAuth = require("../config/verifyAuth");
 const { uploadImage } = require("../helpers/s3Helper");
 const { randomString } = require("../helpers/utills");
+const { POLL_STATUS, GUEST_TYPE } = require("../models/Guest");
 const { createOrUpdateGuestUser, getBasicUserInfo, updateUserInfo } = require("./users");
 
 const router = express.Router();
@@ -14,7 +16,7 @@ const router = express.Router();
 // @access  Public
 router.get("/:guestId", verifyAuth, async (req, res) => {
   try {
-    const guest = await Guest.findById(req.params.guestId).populate("guest").populate("show");
+    const guest = await getPoll(req.params.guestId);
 
     res.json(guest);
   } catch (err) {
@@ -29,65 +31,80 @@ router.get("/:guestId", verifyAuth, async (req, res) => {
 // @access  Public
 router.post("/", verifyAuth, async (req, res) => {
   const {
-    recordingDate,
-    firstName,
-    lastName,
-    email,
-    about = "",
-    cellPhone,
-    linkedinUrl,
-    headshotUrl = "",
-    potentialTopics,
-    guestType,
+    guest = null,
     hostOfferUrl = "",
     guestOfferUrl = "",
-    startHostAutomation,
+    potentialTopics = [],
+    status = POLL_STATUS.DRAFT,
+    recordingDate = new Date(),
+    startHostAutomation = false,
+    guestType = GUEST_TYPE.HOST_GUEST,
   } = req.body;
+
+  console.log("req.body", req.body);
 
   const session = await Guest.startSession();
   const options = { session };
   session.startTransaction();
 
   try {
-    const adminUser = await getBasicUserInfo(req.userId);
+    const hostUser = await getBasicUserInfo(req.userId);
 
-    if (!adminUser) return res.status(400).send({ errors: ["Unauthorised"] });
-    else if (!adminUser.show) {
-      return res.status(400).send({ errors: ["You haven't updated your show info. Please update your show info first."] });
+    if (!hostUser) return res.status(400).send({ errors: ["Unauthorised"] });
+    else if (!hostUser?.show) {
+      return res.status(400).send({ errors: ["You haven't added your show info. Please add your show info first."] });
     }
 
-    // Create Guest User && update it
-    const guestUser = await createOrUpdateGuestUser(firstName, lastName, email, randomString(12));
-    if (guestUser) {
-      const updateInfo = {
-        profile: { ...guestUser.profile, phone: cellPhone, about, headshotUrl },
-        socialAccounts: {
-          ...guestUser.socialAccounts,
-          linkedin: { ...guestUser.socialAccounts.linkedin, profileLink: linkedinUrl },
-        },
-      };
-      await updateUserInfo(guestUser._id, updateInfo);
-    }
-
-    // Create Guest
-    const guest = new Guest({
+    // Poll info
+    const pollInfo = {
+      status,
       guestType,
-      recordingDate,
       hostOfferUrl,
       guestOfferUrl,
+      recordingDate,
       potentialTopics,
       startHostAutomation,
-      show: adminUser.show,
-      guest: guestUser._id,
-    });
+      show: hostUser.show,
+    };
 
-    await guest.save(options);
+    // Create Guest User && update it if guestType is not SOLO_SESSION
+    if (guestType !== GUEST_TYPE.SOLO_SESSION) {
+      const { fullName = "", email = "", cellPhone = "", about = "", picture = "" } = guest;
+      const nameArr = fullName.split(" ");
+      const firstName = nameArr.shift();
+      const lastName = nameArr.join(" ");
+
+      const guestUser = new User({ email, lastName, firstName, profile: { cellPhone, about, picture } });
+
+      console.log(guestUser);
+
+      // const guestUser2 = await createOrUpdateGuestUser(firstName, lastName, email, randomString(12));
+      // if (guestUser) {
+      //   const updateInfo = {
+      //     profile: { ...guestUser.profile, phone: cellPhone, about, headshotUrl },
+      //     socialAccounts: {
+      //       ...guestUser.socialAccounts,
+      //       linkedin: { ...guestUser.socialAccounts.linkedin, profileLink: linkedinUrl },
+      //     },
+      //   };
+      //   await updateUserInfo(guestUser._id, updateInfo);
+      // }
+
+      pollInfo.guest = guestUser._id;
+    } else pollInfo.guest = null; // if guestType is SOLO_SESSION, then guest will be null
+
+    console.log("pollInfo", pollInfo);
+
+    // Create new Poll
+    const poll = new Guest(pollInfo);
+    await poll.save(options);
 
     await session.commitTransaction();
     session.endSession();
 
-    const guest2 = await Guest.findById(guest._id).populate("show").populate("guest");
-    res.json(guest2);
+    console.log("poll", poll);
+
+    res.json(await getPoll(poll._id));
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
@@ -295,4 +312,10 @@ router.get("/poll-images/:guestId", verifyAuth, async (req, res) => {
   }
 });
 
+async function getPoll(pollId) {
+  const poll = await Guest.findById(pollId).populate("guest").populate("show").populate("pollImage");
+  return poll;
+}
+
 module.exports = router;
+module.exports.getPoll = getPoll;
