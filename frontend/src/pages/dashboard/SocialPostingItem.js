@@ -29,8 +29,8 @@ export default function SocialPostingItem() {
       label: 'Confirm socials & posting frequency',
       children: (
         <div className="flex-item gap-1 flex-column align-baseline">
-          {socials.map(({ label, postingOptions }) => (
-            <div className="flex-item gap-1 flex-auto">
+          {socials.map(({ label, postingOptions, key }) => (
+            <div className="flex-item gap-1 flex-auto" key={key}>
               <Checkbox className="checkbox">{label}</Checkbox>
               <Select
                 size="small"

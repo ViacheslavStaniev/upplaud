@@ -22,8 +22,6 @@ import {
 import AppTitle from '../../components/AppTitle';
 import SocialPostingItem from './SocialPostingItem';
 
-import '../../assets/css/new-automation.css';
-
 const { Panel } = Collapse;
 const { Option } = Select;
 const { Text, Title } = Typography;
@@ -161,7 +159,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
 
         <div className="flex-item gap-2">
           <div className="flex-1">
-            <h3>Guest Info</h3>
+            <Title level={5}>Guest Info</Title>
             {[
               'full Name',
               'cell Phone',
@@ -179,7 +177,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
             ))}
           </div>
           <div className="flex-1">
-            <h3>Poll Info</h3>
+            <Title level={5}>Poll Info</Title>
             <Form.Item>
               (Use AI to generate topics; see <u>video tutorial</u>)
             </Form.Item>
@@ -219,7 +217,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
                   <tr key={index}>
                     <td>{config.label}</td>
                     <td>
-                      <Select className="select-dropdown">
+                      <Select className="minw-150px">
                         {config.selectOptions.map((option) => (
                           <Option key={option.value} value={option.value}>
                             {option.label}
@@ -228,7 +226,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
                       </Select>
                     </td>
                     <td>
-                      <Button type="link" icon={config.buttonIcon} className="link-button">
+                      <Button type="link" icon={config.buttonIcon} className="ml-1">
                         {config.buttonLabel}
                       </Button>
                     </td>
@@ -237,7 +235,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
                     </td>
                     {config.previewLabel && (
                       <td>
-                        <Button type="link" className="link-button">
+                        <Button type="link" className="pl-4">
                           {config.previewLabel}
                         </Button>
                       </td>
@@ -245,20 +243,20 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
                     {config.colorLabel && (
                       <>
                         <td>
-                          <span className="color-label">{config.colorLabel}:</span>
+                          <span className="pl-2 ml-1">{config.colorLabel}:</span>
                         </td>
                         <td>
-                          <ColorPicker showText className="color-picker" />
+                          <ColorPicker showText />
                         </td>
                       </>
                     )}
                     {config.textColorLabel && (
                       <>
                         <td>
-                          <span className="color-label">{config.textColorLabel}:</span>
+                          <span className="pl-4 ml-1">{config.textColorLabel}:</span>
                         </td>
                         <td>
-                          <ColorPicker showText className="color-picker" />
+                          <ColorPicker showText className="ml-1" />
                         </td>
                       </>
                     )}
@@ -266,7 +264,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
                 ))}
               </tbody>
             </table>
-            <Space size={30} className="button-space">
+            <Space size={30} className="mt-4">
               <Button type="primary" danger>
                 GENERAL POLL SHARING IMAGE
               </Button>
@@ -283,14 +281,10 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
           <Text type="secondary">Start when guest starts</Text>
         </div>
 
-        <Space size={30} className="button-space">
+        <Space size={30} className="mt-4">
           <Button>SAVE DRAFT</Button>
           <Button type="primary">LAUNCH POLL AUTOMATION</Button>
         </Space>
-
-        {/* <Button shape="round" htmlType="submit" loading={isLoading} className="submit-button">
-          {isNew ? 'ADD TO' : 'UPDATE'} AUTOMATE
-        </Button> */}
       </Form>
     </>
   );

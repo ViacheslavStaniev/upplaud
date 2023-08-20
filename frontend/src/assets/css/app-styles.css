@@ -2,7 +2,6 @@
   width: 110px !important;
   max-height: 56px !important;
 }
-
 .p-50px {
   padding: 50px !important;
 }
@@ -18,14 +17,29 @@
 .p-4 {
   padding: 2rem !important;
 }
+.pt-10px {
+  padding-top: 10px !important;
+}
+.pl-0 {
+  padding-left: 0 !important;
+}
 .pl-2 {
   padding-left: 1rem !important;
+}
+.pl-4 {
+  padding-left: 2rem !important;
 }
 .pr-2 {
   padding-right: 1rem !important;
 }
 .m-0 {
   margin: 0 !important;
+}
+.ml-1 {
+  margin-left: 1rem !important;
+}
+.ml-10px {
+  margin-left: 10px !important;
 }
 .mb-1 {
   margin-bottom: 0.5rem !important;
@@ -47,6 +61,12 @@
 }
 .mt-4 {
   margin-top: 2rem !important;
+}
+.mt-10px {
+  margin-top: 10px !important;
+}
+.mr-10px {
+  margin-right: 10px !important;
 }
 .d-flex {
   display: flex !important;
@@ -89,11 +109,20 @@
 .minw-110px {
   min-width: 110px;
 }
+.minw-150px {
+  min-width: 150px;
+}
 .maxw-125px {
   max-width: 125px !important;
 }
 .maxw-140px {
   max-width: 140px !important;
+}
+.maxw-200px {
+  max-width: 200px !important;
+}
+.w-125px {
+  width: 125px !important;
 }
 .w-25 {
   width: 25%;
@@ -175,6 +204,9 @@
 }
 .bg-54006e {
   background-color: #54006e !important;
+}
+.bg-3cb371 {
+  background-color: #3cb371 !important;
 }
 .bg-EDEBEE,
 .bg-EDEBEE .ant-input {
