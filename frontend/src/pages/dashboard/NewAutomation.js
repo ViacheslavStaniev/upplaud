@@ -21,6 +21,7 @@ import {
 } from 'antd';
 import AppTitle from '../../components/AppTitle';
 import SocialPostingItem from './SocialPostingItem';
+import PollSharingImage from './PollSharingImage';
 
 const { Panel } = Collapse;
 const { Option } = Select;
@@ -54,6 +55,48 @@ const tableConfig = [
   },
 ];
 
+const hostInfoFields = [
+  {
+    name: 'fullName',
+    label: 'FULL NAME',
+  },
+  {
+    name: 'cellPhone',
+    label: 'CELL PHONE',
+  },
+  {
+    name: 'email',
+    label: 'EMAIL ADDRESS',
+  },
+  {
+    name: 'about',
+    label: 'BIO OR SOCIAL URL',
+  },
+  {
+    name: 'picture',
+    label: 'HEADSHOT URL OR UPLOAD',
+  },
+];
+
+const pollInfoFields = [
+  {
+    name: 'potentialTopics1',
+    label: 'TOPIC OR STORY1',
+  },
+  {
+    name: 'potentialTopics2',
+    label: 'TOPIC OR STORY2',
+  },
+  {
+    name: 'hostOfferUrl',
+    label: 'HOST OFFER URL',
+  },
+  {
+    name: 'guestOfferUrl',
+    label: 'GUEST OFFER URL',
+  },
+];
+
 export default function NewAutomation({ isGuestAcceptance = false }) {
   const [form] = Form.useForm();
 
@@ -64,7 +107,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
   const [isAcc2Open, setIsAcc2Open] = useState(false);
 
   const isNew = id === 'new'; // new automation
-  const withGuestValue = Form.useWatch('withGuest', form);
+  const guestTypeValue = Form.useWatch('guestType', form);
 
   const { guest, isLoading } = useSelector((state) => state.guests);
   const {
@@ -75,7 +118,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
     potentialTopics = ['', ''],
     startHostAutomation = false,
   } = guest || {};
-  console.log(guest, id, isNew, withGuestValue);
+  console.log(guest, id, isNew, guestTypeValue);
 
   useEffect(() => {
     if (!isNew && id) dispatch(fetchGuest(id));
@@ -135,6 +178,8 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
         wrapperCol={{ span: 15 }}
         initialValues={initialValues}
         onFinish={(data) => {
+          console.log('formdata', data);
+          return;
           if (isNew) {
             dispatch(addGuest(data));
           } else {
@@ -148,31 +193,26 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
 
         <Form.Item
           name="recordingDate"
+          className='w-50'
           label={
-            <div className="label">
+            <div className="pt-10px">
               Poll End Date: <CalendarOutlined />
             </div>
           }
         >
-          <DatePicker className="hidden-date-picker" />
+          <DatePicker className="w-50 ml-0" bordered={false} />
         </Form.Item>
 
         <div className="flex-item gap-2">
           <div className="flex-1">
-            <Title level={5}>Guest Info</Title>
-            {[
-              'full Name',
-              'cell Phone',
-              'email Address',
-              'bio Or Social Url',
-              'headshot Url or: Upload',
-            ].map((fieldName) => (
+            <Title level={5}>{guestTypeValue === HOST_GUEST ? 'Host Info' : 'Guest Info'}</Title>
+            {hostInfoFields.map((fieldName) => (
               <Form.Item
-                key={fieldName}
-                name={fieldName}
-                label={<div className="label">{fieldName.toUpperCase()}:</div>}
+                key={fieldName.label}
+                name={fieldName.name}
+                label={<div className="pt-10px">{fieldName.label}:</div>}
               >
-                <Input placeholder={fieldName.toUpperCase()} />
+                <Input placeholder={fieldName.label} />
               </Form.Item>
             ))}
           </div>
@@ -181,101 +221,23 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
             <Form.Item>
               (Use AI to generate topics; see <u>video tutorial</u>)
             </Form.Item>
-            {['topic Or Story1', 'topic Or Story2', 'host Offer Url', 'guest Offer Url'].map(
-              (fieldName) => (
-                <Form.Item
-                  key={fieldName}
-                  name={fieldName}
-                  label={<div className="label">{fieldName.toUpperCase()}:</div>}
-                >
-                  <Input placeholder={fieldName.toUpperCase()} />
-                </Form.Item>
-              )
-            )}
+            {pollInfoFields.map((fieldName) => (
+              <Form.Item
+                key={fieldName.label}
+                name={fieldName.name}
+                label={<div className="pt-10px">{fieldName.label}:</div>}
+              >
+                <Input placeholder={fieldName.label} />
+              </Form.Item>
+            ))}
           </div>
         </div>
 
-        <Collapse
-          bordered={false}
-          expandIconPosition="right"
-          defaultActiveKey={['1']}
-          className="collapse-container"
-          onChange={toggleAccordion(1, setIsAcc1Open)}
-        >
-          <Panel
-            header={
-              <h3>
-                {isAcc1Open ? <PlusOutlined /> : <MinusOutlined />} Customize poll sharing image
-              </h3>
-            }
-            key="1"
-            showArrow={false}
-          >
-            <table className="config-table">
-              <tbody>
-                {tableConfig.map((config, index) => (
-                  <tr key={index}>
-                    <td>{config.label}</td>
-                    <td>
-                      <Select className="minw-150px">
-                        {config.selectOptions.map((option) => (
-                          <Option key={option.value} value={option.value}>
-                            {option.label}
-                          </Option>
-                        ))}
-                      </Select>
-                    </td>
-                    <td>
-                      <Button type="link" icon={config.buttonIcon} className="ml-1">
-                        {config.buttonLabel}
-                      </Button>
-                    </td>
-                    <td>
-                      <Divider type="vertical" />
-                    </td>
-                    {config.previewLabel && (
-                      <td>
-                        <Button type="link" className="pl-4">
-                          {config.previewLabel}
-                        </Button>
-                      </td>
-                    )}
-                    {config.colorLabel && (
-                      <>
-                        <td>
-                          <span className="pl-2 ml-1">{config.colorLabel}:</span>
-                        </td>
-                        <td>
-                          <ColorPicker showText />
-                        </td>
-                      </>
-                    )}
-                    {config.textColorLabel && (
-                      <>
-                        <td>
-                          <span className="pl-4 ml-1">{config.textColorLabel}:</span>
-                        </td>
-                        <td>
-                          <ColorPicker showText className="ml-1" />
-                        </td>
-                      </>
-                    )}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <Space size={30} className="mt-4">
-              <Button type="primary" danger>
-                GENERAL POLL SHARING IMAGE
-              </Button>
-              <Button type="primary">UPLOAD YOUR OWN</Button>
-            </Space>
-          </Panel>
-        </Collapse>
+        <PollSharingImage />
 
         <SocialPostingItem />
 
-        <div className="flex-item gap-1">
+        <div className="flex-item mt-4">
           <Text strong>POSTING STARTS NOW</Text>
           <Switch />
           <Text type="secondary">Start when guest starts</Text>

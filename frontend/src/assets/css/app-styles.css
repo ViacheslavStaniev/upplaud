@@ -112,6 +112,9 @@
 .minw-150px {
   min-width: 150px;
 }
+.minw-200px {
+  min-width: 200px;
+}
 .maxw-125px {
   max-width: 125px !important;
 }
