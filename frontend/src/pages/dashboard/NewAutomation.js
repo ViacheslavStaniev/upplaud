@@ -1,92 +1,43 @@
 import dayjs from 'dayjs';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { GUEST_TYPE } from '../../utils/types';
 import { useSelector, useDispatch } from 'react-redux';
-import { CalendarOutlined, MinusOutlined, PlusOutlined } from '@ant-design/icons';
 import { addGuest, fetchGuest, updateGuest, updateState } from '../../reducers/guestsSlice';
-import {
-  Form,
-  Space,
-  Input,
-  Button,
-  DatePicker,
-  Typography,
-  Radio,
-  Collapse,
-  Select,
-  Divider,
-  Switch,
-  ColorPicker,
-} from 'antd';
+import { Form, Space, Input, Button, DatePicker, Typography, Radio, Switch } from 'antd';
 import AppTitle from '../../components/AppTitle';
 import SocialPostingItem from './SocialPostingItem';
 import PollSharingImage from './PollSharingImage';
 
-const { Panel } = Collapse;
-const { Option } = Select;
 const { Text, Title } = Typography;
-
 const { HOST_GUEST, SOLO_SESSION, GUEST_SPEAKER } = GUEST_TYPE;
-
-const tableConfig = [
-  {
-    label: 'LOGO IMAGE FROM:',
-    selectOptions: [{ value: 'default', label: 'Default name' }],
-    buttonLabel: 'ADD NEW IMAGE',
-    buttonIcon: <PlusOutlined />,
-    previewLabel: 'PREVIEW SELECTION',
-  },
-  {
-    label: 'HEADLINE HOOK:',
-    selectOptions: [{ value: 'list', label: 'List' }],
-    buttonLabel: 'ADD NEW HOOK',
-    buttonIcon: <PlusOutlined />,
-    colorLabel: 'HEADLINE BG COLOR',
-    textColorLabel: 'HEADLINE TEXT COLOR',
-  },
-  {
-    label: 'FOOTER HOOK:',
-    selectOptions: [{ value: 'list', label: 'List' }],
-    buttonLabel: 'ADD NEW ACTION',
-    buttonIcon: <PlusOutlined />,
-    colorLabel: 'FOOTER BG COLOR',
-    textColorLabel: 'FOOTER TEXT COLOR',
-  },
-];
 
 const hostInfoFields = [
   {
-    name: 'fullName',
+    name: ['guest', 'fullName'],
     label: 'FULL NAME',
   },
   {
-    name: 'cellPhone',
+    name: ['guest', 'cellPhone'],
     label: 'CELL PHONE',
   },
   {
-    name: 'email',
+    name: ['guest', 'email'],
     label: 'EMAIL ADDRESS',
   },
   {
-    name: 'about',
+    name: ['guest', 'about'],
     label: 'BIO OR SOCIAL URL',
   },
   {
-    name: 'picture',
+    name: ['guest', 'picture'],
     label: 'HEADSHOT URL OR UPLOAD',
   },
 ];
 
+const topicLabels = ['TOPIC OR STORY1', 'TOPIC OR STORY2'];
+
 const pollInfoFields = [
-  {
-    name: 'potentialTopics1',
-    label: 'TOPIC OR STORY1',
-  },
-  {
-    name: 'potentialTopics2',
-    label: 'TOPIC OR STORY2',
-  },
   {
     name: 'hostOfferUrl',
     label: 'HOST OFFER URL',
@@ -103,20 +54,18 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
   const { id } = useParams();
   const dispatch = useDispatch();
 
-  const [isAcc1Open, setIsAcc1Open] = useState(false);
-  const [isAcc2Open, setIsAcc2Open] = useState(false);
-
-  const isNew = id === 'new'; // new automation
+  const isNew = id === undefined; // new automation
   const guestTypeValue = Form.useWatch('guestType', form);
 
   const { guest, isLoading } = useSelector((state) => state.guests);
   const {
     recordingDate = null,
     guest: guestUser,
-    freebieUrl = '',
-    withGuest = true,
+    guestType = HOST_GUEST,
     potentialTopics = ['', ''],
     startHostAutomation = false,
+    hostOfferUrl = null,
+    guestOfferUrl = null,
   } = guest || {};
   console.log(guest, id, isNew, guestTypeValue);
 
@@ -133,22 +82,16 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
   }, [guest, form]);
 
   const initialValues = {
-    withGuest,
-    freebieUrl,
     potentialTopics,
     startHostAutomation,
-    guestType: HOST_GUEST,
+    guestType,
     email: guestUser?.email,
-    lastName: guestUser?.lastName,
-    firstName: guestUser?.firstName,
+    fullName: guestUser?.lastName ? `${guestUser?.firstName} ${guestUser?.lastName}` : null,
     cellPhone: guestUser ? guestUser.profile?.phone : '',
-    linkedinUrl: guestUser ? guestUser.socialAccounts?.linkedin.profileLink : '',
+    linkedinUrl: guestUser ? guestUser.socialAccounts?.linkedin?.profileLink : '',
     recordingDate: recordingDate ? dayjs(recordingDate, 'YYYY/MM/DD') : null,
-  };
-
-  const toggleAccordion = (accordionIndex, setIsOpen) => () => {
-    if (accordionIndex === 1) setIsAcc1Open(!isAcc1Open);
-    if (accordionIndex === 2) setIsAcc2Open(!isAcc2Open);
+    hostOfferUrl,
+    guestOfferUrl
   };
 
   const guestTypeOptions = [
@@ -156,6 +99,17 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
     { key: SOLO_SESSION, value: SOLO_SESSION, label: 'SOLO SESSION' },
     { key: GUEST_SPEAKER, value: GUEST_SPEAKER, label: "I'M A GUEST SPEAKER" },
   ];
+
+  const getText = () => {
+    switch (guestTypeValue) {
+      case HOST_GUEST:
+        return 'Guest Info';
+      case SOLO_SESSION:
+        return 'Solo Info';
+      default:
+        return 'Host Info';
+    }
+  };
 
   return (
     <>
@@ -178,8 +132,8 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
         wrapperCol={{ span: 15 }}
         initialValues={initialValues}
         onFinish={(data) => {
-          console.log('formdata', data);
-          return;
+          data.recordingDate = dayjs(data?.recordingDate).format();
+          console.log(data)
           if (isNew) {
             dispatch(addGuest(data));
           } else {
@@ -193,19 +147,15 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
 
         <Form.Item
           name="recordingDate"
-          className='w-50'
-          label={
-            <div className="pt-10px">
-              Poll End Date: <CalendarOutlined />
-            </div>
-          }
+          className="w-50"
+          label={<div className="pt-10px">Poll End Date:</div>}
         >
           <DatePicker className="w-50 ml-0" bordered={false} />
         </Form.Item>
 
         <div className="flex-item gap-2">
           <div className="flex-1">
-            <Title level={5}>{guestTypeValue === HOST_GUEST ? 'Host Info' : 'Guest Info'}</Title>
+            <Title level={5}>{getText()}</Title>
             {hostInfoFields.map((fieldName) => (
               <Form.Item
                 key={fieldName.label}
@@ -216,20 +166,33 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
               </Form.Item>
             ))}
           </div>
+
           <div className="flex-1">
             <Title level={5}>Poll Info</Title>
             <Form.Item>
               (Use AI to generate topics; see <u>video tutorial</u>)
             </Form.Item>
-            {pollInfoFields.map((fieldName) => (
+            {topicLabels.map((label, index) => (
               <Form.Item
-                key={fieldName.label}
-                name={fieldName.name}
-                label={<div className="pt-10px">{fieldName.label}:</div>}
+                key={index}
+                name={['potentialTopics', index]}
+                label={<div className="pt-10px">{label}:</div>}
               >
-                <Input placeholder={fieldName.label} />
+                <Input placeholder={label} />
               </Form.Item>
             ))}
+
+            {pollInfoFields.map((fieldName) => {
+              return (
+                <Form.Item
+                  key={fieldName.label}
+                  name={fieldName.name}
+                  label={<div className="pt-10px">{fieldName.label}:</div>}
+                >
+                  <Input placeholder={fieldName.label} />
+                </Form.Item>
+              );
+            })}
           </div>
         </div>
 
@@ -237,15 +200,21 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
 
         <SocialPostingItem />
 
-        <div className="flex-item mt-4">
-          <Text strong>POSTING STARTS NOW</Text>
-          <Switch />
-          <Text type="secondary">Start when guest starts</Text>
-        </div>
+        {guestTypeValue !== SOLO_SESSION && (
+          <div className="flex-item mt-4">
+            <Text strong>POSTING STARTS NOW</Text>
+            <Form.Item name="startHostAutomation" className="m-0">
+              <Switch />
+            </Form.Item>
+            <Text type="secondary">Start when they starts</Text>
+          </div>
+        )}
 
         <Space size={30} className="mt-4">
           <Button>SAVE DRAFT</Button>
-          <Button type="primary">LAUNCH POLL AUTOMATION</Button>
+          <Button type="primary" htmlType="submit">
+            LAUNCH POLL AUTOMATION
+          </Button>
         </Space>
       </Form>
     </>

@@ -1,31 +1,28 @@
 import React from 'react';
-import { Collapse, Select, Button, ColorPicker, Space, Table } from 'antd';
-import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
+import { Collapse, Select, Button, ColorPicker, Space, Table, Input } from 'antd';
+import { MinusOutlined, PlusOutlined, QuestionOutlined } from '@ant-design/icons';
 
-const { Panel } = Collapse;
 const { Option } = Select;
 
 const tableConfig = [
   {
     label: 'LOGO IMAGE FROM:',
     selectOptions: [{ value: 'default', label: 'Default name' }],
-    buttonLabel: 'ADD NEW IMAGE',
+    buttonLabel: 'ADD/MANAGE IMAGE',
     buttonIcon: <PlusOutlined />,
     previewLabel: 'PREVIEW SELECTION',
   },
   {
     label: 'HEADLINE HOOK:',
-    selectOptions: [{ value: 'list', label: 'List' }],
-    buttonLabel: 'ADD NEW HOOK',
-    buttonIcon: <PlusOutlined />,
+    element: <Input size="medium" />,
+    buttonIcon: <QuestionOutlined />,
     colorLabel: 'HEADLINE BG COLOR',
     textColorLabel: 'HEADLINE TEXT COLOR',
   },
   {
-    label: 'FOOTER HOOK:',
-    selectOptions: [{ value: 'list', label: 'List' }],
-    buttonLabel: 'ADD NEW ACTION',
-    buttonIcon: <PlusOutlined />,
+    label: 'FOOTER BENEFIT:',
+    element: <Input size="medium" />,
+    buttonIcon: <QuestionOutlined />,
     colorLabel: 'FOOTER BG COLOR',
     textColorLabel: 'FOOTER TEXT COLOR',
   },
@@ -51,15 +48,16 @@ const columns = [
           ))}
         </Select>
       ) : (
-        text
+        record.element
       ),
   },
   {
     title: 'Button',
     dataIndex: 'buttonLabel',
     key: 'buttonLabel',
+    align: "center",
     render: (text, record) =>
-      record.buttonLabel ? (
+      record.buttonIcon ? (
         <Button type="link" icon={record.buttonIcon} size="medium">
           {text}
         </Button>
@@ -69,10 +67,11 @@ const columns = [
     title: 'Action / Color Label',
     dataIndex: 'previewLabel',
     key: 'previewLabel',
+    align: "right",
     render: (text, record) => {
       if (text) {
         return (
-          <Button type="link" size="medium" className='pl-0'>
+          <Button type="link" size="medium" className="pl-0 pr-0">
             {text}
           </Button>
         );
@@ -92,7 +91,8 @@ const columns = [
     title: 'Text Color Label',
     dataIndex: 'textColorLabel',
     key: 'textColorLabel',
-    render: (text, record) => (record.textColorLabel ? text : null),
+    align: "right",
+    render: (text, record) => (record.textColorLabel ? <span className='ml-1'>{text}</span> : null),
   },
   {
     title: 'Text Color Picker',
@@ -107,15 +107,12 @@ const dataSource = tableConfig.map((config) => ({
   ...config,
 }));
 
-export default function PollSharingImage() {
-  return (
-    <Collapse
-      bordered={false}
-      className="mb-2 bg-F7F3F9"
-      expandIconPosition="left"
-      expandIcon={({ isActive }) => (isActive ? <MinusOutlined /> : <PlusOutlined />)}
-    >
-      <Panel header="Customize poll sharing image">
+const items = [
+  {
+    key: 'social',
+    label: 'Customize poll sharing image',
+    children: (
+      <div className="flex-item gap-1 flex-column align-baseline">
         <Table
           columns={columns}
           dataSource={dataSource}
@@ -126,11 +123,22 @@ export default function PollSharingImage() {
         />
         <Space size={30} className="mt-4">
           <Button type="primary" danger>
-            GENERAL POLL SHARING IMAGE
+            GENERATE POLL SHARING IMAGE
           </Button>
           <Button type="primary">UPLOAD YOUR OWN</Button>
         </Space>
-      </Panel>
-    </Collapse>
+      </div>
+    ),
+  },
+];
+
+export default function PollSharingImage() {
+  return (
+    <Collapse
+      items={items}
+      bordered={false}
+      className="mb-2 bg-F7F3F9"
+      expandIcon={({ isActive }) => (isActive ? <MinusOutlined /> : <PlusOutlined />)}
+    />
   );
 }

@@ -29,6 +29,9 @@
 .pl-4 {
   padding-left: 2rem !important;
 }
+.pr-0 {
+  padding-right: 0 !important;
+}
 .pr-2 {
   padding-right: 1rem !important;
 }

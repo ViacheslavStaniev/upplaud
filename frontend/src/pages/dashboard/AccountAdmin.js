@@ -3,6 +3,7 @@ import AppTitle from '../../components/AppTitle';
 import SocialMediaConnect from './SocialMediaConnect';
 import { useAuthContext } from '../../auth/AuthProvider';
 import { Form, Input, Button, Divider, Typography, Space } from 'antd';
+import Dragger from 'antd/es/upload/Dragger';
 
 const { Text, Title, Paragraph } = Typography;
 
@@ -52,6 +53,30 @@ export default function AccountAdmin() {
               ]}
             >
               <Input placeholder="EMAIL" />
+            </Form.Item>
+          </div>
+          <div className="flex-item align-baseline gap-2">
+            <Form.Item
+              name="about"
+              label="SOCIAL BIO"
+              className="flex-1"
+              rules={[{ required: true, message: 'Social Bio is required.' }]}
+            >
+              <Input placeholder="SOCIAL BIO" />
+            </Form.Item>
+            <Form.Item label="HEADSHOT IMAGE" className="flex-1">
+              <Dragger
+                style={{
+                  background: 'rgb(252, 251, 252)',
+                  border: '2px dashed rgb(179, 179, 179)',
+                }}
+              >
+                <Paragraph>Click to upload photo or drag and drop</Paragraph>
+                <Text>Any file up to 10MB</Text>
+              </Dragger>
+            </Form.Item>
+            <Form.Item label="" className="flex-1">
+              &nbsp;
             </Form.Item>
           </div>
 
