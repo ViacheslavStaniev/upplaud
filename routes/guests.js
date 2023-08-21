@@ -238,7 +238,7 @@ router.post("/batch-delete", verifyAuth, async (req, res) => {
 // @access  Public
 router.get("/list/:showId", verifyAuth, async (req, res) => {
   try {
-    const guestList = await Guest.find({ show: req.params.showId }).populate("guest").populate("show");
+    const guestList = await Guest.find({ show: req.params.showId }).populate("guest show pollImageInfo");
 
     res.json(guestList);
   } catch (err) {
@@ -298,13 +298,38 @@ router.post("/images/:guestId", verifyAuth, async (req, res) => {
   }
 });
 
-// @route   GET api/guests/poll-images/:guestId
-// @desc    gets guest poll images
+// @route   POST api/guests/poll-image-info/:pollId
+// @desc    Save Poll Image Info
 // @access  Public
-router.get("/poll-images/:guestId", verifyAuth, async (req, res) => {
+router.post("/poll-image-info/:pollId", verifyAuth, async (req, res) => {
+  const { logo = "", footer = {}, header = {} } = req.body;
+
   try {
-    const images = await PollImage.find({ guest: req.params.guestId });
-    res.json(images);
+    const pollId = req.params.pollId;
+    const pollImageInfo = new PollImage({ poll: pollId, logo, footer, header });
+    await pollImageInfo.save();
+
+    // Save pollImageInfo id to poll
+    await Guest.findByIdAndUpdate(pollId, { pollImageInfo: pollImageInfo._id });
+
+    res.json(pollImageInfo);
+  } catch (err) {
+    // throw err;
+    console.error({ msg: err.message });
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// @route   PUT api/guests/poll-image-info/:pollImageId
+// @desc    Update Poll Image Info
+// @access  Public
+router.put("/poll-image-info/:pollImageId", verifyAuth, async (req, res) => {
+  const { logo = "", footer = {}, header = {} } = req.body;
+
+  try {
+    await PollImage.findByIdAndUpdate(req.params.pollImageId, { logo, footer, header });
+
+    res.json({ msg: "Poll Image Info updated successfully." });
   } catch (err) {
     // throw err;
     console.error({ msg: err.message });
@@ -313,8 +338,7 @@ router.get("/poll-images/:guestId", verifyAuth, async (req, res) => {
 });
 
 async function getPoll(pollId) {
-  const poll = await Guest.findById(pollId).populate("guest").populate("show").populate("pollImage");
-  return poll;
+  return await Guest.findById(pollId).populate("guest show pollImageInfo");
 }
 
 module.exports = router;

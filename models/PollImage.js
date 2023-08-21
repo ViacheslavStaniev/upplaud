@@ -3,7 +3,6 @@ const Schema = mongoose.Schema;
 
 const PollImageSchema = new Schema(
   {
-    generatedImage: { type: String, default: "" },
     poll: { ref: "Guest", type: Schema.Types.ObjectId },
     logo: { ref: "Image", type: Schema.Types.ObjectId },
     footer: {
@@ -11,7 +10,7 @@ const PollImageSchema = new Schema(
       bgColor: { type: String, default: "" },
       textColor: { type: String, default: "" },
     },
-    headline: {
+    header: {
       text: { type: String, default: "" },
       bgColor: { type: String, default: "" },
       textColor: { type: String, default: "" },
