@@ -25,7 +25,8 @@ export default function Automations() {
   const totalSelected = selectedRows.length;
 
   const { user } = useAuthContext();
-  const { guests = [] } = useSelector((state) => state.guests);
+  const { guests = [], isLoading = false } = useSelector((state) => state.guests);
+  console.log(isLoading);
 
   useEffect(() => {
     dispatch(getGuestsList(user.show?._id));
@@ -214,6 +215,7 @@ export default function Automations() {
           columns={columns}
           dataSource={data}
           title={tableTitle}
+          loading={isLoading}
           pagination={{ defaultPageSize: 5 }}
           rowSelection={{ type: 'checkbox', onChange: (_, rows) => setSelectedRows(rows) }}
         />

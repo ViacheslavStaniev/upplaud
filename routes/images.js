@@ -20,7 +20,7 @@ router.get("/poll-images/:pollId", verifyAuth, async (req, res) => {
   }
 });
 
-// @route   GET api/images/:userId
+// @route   GET api/images
 // @desc    gets users images
 // @access  Public
 router.get("/", verifyAuth, async (req, res) => {
@@ -34,7 +34,7 @@ router.get("/", verifyAuth, async (req, res) => {
   }
 });
 
-// @route   POST api/images/:userId
+// @route   POST api/images
 // @desc    creates guest images
 // @access  Public
 router.post("/", verifyAuth, async (req, res) => {

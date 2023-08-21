@@ -12,4 +12,4 @@ export const CLOUDFRONT_URL = REACT_APP_CLOUDFRONT_URL || '';
 export const PATH_AFTER_LOGIN = PATH_DASHBOARD.dashboard.accountAdmin; // as '/account-admin'
 
 // Get S3 full URL
-export const getFullS3Url = (s3Path = '') => (s3Path ? `${CLOUDFRONT_URL}/${s3Path}` : '');
+export const getFullS3Url = (s3Path = '') => (s3Path ? CLOUDFRONT_URL + s3Path : '');

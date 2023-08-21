@@ -72,13 +72,13 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
   useEffect(() => {
     if (!isNew && id) dispatch(fetchGuest(id));
 
-    return () => {
-      updateState({ guest: null });
-    };
+    return () => dispatch(updateState({ guest: null }));
   }, [isNew, id, dispatch]);
 
   useEffect(() => {
     guest && form.resetFields();
+
+    return () => form.resetFields();
   }, [guest, form]);
 
   const initialValues = {

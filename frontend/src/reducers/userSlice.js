@@ -1,3 +1,4 @@
+import axios from '../utils/axios';
 import { createSlice } from '@reduxjs/toolkit';
 
 export const userSlice = createSlice({
@@ -30,3 +31,15 @@ export const userSlice = createSlice({
 export const { initialize, saveUser, logoutUser, updateState } = userSlice.actions;
 
 export default userSlice.reducer;
+
+export const getImages = async () => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const result = await axios.get('images');
+      resolve(result.data);
+    } catch (error) {
+      console.error({ msg: error.message });
+      reject(error);
+    }
+  });
+};
