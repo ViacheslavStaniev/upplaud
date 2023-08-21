@@ -1,5 +1,5 @@
-import { Spin } from "antd";
+import { Spin } from 'antd';
 
 export default function LoadingScreen() {
-  return <Spin tip='Loading' className='loading-screen' />;
+  return <Spin className="loading-screen" />;
 }

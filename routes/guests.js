@@ -1,9 +1,9 @@
 const express = require("express");
-const User = require("../models/User");
 const Guest = require("../models/Guest");
 const Image = require("../models/Image");
 const PollImage = require("../models/PollImage");
 const verifyAuth = require("../config/verifyAuth");
+const { USER_TYPE } = require("../models/User");
 const { uploadImage } = require("../helpers/s3Helper");
 const { randomString } = require("../helpers/utills");
 const { POLL_STATUS, GUEST_TYPE } = require("../models/Guest");
@@ -41,8 +41,6 @@ router.post("/", verifyAuth, async (req, res) => {
     guestType = GUEST_TYPE.HOST_GUEST,
   } = req.body;
 
-  console.log("req.body", req.body);
-
   const session = await Guest.startSession();
   const options = { session };
   session.startTransaction();
@@ -69,31 +67,22 @@ router.post("/", verifyAuth, async (req, res) => {
 
     // Create Guest User && update it if guestType is not SOLO_SESSION
     if (guestType !== GUEST_TYPE.SOLO_SESSION) {
-      const { fullName = "", email = "", cellPhone = "", about = "", picture = "" } = guest;
+      const { fullName = "", email = "", phone = "", about = "", picture = "" } = guest;
       const nameArr = fullName.split(" ");
       const firstName = nameArr.shift();
       const lastName = nameArr.join(" ");
 
-      const guestUser = new User({ email, lastName, firstName, profile: { cellPhone, about, picture } });
+      const newUser = await createOrUpdateGuestUser(firstName, lastName, email, randomString(8), USER_TYPE.GUEST);
+      if (newUser) await updateUserInfo(newUser._id, { profile: { ...newUser.profile, phone, about, picture } });
 
-      console.log(guestUser);
+      // Current Host is a Guest for another show
+      const isGuestSpeaker = guestType === GUEST_TYPE.GUEST_SPEAKER;
 
-      // const guestUser2 = await createOrUpdateGuestUser(firstName, lastName, email, randomString(12));
-      // if (guestUser) {
-      //   const updateInfo = {
-      //     profile: { ...guestUser.profile, phone: cellPhone, about, headshotUrl },
-      //     socialAccounts: {
-      //       ...guestUser.socialAccounts,
-      //       linkedin: { ...guestUser.socialAccounts.linkedin, profileLink: linkedinUrl },
-      //     },
-      //   };
-      //   await updateUserInfo(guestUser._id, updateInfo);
-      // }
+      pollInfo.guest = isGuestSpeaker ? hostUser._id : newUser?._id;
 
-      pollInfo.guest = guestUser._id;
+      // there are no details for show
+      if (isGuestSpeaker) pollInfo.show = null;
     } else pollInfo.guest = null; // if guestType is SOLO_SESSION, then guest will be null
-
-    console.log("pollInfo", pollInfo);
 
     // Create new Poll
     const poll = new Guest(pollInfo);
@@ -101,8 +90,6 @@ router.post("/", verifyAuth, async (req, res) => {
 
     await session.commitTransaction();
     session.endSession();
-
-    console.log("poll", poll);
 
     res.json(await getPoll(poll._id));
   } catch (err) {
@@ -114,68 +101,71 @@ router.post("/", verifyAuth, async (req, res) => {
   }
 });
 
-// @route   PUT api/guests
-// @desc    Updates a Guest
+// @route   PUT api/guests/:pollId
+// @desc    Updates a Poll
 // @access  Public
-router.put("/:guestId", verifyAuth, async (req, res) => {
+router.put("/:pollId", verifyAuth, async (req, res) => {
   const {
-    recordingDate,
-    firstName,
-    lastName,
-    email,
-    about = "",
-    cellPhone,
-    linkedinUrl,
-    headshotUrl = "",
-    potentialTopics,
-    guestType,
+    guest = null,
     hostOfferUrl = "",
     guestOfferUrl = "",
-    startHostAutomation,
+    potentialTopics = [],
+    status = POLL_STATUS.DRAFT,
+    recordingDate = new Date(),
+    startHostAutomation = false,
+    guestType = GUEST_TYPE.HOST_GUEST,
   } = req.body;
+
+  const pollId = req.params.pollId;
 
   const session = await Guest.startSession();
   session.startTransaction();
 
   try {
-    const guestData = await Guest.findById(req.params.guestId).populate("guest");
-    if (!guestData) {
+    const poll = await getPoll(pollId);
+    if (!poll) {
       return res.status(400).send({ errors: ["Invalid automations details. Please make sure you're updating the right automation."] });
     }
 
-    // update guest user
-    const guestUser = guestData?.guest;
-    if (guestUser) {
-      const updateInfo = {
-        email,
-        lastName,
-        firstName,
-        profile: { ...guestUser.profile, phone: cellPhone, about, headshotUrl },
-        socialAccounts: {
-          ...guestUser.socialAccounts,
-          linkedin: { ...guestUser.socialAccounts.linkedin, profileLink: linkedinUrl },
-        },
-      };
-      await updateUserInfo(guestUser._id, updateInfo);
-    }
+    // Host User
+    const hostUser = await getBasicUserInfo(req.userId);
 
-    const info = {
+    // Poll info
+    const pollInfo = {
+      status,
       guestType,
-      recordingDate,
       hostOfferUrl,
       guestOfferUrl,
+      recordingDate,
       potentialTopics,
       startHostAutomation,
-      show: adminUser.show,
-      guest: guestUser._id,
+      show: hostUser.show,
     };
 
-    const guest = await Guest.findByIdAndUpdate(req.params.guestId, info);
+    // Create Guest User && update it if guestType is not SOLO_SESSION
+    if (guestType !== GUEST_TYPE.SOLO_SESSION) {
+      const { fullName = "", phone = "", about = "", picture = "" } = guest;
+      const nameArr = fullName.split(" ");
+      const firstName = nameArr.shift();
+      const lastName = nameArr.join(" ");
+
+      const userObj = poll.guest;
+      if (userObj) await updateUserInfo(userObj._id, { firstName, lastName, profile: { ...userObj.profile, phone, about, picture } });
+
+      const isGuestSpeaker = guestType === GUEST_TYPE.GUEST_SPEAKER;
+      pollInfo.guest = isGuestSpeaker ? hostUser._id : userObj?._id;
+
+      // there are no details for show
+      if (isGuestSpeaker) pollInfo.show = null;
+    } else pollInfo.guest = null; // if guestType is SOLO_SESSION, then guest will be null
+
+    // Update PollINfo
+    await Guest.findByIdAndUpdate(pollId, pollInfo);
 
     await session.commitTransaction();
     session.endSession();
 
-    res.json(guest);
+    res.json(await getPoll(pollId));
   } catch (err) {
     await session.abortTransaction();
     session.endSession();

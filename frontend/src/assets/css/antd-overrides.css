@@ -124,3 +124,7 @@ span.ant-tag {
 .ant-collapse-header .ant-collapse-header-text {
   font-size: inherit;
 }
+
+form.automation-form .ant-row.ant-form-item-row {
+  align-items: center;
+}

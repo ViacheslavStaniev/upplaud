@@ -88,5 +88,6 @@ const UserSchema = new Schema(
 );
 
 module.exports = User = mongoose.model("User", UserSchema);
+module.exports.USER_TYPE = USER_TYPE;
 global.IS_ADMIN_NO = IS_ADMIN_NO;
 global.IS_ADMIN_YES = IS_ADMIN_YES;
