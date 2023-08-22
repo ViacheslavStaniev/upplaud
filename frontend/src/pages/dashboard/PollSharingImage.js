@@ -1,7 +1,7 @@
 import Simplebar from 'simplebar-react';
 import { useEffect, useState } from 'react';
 import { getFullS3Url } from '../../config-global';
-import { getImages } from '../../reducers/userSlice';
+import { getImages, onFetchImages, uploadImage } from '../../reducers/imageSlice';
 import {
   List,
   Form,
@@ -23,6 +23,8 @@ import {
   PlusOutlined,
   QuestionCircleOutlined,
 } from '@ant-design/icons';
+import { useDispatch, useSelector } from 'react-redux';
+import { deleteImage } from '../../reducers/imageSlice';
 
 const { Option } = Select;
 const { Dragger } = Upload;
@@ -30,14 +32,14 @@ const { Text, Paragraph } = Typography;
 
 export default function PollSharingImage() {
   const [form] = Form.useForm();
-  const [images, setImages] = useState([]);
+  const dispatch = useDispatch();
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showAddManageImages, setShowAddManageImages] = useState(false);
-  console.log(images);
+  const { images } = useSelector((state) => state.images);
 
   useEffect(() => {
-    getImages().then(setImages).catch(console.error);
-  }, []);
+    dispatch(getImages());
+  }, [dispatch]);
 
   const TextColorFormItem = ({ label, title, formType }) => {
     return (
@@ -141,21 +143,36 @@ export default function PollSharingImage() {
   const uploadProps = {
     name: 'file',
     multiple: true,
-    action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
-    onChange(info) {
-      const { status } = info.file;
-      if (status !== 'uploading') {
-        console.log(info.file, info.fileList);
-      }
-      if (status === 'done') {
-        console.log(`${info.file.name} file uploaded successfully.`);
-      } else if (status === 'error') {
-        console.error(`${info.file.name} file upload failed.`);
-      }
+    showUploadList: false,
+    accept: '.png, .gif, .jpeg, .jpg',
+    customRequest: async ({ file }) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+
+      reader.onload = async () => {
+        const imageData = reader.result.split(',')[1];
+        const requestBody = {
+          images: [
+            {
+              name: file.name,
+              imageData: `data:${file.type};base64,${imageData}`,
+            },
+          ],
+        };
+        dispatch(uploadImage(requestBody));
+      };
     },
     onDrop(e) {
       console.log('Dropped files', e.dataTransfer.files);
     },
+  };
+
+  const deleteSingleImage = (id) => {
+    if (id) {
+      const newImages = images.filter((image) => image._id !== id);
+      dispatch(onFetchImages(newImages));
+      dispatch(deleteImage(id));
+    }
   };
 
   return (
@@ -209,7 +226,7 @@ export default function PollSharingImage() {
             bordered={false}
             dataSource={images}
             header="Available Images"
-            renderItem={({ name, s3Path }) => (
+            renderItem={({ _id, name, s3Path }) => (
               <List.Item
                 actions={[
                   <Popconfirm
@@ -218,6 +235,7 @@ export default function PollSharingImage() {
                     cancelText="No"
                     title="Delete Image"
                     description="Are you sure to delete this image?"
+                    onConfirm={() => deleteSingleImage(_id)}
                   >
                     <Button danger size="small">
                       Delete
