@@ -1,10 +1,12 @@
 import Simplebar from 'simplebar-react';
 import { useEffect, useState } from 'react';
 import { getFullS3Url } from '../../config-global';
-import { getImages, onFetchImages, uploadImage } from '../../reducers/imageSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { getImages, uploadImage, deleteImage } from '../../reducers/imageSlice';
 import {
   List,
   Form,
+  Spin,
   Modal,
   Select,
   Button,
@@ -23,8 +25,7 @@ import {
   PlusOutlined,
   QuestionCircleOutlined,
 } from '@ant-design/icons';
-import { useDispatch, useSelector } from 'react-redux';
-import { deleteImage } from '../../reducers/imageSlice';
+import SuggestionModal from '../layouts/SuggestionModal';
 
 const { Option } = Select;
 const { Dragger } = Upload;
@@ -32,10 +33,11 @@ const { Text, Paragraph } = Typography;
 
 export default function PollSharingImage() {
   const [form] = Form.useForm();
-  const dispatch = useDispatch();
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showAddManageImages, setShowAddManageImages] = useState(false);
-  const { images } = useSelector((state) => state.images);
+
+  const dispatch = useDispatch();
+  const { images, isLoading, isUploading } = useSelector((state) => state.images);
 
   useEffect(() => {
     dispatch(getImages());
@@ -92,11 +94,16 @@ export default function PollSharingImage() {
           >
             <div className="flex-item gap-2 mb-2">
               <Form.Item label="LOGO IMAGE FROM" name="logo" className="w-40 m-0">
-                <Select className="minw-200px" placeholder="Select an Image">
+                <Select
+                  loading={isLoading}
+                  disabled={isLoading}
+                  className="minw-200px"
+                  placeholder="Select an Image"
+                >
                   {images.map(({ _id, name, s3Path }) => (
-                    <Option key={_id} value={_id} className="flex-item gap-1">
-                      <Avatar src={getFullS3Url(s3Path)} />
-                      <Text>{name}</Text>
+                    <Option key={_id} value={_id}>
+                      <Avatar src={getFullS3Url(s3Path)} size={32} />
+                      <Text style={{ marginLeft: 5 }}>{name}</Text>
                     </Option>
                   ))}
                 </Select>
@@ -129,17 +136,6 @@ export default function PollSharingImage() {
     },
   ];
 
-  const suggestions = [
-    'BENEFIT TO VOTER:',
-    'Learn 3 mistakes to avoid...',
-    'Hear the juicy details',
-    'Ask Anything & Hear The Answer',
-    'Make our podcast perfect for you...',
-    'Have us discuss what you want to know',
-    'Hear some step by step instructions',
-    'Get free help from our guest speaker',
-  ];
-
   const uploadProps = {
     name: 'file',
     multiple: true,
@@ -167,14 +163,6 @@ export default function PollSharingImage() {
     },
   };
 
-  const deleteSingleImage = (id) => {
-    if (id) {
-      const newImages = images.filter((image) => image._id !== id);
-      dispatch(onFetchImages(newImages));
-      dispatch(deleteImage(id));
-    }
-  };
-
   return (
     <>
       <Collapse
@@ -184,25 +172,7 @@ export default function PollSharingImage() {
         expandIcon={({ isActive }) => (isActive ? <MinusOutlined /> : <PlusOutlined />)}
       />
 
-      <Modal
-        centered
-        footer={false}
-        title="Suggestions"
-        open={showSuggestions}
-        onCancel={() => setShowSuggestions(false)}
-      >
-        <List
-          header={false}
-          footer={false}
-          bordered={false}
-          dataSource={suggestions}
-          renderItem={(item) => (
-            <List.Item>
-              <Text copyable>{item}</Text>
-            </List.Item>
-          )}
-        />
-      </Modal>
+      <SuggestionModal open={showSuggestions} onCancel={() => setShowSuggestions(false)} />
 
       <Modal
         centered
@@ -212,18 +182,21 @@ export default function PollSharingImage() {
         onCancel={() => setShowAddManageImages(false)}
       >
         <Paragraph>Add New Image</Paragraph>
-        <Dragger {...uploadProps}>
-          <p className="ant-upload-drag-icon">
-            <InboxOutlined />
-          </p>
-          <p className="ant-upload-text">Click or drag file to this area to upload</p>
-          <p className="ant-upload-hint">Supported file types: PNG/JPG/JPEG</p>
-        </Dragger>
+        <Spin spinning={isUploading} tip="Uploading...">
+          <Dragger {...uploadProps}>
+            <p className="ant-upload-drag-icon">
+              <InboxOutlined />
+            </p>
+            <p className="ant-upload-text">Click or drag file to this area to upload</p>
+            <p className="ant-upload-hint">Supported file types: PNG/JPG/JPEG</p>
+          </Dragger>
+        </Spin>
 
         <Simplebar style={{ maxHeight: 420, paddingRight: 10 }}>
           <List
             footer={false}
             bordered={false}
+            loading={isLoading}
             dataSource={images}
             header="Available Images"
             renderItem={({ _id, name, s3Path }) => (
@@ -234,8 +207,8 @@ export default function PollSharingImage() {
                     okText="Yes"
                     cancelText="No"
                     title="Delete Image"
+                    onConfirm={() => dispatch(deleteImage(_id))}
                     description="Are you sure to delete this image?"
-                    onConfirm={() => deleteSingleImage(_id)}
                   >
                     <Button danger size="small">
                       Delete

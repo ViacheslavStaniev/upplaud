@@ -82,7 +82,7 @@ router.post("/", verifyAuth, async (req, res) => {
 
       // there are no details for show
       if (isGuestSpeaker) pollInfo.show = null;
-    } else pollInfo.guest = null; // if guestType is SOLO_SESSION, then guest will be null
+    } else pollInfo.guest = hostUser._id; // if guestType is SOLO_SESSION, then guest will be HostUser
 
     // Create new Poll
     const poll = new Guest(pollInfo);
@@ -157,7 +157,7 @@ router.put("/:pollId", verifyAuth, async (req, res) => {
 
       // there are no details for show
       if (isGuestSpeaker) pollInfo.show = null;
-    } else pollInfo.guest = null; // if guestType is SOLO_SESSION, then guest will be null
+    } else pollInfo.guest = hostUser._id; // if guestType is SOLO_SESSION, then guest will be HostUser
 
     // Update PollINfo
     await Guest.findByIdAndUpdate(pollId, pollInfo);

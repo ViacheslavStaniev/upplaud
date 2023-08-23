@@ -1,61 +1,77 @@
 import axios from '../utils/axios';
 import { notification } from 'antd';
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, current } from '@reduxjs/toolkit';
 
 const slice = createSlice({
   name: 'images',
-  initialState: { images: [] },
+  initialState: { images: [], isLoading: false, isUploading: false },
   reducers: {
+    // START LOADING
+    startLoading(state, { payload }) {
+      return { ...state, isLoading: payload };
+    },
     // GET IMAGES LIST
     onFetchImages(state, { payload }) {
-      return { ...state, images: payload };
+      return { ...state, images: payload, isLoading: false };
+    },
+    // ON DELETE IMAGE
+    onDeleteImage(state, { payload }) {
+      const { images } = current(state);
+      return { ...state, images: images.filter(({ _id }) => _id !== payload) };
+    },
+    // ON UPLOAD IMAGES
+    onUploadImages(state, { payload }) {
+      const { images } = current(state);
+      return { ...state, images: [...images, ...payload], isUploading: false };
+    },
+    // START UPLOADING
+    startUploading(state, { payload }) {
+      return { ...state, isUploading: payload };
     },
   },
 });
 
 export default slice.reducer;
 
-export const { onFetchImages } = slice.actions;
+export const { startLoading, startUploading, onFetchImages, onDeleteImage, onUploadImages } =
+  slice.actions;
 
 // Get images list
 export const getImages = () => async (dispatch) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const { data } = await axios.get('images');
-      dispatch(onFetchImages(data));
-      resolve(data);
-    } catch (error) {
-      console.error({ msg: error.message });
-      reject(error);
-    }
-  });
+  try {
+    dispatch(startLoading(true));
+
+    const { data } = await axios.get('images');
+    dispatch(onFetchImages(data));
+  } catch (error) {
+    dispatch(startLoading(false));
+    console.error({ msg: error.message });
+  }
 };
 
 // Delete an image
 export const deleteImage = (id) => async (dispatch) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      await axios.delete(`images/${id}`);
-      notification.success({ message: 'Success', description: 'Image deleted successfully.' });
-      resolve();
-    } catch (error) {
-      console.error({ msg: error.message });
-      reject(error);
-    }
-  });
+  try {
+    await axios.delete(`images/${id}`);
+    dispatch(onDeleteImage(id));
+
+    notification.success({ message: 'Success', description: 'Image deleted successfully.' });
+  } catch (error) {
+    console.error({ msg: error.message });
+  }
 };
 
 // Upload image(s)
 export const uploadImage = (files) => async (dispatch) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      await axios.post('images/bulk', files);
-      notification.success({ message: 'Success', description: 'Image uploaded successfully.' });
-      dispatch(getImages())
-      resolve();
-    } catch (error) {
-      console.error({ msg: error.message });
-      reject(error);
-    }
-  });
+  try {
+    dispatch(startUploading(true));
+
+    const { data } = await axios.post('images/bulk', files);
+    dispatch(onUploadImages(data));
+
+    notification.success({ message: 'Success', description: 'Image uploaded successfully.' });
+  } catch (error) {
+    dispatch(startUploading(false));
+    console.error({ msg: error.message });
+  }
 };
