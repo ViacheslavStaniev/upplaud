@@ -125,6 +125,6 @@ span.ant-tag {
   font-size: inherit;
 }
 
-form.automation-form .ant-row.ant-form-item-row {
-  align-items: center;
-}
+/* .automation-form .ant-row.ant-form-item-row .ant-form-item-label-left {
+  padding-top: 12px;
+} */

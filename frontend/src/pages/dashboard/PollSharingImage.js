@@ -32,7 +32,7 @@ const { Dragger } = Upload;
 const { Text, Paragraph } = Typography;
 
 export default function PollSharingImage() {
-  const [form] = Form.useForm();
+  const form = Form.useFormInstance();
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showAddManageImages, setShowAddManageImages] = useState(false);
 
@@ -43,10 +43,12 @@ export default function PollSharingImage() {
     dispatch(getImages());
   }, [dispatch]);
 
+  const getFormName = (name) => ['pollSharingImage', name];
+
   const TextColorFormItem = ({ label, title, formType }) => {
     return (
       <div className="flex-item gap-2 mb-2">
-        <Form.Item label={label} name={[formType, 'text']} className="w-40 m-0">
+        <Form.Item label={label} name={getFormName(`${formType}Text`)} className="w-40 m-0">
           <Input
             placeholder="Enter the text here"
             suffix={
@@ -62,16 +64,30 @@ export default function PollSharingImage() {
           />
         </Form.Item>
 
-        <Form.Item className="flex-1 m-0" label={`${title} BG COLOR`} name={[formType, 'bgColor']}>
-          <ColorPicker showText />
+        <Form.Item
+          className="flex-1 m-0"
+          label={`${title} BG COLOR`}
+          name={getFormName(`${formType}BgColor`)}
+        >
+          <ColorPicker
+            showText
+            onChangeComplete={(metaColor) =>
+              form.setFieldValue(getFormName(`${formType}BgColor`), metaColor.toHexString())
+            }
+          />
         </Form.Item>
 
         <Form.Item
           className="flex-1 m-0"
           label={`${title} TEXT COLOR`}
-          name={[formType, 'textColor']}
+          name={getFormName(`${formType}TextColor`)}
         >
-          <ColorPicker showText />
+          <ColorPicker
+            showText
+            onChangeComplete={(metaColor) =>
+              form.setFieldValue(getFormName(`${formType}TextColor`), metaColor.toHexString())
+            }
+          />
         </Form.Item>
       </div>
     );
@@ -80,50 +96,40 @@ export default function PollSharingImage() {
   const items = [
     {
       key: 'social',
-      label: 'Customize poll sharing image',
+      label: 'Customize Poll Sharing Image',
       children: (
         <>
-          <Form
-            form={form}
-            size="medium"
-            labelWrap={true}
-            labelAlign="left"
-            layout="horizontal"
-            labelCol={{ span: 11 }}
-            wrapperCol={{ span: 13 }}
-          >
-            <div className="flex-item gap-2 mb-2">
-              <Form.Item label="LOGO IMAGE FROM" name="logo" className="w-40 m-0">
-                <Select
-                  loading={isLoading}
-                  disabled={isLoading}
-                  className="minw-200px"
-                  placeholder="Select an Image"
-                >
-                  {images.map(({ _id, name, s3Path }) => (
-                    <Option key={_id} value={_id}>
-                      <Avatar src={getFullS3Url(s3Path)} size={32} />
-                      <Text style={{ marginLeft: 5 }}>{name}</Text>
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-
-              <Button
-                type="link"
-                icon={<PlusOutlined />}
-                onClick={() => setShowAddManageImages(true)}
+          <div className="flex-item gap-2 mb-2">
+            <Form.Item label="LOGO IMAGE FROM" name={getFormName('logo')} className="w-40 m-0">
+              <Select
+                loading={isLoading}
+                disabled={isLoading}
+                className="minw-200px"
+                placeholder="Select an Image"
               >
-                ADD/MANAGE IMAGES
-              </Button>
-              <Button type="link" disabled>
-                PREVIEW SELECTION
-              </Button>
-            </div>
+                {images.map(({ _id, name, s3Path }) => (
+                  <Option key={_id} value={_id}>
+                    <Avatar src={getFullS3Url(s3Path)} size={32} />
+                    <Text style={{ marginLeft: 5 }}>{name}</Text>
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
 
-            <TextColorFormItem label="HEADLINE HOOK" title="HEADLINE" formType="header" />
-            <TextColorFormItem label="FOOTER BENEFIT" title="FOOTER" formType="footer" />
-          </Form>
+            <Button
+              type="link"
+              icon={<PlusOutlined />}
+              onClick={() => setShowAddManageImages(true)}
+            >
+              ADD/MANAGE IMAGES
+            </Button>
+            <Button type="link" disabled>
+              PREVIEW SELECTION
+            </Button>
+          </div>
+
+          <TextColorFormItem label="HEADLINE HOOK" title="HEADLINE" formType="header" />
+          <TextColorFormItem label="FOOTER BENEFIT" title="FOOTER" formType="footer" />
 
           <div className="flex-item gap-2 mt-4">
             <Button type="primary" danger>

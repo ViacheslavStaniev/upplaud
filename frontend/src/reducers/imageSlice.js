@@ -75,3 +75,13 @@ export const uploadImage = (files) => async (dispatch) => {
     console.error({ msg: error.message });
   }
 };
+
+// Upload And Get S3Path
+export const uploadAndGetS3Path = (obj) => {
+  return new Promise((resolve, reject) => {
+    axios
+      .post('images/upload2s3', obj)
+      .then((result) => resolve(result.data))
+      .catch(reject);
+  });
+};

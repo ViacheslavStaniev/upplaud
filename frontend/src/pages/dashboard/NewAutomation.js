@@ -1,37 +1,37 @@
 import dayjs from 'dayjs';
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { GUEST_TYPE, POLL_STATUS } from '../../utils/types';
 import { useSelector, useDispatch } from 'react-redux';
+import { useAuthContext } from '../../auth/AuthProvider';
+import { GUEST_TYPE, POLL_STATUS } from '../../utils/types';
 import { addGuest, fetchGuest, updateGuest, updateState } from '../../reducers/guestsSlice';
 import { Form, Space, Input, Button, DatePicker, Typography, Radio, Switch } from 'antd';
 import AppTitle from '../../components/AppTitle';
-import SocialPostingItem from './SocialPostingItem';
 import PollSharingImage from './PollSharingImage';
+import SocialPostingItem from './SocialPostingItem';
+import HeadshotImage from '../layouts/HeadshotImage';
 
 const { Text, Link, Title } = Typography;
 const { HOST_GUEST, SOLO_SESSION, GUEST_SPEAKER } = GUEST_TYPE;
 
 const hostInfoFields = [
   {
-    name: ['guest', 'fullName'],
     label: 'FULL NAME',
+    name: ['guest', 'fullName'],
+    rules: [{ required: true }],
   },
   {
-    name: ['guest', 'phone'],
     label: 'CELL PHONE',
+    name: ['guest', 'phone'],
   },
   {
-    name: ['guest', 'email'],
     label: 'EMAIL ADDRESS',
+    name: ['guest', 'email'],
+    rules: [{ required: true }],
   },
   {
     name: ['guest', 'about'],
     label: 'BIO OR SOCIAL URL',
-  },
-  {
-    name: ['guest', 'picture'],
-    label: 'HEADSHOT URL OR UPLOAD',
   },
 ];
 
@@ -48,19 +48,45 @@ const pollInfoFields = [
   },
 ];
 
-export default function NewAutomation({ isGuestAcceptance = false }) {
-  const [form] = Form.useForm();
+const getGuesUsertObj = (userObj = null) => {
+  return {
+    email: userObj?.email,
+    phone: userObj ? userObj.profile?.phone : '',
+    about: userObj ? userObj?.profile?.about : '',
+    picture: userObj ? userObj?.profile?.picture : '',
+    fullName: userObj ? `${userObj?.firstName} ${userObj?.lastName}` : '',
+  };
+};
 
+const getPostSharingImageInfo = (obj) => {
+  const { logo, header = null, footer = null } = obj || {};
+
+  return {
+    logo,
+    headerText: (header && header?.text) || '',
+    headerBgColor: (header && header?.bgColor) || '#1677FF',
+    headerTextColor: (header && header.textColor) || '#FFFFFF',
+    footerText: (footer && footer?.text) || '',
+    footerBgColor: (footer && footer?.bgColor) || '#1677FF',
+    footerTextColor: (footer && footer?.textColor) || '#FFFFFF',
+  };
+};
+
+export default function NewAutomation({ isGuestAcceptance = false }) {
   const { id } = useParams();
+  const [form] = Form.useForm();
   const dispatch = useDispatch();
+  const { user } = useAuthContext();
 
   const isNew = id === undefined; // new automation
   const guestTypeValue = Form.useWatch('guestType', form);
 
+  const isSoloSession = guestTypeValue === SOLO_SESSION;
   const { guest, isLoading } = useSelector((state) => state.guests);
 
   const {
     guest: guestUser,
+    pollImageInfo = null,
     hostOfferUrl = null,
     guestOfferUrl = null,
     recordingDate = null,
@@ -68,6 +94,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
     potentialTopics = ['', ''],
     startHostAutomation = false,
   } = guest || {};
+  console.log('guest', guest);
 
   useEffect(() => {
     if (!isNew && id) dispatch(fetchGuest(id));
@@ -81,20 +108,23 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
     return () => form.resetFields();
   }, [guest, form]);
 
+  useEffect(() => {
+    const { email, phone, about, picture, fullName } = getGuesUsertObj(
+      isSoloSession ? user : guestUser
+    );
+
+    form.setFieldsValue({ guest: { email, phone, about, picture, fullName } });
+  }, [user, guestUser, form, isSoloSession]);
+
   const initialValues = {
     guestType,
     hostOfferUrl,
     guestOfferUrl,
     potentialTopics,
     startHostAutomation,
+    guest: getGuesUsertObj(guestUser),
+    pollSharingImage: getPostSharingImageInfo(pollImageInfo),
     recordingDate: recordingDate ? dayjs(recordingDate, 'YYYY/MM/DD') : null,
-    guest: {
-      email: guestUser?.email,
-      phone: guestUser ? guestUser.profile?.phone : '',
-      about: guestUser ? guestUser?.profile?.about : '',
-      picture: guestUser ? guestUser?.profile?.picture : '',
-      fullName: guestUser ? `${guestUser?.firstName} ${guestUser?.lastName}` : '',
-    },
   };
 
   const guestTypeOptions = [
@@ -106,21 +136,24 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
   const getText = () => guestTypeOptions.find((item) => item.key === guestTypeValue)?.text;
 
   const onFormSubmit = (status) => {
-    form.validateFields().then((values) => {
-      values.status = status;
-      values.recordingDate = dayjs(values?.recordingDate).format();
-      console.log(values, isNew);
+    form
+      .validateFields()
+      .then((values) => {
+        values.status = status;
+        values.recordingDate = dayjs(values?.recordingDate).format();
+        console.log(values, isNew);
 
-      if (isNew) {
-        dispatch(addGuest(values));
-      } else {
-        dispatch(updateGuest(id, values));
-      }
-    });
+        if (isNew) {
+          dispatch(addGuest(values));
+        } else {
+          dispatch(updateGuest(id, values));
+        }
+      })
+      .catch(console.log);
   };
 
   return (
-    <>
+    <div className="automation-form">
       {!isGuestAcceptance && <AppTitle title={`${isNew ? 'New' : 'Update'} Automation`} />}
 
       <div className="add-guest">
@@ -133,30 +166,43 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
       <Form
         form={form}
         size="large"
+        labelWrap={true}
         labelAlign="left"
         layout="horizontal"
+        requiredMark={false}
         labelCol={{ span: 8 }}
         wrapperCol={{ span: 15 }}
-        className="automation-form"
         initialValues={initialValues}
       >
         <Form.Item name="guestType">
           <Radio.Group options={guestTypeOptions} />
         </Form.Item>
 
-        <Form.Item className="w-50" name="recordingDate" label="Poll End Date">
-          <DatePicker className="w-50 ml-0" bordered={false} />
+        <Form.Item
+          className="w-50"
+          name="recordingDate"
+          label="Poll End Date"
+          rules={[{ required: true }]}
+        >
+          <DatePicker className="w-75 ml-0" />
         </Form.Item>
 
         <div className="flex-item gap-2">
           <div className="flex-1">
             <Title level={5}>{getText()}</Title>
 
-            {hostInfoFields.map(({ label, name }) => (
-              <Form.Item key={label} name={name} label={label}>
-                <Input placeholder={label} />
+            {hostInfoFields.map(({ label, name, rules = null }) => (
+              <Form.Item key={label} name={name} label={label} rules={isSoloSession ? null : rules}>
+                <Input placeholder={label} disabled={isSoloSession} />
               </Form.Item>
             ))}
+
+            <Form.Item name={['guest', 'picture']} label="HEADSHOT IMAGE">
+              <HeadshotImage
+                picture={Form.useWatch(['guest', 'picture'], form)}
+                onChange={(picture) => form.setFieldValue(['guest', 'picture'], picture)}
+              />
+            </Form.Item>
           </div>
 
           <div className="flex-1">
@@ -171,7 +217,12 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
             </Form.Item>
 
             {topicLabels.map((label, index) => (
-              <Form.Item key={index} label={label} name={['potentialTopics', index]}>
+              <Form.Item
+                key={index}
+                label={label}
+                rules={[{ required: true }]}
+                name={['potentialTopics', index]}
+              >
                 <Input placeholder={label} />
               </Form.Item>
             ))}
@@ -190,15 +241,13 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
 
         <SocialPostingItem />
 
-        {guestTypeValue !== SOLO_SESSION && (
-          <div className="flex-item mt-4">
-            <Text strong>POSTING STARTS NOW</Text>
-            <Form.Item name="startHostAutomation" className="m-0" valuePropName="checked">
-              <Switch />
-            </Form.Item>
-            <Text type="secondary">Start when they starts</Text>
-          </div>
-        )}
+        <div className="flex-item mt-4">
+          <Text strong>POSTING STARTS NOW</Text>
+          <Form.Item name="startHostAutomation" valuePropName="checked" className="m-0">
+            <Switch disabled={isSoloSession} />
+          </Form.Item>
+          <Text type="secondary">Start when they starts</Text>
+        </div>
 
         <Space size={30} className="mt-4">
           <Button loading={isLoading} onClick={() => onFormSubmit(POLL_STATUS.DRAFT)}>
@@ -213,6 +262,6 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
           </Button>
         </Space>
       </Form>
-    </>
+    </div>
   );
 }

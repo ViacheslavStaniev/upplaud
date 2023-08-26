@@ -1,16 +1,17 @@
 import ShowInfo from './ShowInfo';
 import AppTitle from '../../components/AppTitle';
+import HeadshotImage from '../layouts/HeadshotImage';
 import SocialMediaConnect from './SocialMediaConnect';
 import { useAuthContext } from '../../auth/AuthProvider';
 import { Form, Input, Button, Divider, Typography, Space } from 'antd';
-import Dragger from 'antd/es/upload/Dragger';
 
 const { Text, Title, Paragraph } = Typography;
 
 export default function AccountAdmin() {
   const [form] = Form.useForm();
   const { user, isLoading, updateUser } = useAuthContext();
-  const { firstName, lastName, email, userName } = user;
+  const { firstName, lastName, email, userName, profile = {} } = user;
+  const pictureSrc = Form.useWatch(['profile', 'picture'], form);
 
   return (
     <>
@@ -26,10 +27,10 @@ export default function AccountAdmin() {
         <Form
           form={form}
           size="large"
-          className="w-80 "
+          className="w-80"
           layout="vertical"
           onFinish={updateUser}
-          initialValues={{ firstName, lastName, email }}
+          initialValues={{ email, lastName, firstName, profile: { ...profile } }}
         >
           <div className="flex-item gap-2">
             <Form.Item
@@ -55,28 +56,19 @@ export default function AccountAdmin() {
               <Input placeholder="EMAIL" />
             </Form.Item>
           </div>
+
           <div className="flex-item align-baseline gap-2">
-            <Form.Item
-              name="about"
-              label="SOCIAL BIO"
-              className="flex-1"
-              rules={[{ required: true, message: 'Social Bio is required.' }]}
-            >
-              <Input placeholder="SOCIAL BIO" />
+            <Form.Item name={['profile', 'phone']} label="CELL PHONE" className="flex-1">
+              <Input placeholder="CELL PHONE" />
             </Form.Item>
-            <Form.Item label="HEADSHOT IMAGE" className="flex-1">
-              <Dragger
-                style={{
-                  background: 'rgb(252, 251, 252)',
-                  border: '2px dashed rgb(179, 179, 179)',
-                }}
-              >
-                <Paragraph>Click to upload photo or drag and drop</Paragraph>
-                <Text>Any file up to 10MB</Text>
-              </Dragger>
+            <Form.Item name={['profile', 'about']} label="BIO OR SOCIAL URL" className="flex-1">
+              <Input placeholder="BIO OR SOCIAL URL" />
             </Form.Item>
-            <Form.Item label="" className="flex-1">
-              &nbsp;
+            <Form.Item name={['profile', 'picture']} label="HEADSHOT IMAGE" className="flex-1">
+              <HeadshotImage
+                picture={pictureSrc}
+                onChange={(picture) => form.setFieldValue('picture', picture)}
+              />
             </Form.Item>
           </div>
 

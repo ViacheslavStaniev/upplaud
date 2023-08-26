@@ -32,11 +32,11 @@ export default function SidebarNavMenu() {
           label: 'Automations',
           icon: <CustomIcon name="ul_menu" height={iconSize} width={iconSize} />,
         },
-        {
-          key: postingTemplate,
-          label: 'Posting Template',
-          icon: <CustomIcon name="edit_square" height={iconSize} width={iconSize} />,
-        },
+        // {
+        //   key: postingTemplate,
+        //   label: 'Posting Template',
+        //   icon: <CustomIcon name="edit_square" height={iconSize} width={iconSize} />,
+        // },
         {
           key: emailTemplates,
           label: 'Invitation Templates',

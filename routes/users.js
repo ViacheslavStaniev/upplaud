@@ -21,7 +21,7 @@ router.put("/", [check("email", "Please enter a valid email address").isEmail()]
     const user = await User.findById(req.userId);
     if (!user) return res.status(400).json({ errors: ["User doesn't exists. Please login again."] });
 
-    const { firstName, lastName, email, userName } = req.body;
+    const { firstName, lastName, email, userName, profile } = req.body;
 
     if (email) user.email = email;
     if (firstName) user.firstName = firstName;
@@ -32,6 +32,7 @@ router.put("/", [check("email", "Please enter a valid email address").isEmail()]
 
       user.userName = userName;
     }
+    if (profile) user.profile = { ...user.profile, ...profile };
 
     await user.save();
 

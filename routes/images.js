@@ -81,6 +81,22 @@ router.delete("/:imageId", verifyAuth, async (req, res) => {
   }
 });
 
+// @route POST api/images/upload2s3
+// @desc  Uploads an image to S3 and give the path
+// @access Public
+router.post("/upload2s3", verifyAuth, async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { imageData } = req.body;
+    const s3Path = await uploadImage(imageData, `${userId}/images/pictures`);
+    res.json({ s3Path });
+  } catch (err) {
+    // throw err;
+    console.error({ msg: err.message });
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 // Create User Image Helper
 async function createUserImage(name, imageData, userId) {
   const image = new Image({ name, user: userId });

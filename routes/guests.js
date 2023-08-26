@@ -35,6 +35,7 @@ router.post("/", verifyAuth, async (req, res) => {
     hostOfferUrl = "",
     guestOfferUrl = "",
     potentialTopics = [],
+    pollSharingImage = null,
     status = POLL_STATUS.DRAFT,
     recordingDate = new Date(),
     startHostAutomation = false,
@@ -63,6 +64,7 @@ router.post("/", verifyAuth, async (req, res) => {
       potentialTopics,
       startHostAutomation,
       show: hostUser.show,
+      pollImageInfo: null,
     };
 
     // Create Guest User && update it if guestType is not SOLO_SESSION
@@ -81,12 +83,22 @@ router.post("/", verifyAuth, async (req, res) => {
       pollInfo.guest = isGuestSpeaker ? hostUser._id : newUser?._id;
 
       // there are no details for show
-      if (isGuestSpeaker) pollInfo.show = null;
+      // if (isGuestSpeaker) pollInfo.show = null;
     } else pollInfo.guest = hostUser._id; // if guestType is SOLO_SESSION, then guest will be HostUser
 
     // Create new Poll
     const poll = new Guest(pollInfo);
     await poll.save(options);
+
+    // Save Poll Sharing Image Info
+    if (pollSharingImage) {
+      const pollId = poll._id;
+      const pollImageInfo = await createPollSharingImage(pollId, pollSharingImage);
+
+      // Save pollImageInfo id to poll
+      poll.pollImageInfo = pollImageInfo._id;
+      await poll.save(options);
+    }
 
     await session.commitTransaction();
     session.endSession();
@@ -110,6 +122,7 @@ router.put("/:pollId", verifyAuth, async (req, res) => {
     hostOfferUrl = "",
     guestOfferUrl = "",
     potentialTopics = [],
+    pollSharingImage = null,
     status = POLL_STATUS.DRAFT,
     recordingDate = new Date(),
     startHostAutomation = false,
@@ -140,6 +153,7 @@ router.put("/:pollId", verifyAuth, async (req, res) => {
       potentialTopics,
       startHostAutomation,
       show: hostUser.show,
+      pollImageInfo: null,
     };
 
     // Create Guest User && update it if guestType is not SOLO_SESSION
@@ -156,8 +170,18 @@ router.put("/:pollId", verifyAuth, async (req, res) => {
       pollInfo.guest = isGuestSpeaker ? hostUser._id : userObj?._id;
 
       // there are no details for show
-      if (isGuestSpeaker) pollInfo.show = null;
+      // if (isGuestSpeaker) pollInfo.show = null;
     } else pollInfo.guest = hostUser._id; // if guestType is SOLO_SESSION, then guest will be HostUser
+
+    // Save Poll Sharing Image Info
+    if (pollSharingImage) {
+      let pollImageInfo = await PollImage.findOne({ poll: pollId });
+      if (pollImageInfo) await PollImage.findByIdAndUpdate(pollImageInfo._id, getPollSharingInfoObj(pollSharingImage));
+      else pollImageInfo = await createPollSharingImage(pollId, pollSharingImage);
+
+      // Save pollImageInfo id to poll
+      pollInfo.pollImageInfo = pollImageInfo._id;
+    }
 
     // Update PollINfo
     await Guest.findByIdAndUpdate(pollId, pollInfo);
@@ -331,5 +355,20 @@ async function getPoll(pollId) {
   return await Guest.findById(pollId).populate("guest show pollImageInfo");
 }
 
+function getPollSharingInfoObj(obj) {
+  const { logo, headerText, headerBgColor, headerTextColor, footerText, footerBgColor, footerTextColor } = obj;
+  const header = { text: headerText, bgColor: headerBgColor, textColor: headerTextColor };
+  const footer = { text: footerText, bgColor: footerBgColor, textColor: footerTextColor };
+
+  return { logo, header, footer };
+}
+
+async function createPollSharingImage(pollId, obj) {
+  const pollImageInfo = new PollImage({ poll: pollId, ...getPollSharingInfoObj(obj) });
+  await pollImageInfo.save();
+  return pollImageInfo;
+}
+
 module.exports = router;
 module.exports.getPoll = getPoll;
+module.exports.createPollSharingImage = createPollSharingImage;

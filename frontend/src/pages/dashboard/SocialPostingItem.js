@@ -26,7 +26,7 @@ export default function SocialPostingItem() {
   const items = [
     {
       key: 'social',
-      label: 'Confirm socials & posting frequency',
+      label: 'Confirm Socials & Posting Frequency',
       children: (
         <div className="flex-item gap-1 flex-column align-baseline">
           {socials.map(({ label, postingOptions, key }) => (

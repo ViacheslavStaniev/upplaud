@@ -12,7 +12,6 @@ const POLL_STATUS = { DRAFT: "DRAFT", PUBLISHED: "PUBLISHED" };
 const GuestSchema = new Schema(
   {
     potentialTopics: [{ type: String }],
-    withGuest: { type: Boolean, default: true },
     hostOfferUrl: { type: String, default: "" },
     guestOfferUrl: { type: String, default: "" },
     recordingDate: { type: Date, default: new Date() },

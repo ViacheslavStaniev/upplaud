@@ -23,10 +23,10 @@ AuthProvider.propTypes = { children: PropTypes.node };
 export function AuthProvider({ children }) {
   const dispatch = useDispatch();
   const { user, errors, isLoading, isInitialized, isAuthenticated } = useSelector(
-    (state) => state.user
+    ({ user }) => user
   );
 
-  const { message } = App.useApp();
+  const { notification } = App.useApp();
 
   const onInitialize = useCallback(async () => {
     try {
@@ -102,15 +102,21 @@ export function AuthProvider({ children }) {
 
         await axios.put('users', userData);
 
-        message.success('User info updated successfully.');
+        notification.success({
+          message: 'Success',
+          description: 'User info updated successfully.',
+        });
         dispatch(updateState({ user: { ...user, ...userData }, isLoading: false }));
       } catch (error) {
         console.log(error);
         update({ isLoading: false });
-        message.error('An error occurred. Please try again.');
+        notification.error({
+          message: 'Error',
+          description: 'An error occurred. Please try again.',
+        });
       }
     },
-    [dispatch, update, user, message]
+    [dispatch, update, user, notification]
   );
 
   // Update Show
@@ -118,24 +124,23 @@ export function AuthProvider({ children }) {
     async (showData, showId) => {
       try {
         update({ isLoading: true });
-        if (showId) {
-          const { data } = await axios.put(`show/${showId}`, showData);
 
-          message.success('Data updated successfully.');
-          dispatch(updateState({ user: { ...user, show: data.show }, isLoading: false }));
-        } else {
-          const { data } = await axios.post('show', showData);
+        let result = null;
+        if (showId) result = await axios.put(`show/${showId}`, showData);
+        else result = await axios.post('show', showData);
 
-          message.success('Data updated successfully.');
-          dispatch(updateState({ user: { ...user, show: data.show }, isLoading: false }));
-        }
+        notification.success({ message: 'Success', description: 'Data Updated Successfully.' });
+        dispatch(updateState({ user: { ...user, show: result.data.show }, isLoading: false }));
       } catch (error) {
         console.log(error);
         update({ isLoading: false });
-        message.error('An error occurred. Please try again.');
+        notification.error({
+          message: 'Error',
+          description: 'An error occurred. Please try again.',
+        });
       }
     },
-    [dispatch, update, user, message]
+    [dispatch, update, user, notification]
   );
 
   // Social Login - Login via AuthToken
