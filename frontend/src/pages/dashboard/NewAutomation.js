@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { useAuthContext } from '../../auth/AuthProvider';
 import { GUEST_TYPE, POLL_STATUS } from '../../utils/types';
+import { pollTypeOptions, getPollType } from '../../utils/common';
 import { addGuest, fetchGuest, updateGuest, updateState } from '../../reducers/guestsSlice';
 import { Form, Space, Input, Button, DatePicker, Typography, Radio, Switch } from 'antd';
 import AppTitle from '../../components/AppTitle';
@@ -12,7 +13,7 @@ import SocialPostingItem from './SocialPostingItem';
 import HeadshotImage from '../layouts/HeadshotImage';
 
 const { Text, Link, Title } = Typography;
-const { HOST_GUEST, SOLO_SESSION, GUEST_SPEAKER } = GUEST_TYPE;
+const { HOST_GUEST, SOLO_SESSION } = GUEST_TYPE;
 
 const hostInfoFields = [
   {
@@ -127,14 +128,6 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
     recordingDate: recordingDate ? dayjs(recordingDate, 'YYYY/MM/DD') : null,
   };
 
-  const guestTypeOptions = [
-    { key: HOST_GUEST, value: HOST_GUEST, label: 'HOST A GUEST', text: 'Guest Info' },
-    { key: SOLO_SESSION, value: SOLO_SESSION, label: 'SOLO SESSION', text: 'Solo Info' },
-    { key: GUEST_SPEAKER, value: GUEST_SPEAKER, label: "I'M A GUEST SPEAKER", text: 'Host Info' },
-  ];
-
-  const getText = () => guestTypeOptions.find((item) => item.key === guestTypeValue)?.text;
-
   const onFormSubmit = (status) => {
     form
       .validateFields()
@@ -175,7 +168,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
         initialValues={initialValues}
       >
         <Form.Item name="guestType">
-          <Radio.Group options={guestTypeOptions} />
+          <Radio.Group options={pollTypeOptions} />
         </Form.Item>
 
         <Form.Item
@@ -189,7 +182,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
 
         <div className="flex-item gap-2">
           <div className="flex-1">
-            <Title level={5}>{getText()}</Title>
+            <Title level={5}>{getPollType(guestTypeValue)?.text}</Title>
 
             {hostInfoFields.map(({ label, name, rules = null }) => (
               <Form.Item key={label} name={name} label={label} rules={isSoloSession ? null : rules}>
