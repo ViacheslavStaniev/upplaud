@@ -85,3 +85,13 @@ export const uploadAndGetS3Path = (obj) => {
       .catch(reject);
   });
 };
+
+// Generate Poll Sharing Image
+export const generatePollImage = (obj) => {
+  return new Promise((resolve, reject) => {
+    axios
+      .post('guests/generate-poll-image', obj)
+      .then((result) => resolve(result.data))
+      .catch(reject);
+  });
+};

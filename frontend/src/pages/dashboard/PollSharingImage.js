@@ -2,29 +2,26 @@ import Simplebar from 'simplebar-react';
 import { useEffect, useState } from 'react';
 import { getFullS3Url } from '../../config-global';
 import { useDispatch, useSelector } from 'react-redux';
-import { getImages, uploadImage, deleteImage } from '../../reducers/imageSlice';
+import { getImages, uploadImage, deleteImage, generatePollImage } from '../../reducers/imageSlice';
 import {
   List,
   Form,
   Spin,
   Modal,
+  Image,
   Select,
   Button,
   Input,
   Avatar,
   Upload,
   Tooltip,
-  Collapse,
   Typography,
   Popconfirm,
   ColorPicker,
 } from 'antd';
-import {
-  InboxOutlined,
-  MinusOutlined,
-  PlusOutlined,
-  QuestionCircleOutlined,
-} from '@ant-design/icons';
+import { PlusOutlined, InboxOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import Accordian from '../../components/Accordian';
+import CustomUpload from '../layouts/CustomUpload';
 import SuggestionModal from '../layouts/SuggestionModal';
 
 const { Option } = Select;
@@ -33,12 +30,19 @@ const { Text, Paragraph } = Typography;
 
 export default function PollSharingImage() {
   const form = Form.useFormInstance();
+  const pollImageSrc = Form.useWatch('pollImageSrc', form);
+
+  // Local States
+  const [isGenerating, setIsGenerating] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showAddManageImages, setShowAddManageImages] = useState(false);
+  const [showPollImagePreview, setShowPollImagePreview] = useState(false);
 
+  // Redux States
   const dispatch = useDispatch();
   const { images, isLoading, isUploading } = useSelector((state) => state.images);
 
+  // Get Images
   useEffect(() => {
     dispatch(getImages());
   }, [dispatch]);
@@ -93,9 +97,24 @@ export default function PollSharingImage() {
     );
   };
 
+  const onPollImageGenerateClick = async () => {
+    setIsGenerating(true);
+    const { pollSharingImage } = form.getFieldsValue();
+
+    try {
+      const res = await generatePollImage(pollSharingImage);
+
+      form.setFieldValue('pollImageSrc', res.s3Path);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   const items = [
     {
-      key: 'social',
+      key: 'pollSharingImage',
       label: 'Customize Poll Sharing Image',
       children: (
         <>
@@ -115,7 +134,6 @@ export default function PollSharingImage() {
                 ))}
               </Select>
             </Form.Item>
-
             <Button
               type="link"
               icon={<PlusOutlined />}
@@ -123,19 +141,39 @@ export default function PollSharingImage() {
             >
               ADD/MANAGE IMAGES
             </Button>
-            <Button type="link" disabled>
-              PREVIEW SELECTION
-            </Button>
           </div>
 
           <TextColorFormItem label="HEADLINE HOOK" title="HEADLINE" formType="header" />
           <TextColorFormItem label="FOOTER BENEFIT" title="FOOTER" formType="footer" />
 
           <div className="flex-item gap-2 mt-4">
-            <Button type="primary" danger>
+            <Button danger type="primary" loading={isGenerating} onClick={onPollImageGenerateClick}>
               GENERATE POLL SHARING IMAGE
             </Button>
-            <Button type="primary">UPLOAD YOUR OWN</Button>
+            <CustomUpload
+              cropShape="rect"
+              aspect={1.9 / 1}
+              onComplete={(value) => form.setFieldValue('pollImageSrc', value)}
+            >
+              <Button type="primary">UPLOAD YOUR OWN</Button>
+            </CustomUpload>
+
+            <Button
+              type="default"
+              disabled={!pollImageSrc}
+              onClick={() => setShowPollImagePreview(true)}
+            >
+              Preview Image
+            </Button>
+
+            <Image
+              style={{ display: 'none' }}
+              src={getFullS3Url(pollImageSrc)}
+              preview={{
+                visible: showPollImagePreview,
+                onVisibleChange: (value) => setShowPollImagePreview(value),
+              }}
+            />
           </div>
         </>
       ),
@@ -171,12 +209,7 @@ export default function PollSharingImage() {
 
   return (
     <>
-      <Collapse
-        items={items}
-        bordered={false}
-        className="mb-2 bg-F7F3F9"
-        expandIcon={({ isActive }) => (isActive ? <MinusOutlined /> : <PlusOutlined />)}
-      />
+      <Accordian items={items} defaultActive="pollSharingImage" />
 
       <SuggestionModal open={showSuggestions} onCancel={() => setShowSuggestions(false)} />
 

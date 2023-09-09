@@ -32,9 +32,12 @@ router.get("/:guestId", verifyAuth, async (req, res) => {
 router.post("/", verifyAuth, async (req, res) => {
   const {
     guest = null,
+    pollImageSrc = "",
     hostOfferUrl = "",
     guestOfferUrl = "",
     potentialTopics = [],
+    hostSpeakerLabel = "",
+    guestSpeakerLabel = "",
     pollSharingImage = null,
     status = POLL_STATUS.DRAFT,
     recordingDate = new Date(),
@@ -58,10 +61,13 @@ router.post("/", verifyAuth, async (req, res) => {
     const pollInfo = {
       status,
       guestType,
+      pollImageSrc,
       hostOfferUrl,
       guestOfferUrl,
       recordingDate,
       potentialTopics,
+      hostSpeakerLabel,
+      guestSpeakerLabel,
       startHostAutomation,
       show: hostUser.show,
       pollImageInfo: null,
@@ -69,13 +75,14 @@ router.post("/", verifyAuth, async (req, res) => {
 
     // Create Guest User && update it if guestType is not SOLO_SESSION
     if (guestType !== GUEST_TYPE.SOLO_SESSION) {
-      const { fullName = "", email = "", phone = "", about = "", picture = "" } = guest;
+      const { fullName = "", email = "", phone = "", about = "", picture = "", jobTitle = "", organization = "" } = guest;
       const nameArr = fullName.split(" ");
       const firstName = nameArr.shift();
       const lastName = nameArr.join(" ");
 
       const newUser = await createOrUpdateGuestUser(firstName, lastName, email, randomString(8), USER_TYPE.GUEST);
-      if (newUser) await updateUserInfo(newUser._id, { profile: { ...newUser.profile, phone, about, picture } });
+      if (newUser)
+        await updateUserInfo(newUser._id, { profile: { ...newUser.profile, phone, about, picture, jobTitle, organization } });
 
       // Current Host is a Guest for another show
       const isGuestSpeaker = guestType === GUEST_TYPE.GUEST_SPEAKER;
@@ -119,9 +126,12 @@ router.post("/", verifyAuth, async (req, res) => {
 router.put("/:pollId", verifyAuth, async (req, res) => {
   const {
     guest = null,
+    pollImageSrc = "",
     hostOfferUrl = "",
     guestOfferUrl = "",
     potentialTopics = [],
+    hostSpeakerLabel = "",
+    guestSpeakerLabel = "",
     pollSharingImage = null,
     status = POLL_STATUS.DRAFT,
     recordingDate = new Date(),
@@ -147,10 +157,13 @@ router.put("/:pollId", verifyAuth, async (req, res) => {
     const pollInfo = {
       status,
       guestType,
+      pollImageSrc,
       hostOfferUrl,
       guestOfferUrl,
       recordingDate,
       potentialTopics,
+      hostSpeakerLabel,
+      guestSpeakerLabel,
       startHostAutomation,
       show: hostUser.show,
       pollImageInfo: null,
@@ -158,13 +171,18 @@ router.put("/:pollId", verifyAuth, async (req, res) => {
 
     // Create Guest User && update it if guestType is not SOLO_SESSION
     if (guestType !== GUEST_TYPE.SOLO_SESSION) {
-      const { fullName = "", phone = "", about = "", picture = "" } = guest;
+      const { fullName = "", phone = "", about = "", picture = "", jobTitle = "", organization = "organization" } = guest;
       const nameArr = fullName.split(" ");
       const firstName = nameArr.shift();
       const lastName = nameArr.join(" ");
 
       const userObj = poll.guest;
-      if (userObj) await updateUserInfo(userObj._id, { firstName, lastName, profile: { ...userObj.profile, phone, about, picture } });
+      if (userObj)
+        await updateUserInfo(userObj._id, {
+          firstName,
+          lastName,
+          profile: { ...userObj.profile, phone, about, picture, jobTitle, organization },
+        });
 
       const isGuestSpeaker = guestType === GUEST_TYPE.GUEST_SPEAKER;
       pollInfo.guest = isGuestSpeaker ? hostUser._id : userObj?._id;
@@ -344,6 +362,32 @@ router.put("/poll-image-info/:pollImageId", verifyAuth, async (req, res) => {
     await PollImage.findByIdAndUpdate(req.params.pollImageId, { logo, footer, header });
 
     res.json({ msg: "Poll Image Info updated successfully." });
+  } catch (err) {
+    // throw err;
+    console.error({ msg: err.message });
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// @route   POST api/guests/generate-poll-image
+// @desc    Generate Poll Image
+// @access  Public
+router.post("/generate-poll-image", verifyAuth, async (req, res) => {
+  try {
+    const { footerBgColor, footerText, footerTextColor, headerBgColor, headerText, headerTextColor, logo } = req.body;
+
+    let logoDetails = null;
+    if (logo) logoDetails = await Image.findById(logo);
+
+    // Write code to generate the poll sharing image @ankit sir
+
+    // blah blah blah
+
+    // you can use the "uploadImage" function form s3helper file for uploading the image to s3
+    // return just the S3 path of the generated image like the following
+    const s3Path = "63f741756837d73eb66215fb/images/pictures/1694274752472.png";
+
+    res.json({ s3Path });
   } catch (err) {
     // throw err;
     console.error({ msg: err.message });

@@ -12,7 +12,7 @@ import PollSharingImage from './PollSharingImage';
 import SocialPostingItem from './SocialPostingItem';
 import HeadshotImage from '../layouts/HeadshotImage';
 
-const { Text, Link, Title } = Typography;
+const { Text, Title } = Typography;
 const { HOST_GUEST, SOLO_SESSION } = GUEST_TYPE;
 
 const hostInfoFields = [
@@ -34,18 +34,34 @@ const hostInfoFields = [
     name: ['guest', 'about'],
     label: 'BIO OR SOCIAL URL',
   },
+  {
+    name: ['guest', 'jobTitle'],
+    label: 'JOB TITLE',
+  },
+  {
+    name: ['guest', 'organization'],
+    label: 'ORGANIZATION',
+  },
 ];
 
 const topicLabels = ['TOPIC OR STORY1', 'TOPIC OR STORY2'];
 
 const pollInfoFields = [
   {
+    name: 'hostSpeakerLabel',
+    label: 'YOUR SPEAKER LABEL',
+  },
+  {
+    name: 'guestSpeakerLabel',
+    label: 'THEIR SPEAKER LABEL',
+  },
+  {
     name: 'hostOfferUrl',
-    label: 'HOST OFFER URL',
+    label: 'YOUR REWARD URL',
   },
   {
     name: 'guestOfferUrl',
-    label: 'GUEST OFFER URL',
+    label: 'THEIR REWARD URL',
   },
 ];
 
@@ -55,6 +71,8 @@ const getGuesUsertObj = (userObj = null) => {
     phone: userObj ? userObj.profile?.phone : '',
     about: userObj ? userObj?.profile?.about : '',
     picture: userObj ? userObj?.profile?.picture : '',
+    jobTitle: userObj ? userObj?.profile?.jobTitle : '',
+    organization: userObj ? userObj?.profile?.organization : '',
     fullName: userObj ? `${userObj?.firstName} ${userObj?.lastName}` : '',
   };
 };
@@ -87,11 +105,14 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
 
   const {
     guest: guestUser,
+    pollImageSrc = '',
     pollImageInfo = null,
     hostOfferUrl = null,
     guestOfferUrl = null,
     recordingDate = null,
     guestType = HOST_GUEST,
+    hostSpeakerLabel = '',
+    guestSpeakerLabel = '',
     potentialTopics = ['', ''],
     startHostAutomation = false,
   } = guest || {};
@@ -119,9 +140,12 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
 
   const initialValues = {
     guestType,
+    pollImageSrc,
     hostOfferUrl,
     guestOfferUrl,
     potentialTopics,
+    hostSpeakerLabel,
+    guestSpeakerLabel,
     startHostAutomation,
     guest: getGuesUsertObj(guestUser),
     pollSharingImage: getPostSharingImageInfo(pollImageInfo),
@@ -167,6 +191,10 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
         wrapperCol={{ span: 15 }}
         initialValues={initialValues}
       >
+        <Form.Item hidden name="pollImageSrc" label="Poll Image">
+          <Input placeholder="Poll Image" />
+        </Form.Item>
+
         <Form.Item name="guestType">
           <Radio.Group options={pollTypeOptions} />
         </Form.Item>
@@ -180,7 +208,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
           <DatePicker className="w-75 ml-0" />
         </Form.Item>
 
-        <div className="flex-item gap-2">
+        <div className="d-flex gap-2">
           <div className="flex-1">
             <Title level={5}>{getPollType(guestTypeValue)?.text}</Title>
 
@@ -200,14 +228,6 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
 
           <div className="flex-1">
             <Title level={5}>Poll Info</Title>
-
-            <Form.Item>
-              (Use AI to generate topics; see{' '}
-              <Link href="#" target="_blank">
-                video tutorial
-              </Link>
-              )
-            </Form.Item>
 
             {topicLabels.map((label, index) => (
               <Form.Item

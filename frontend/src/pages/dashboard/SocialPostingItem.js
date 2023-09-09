@@ -1,5 +1,5 @@
-import { Checkbox, Collapse, Select } from 'antd';
-import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
+import { Checkbox, Select } from 'antd';
+import Accordian from '../../components/Accordian';
 
 export default function SocialPostingItem() {
   const postTimes = [4, 3, 2, 1];
@@ -46,12 +46,5 @@ export default function SocialPostingItem() {
     },
   ];
 
-  return (
-    <Collapse
-      items={items}
-      bordered={false}
-      className="mb-2 bg-F7F3F9"
-      expandIcon={({ isActive }) => (isActive ? <MinusOutlined /> : <PlusOutlined />)}
-    />
-  );
+  return <Accordian items={items} defaultActive="social" />;
 }

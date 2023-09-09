@@ -50,6 +50,8 @@ const UserSchema = new Schema(
       state: { type: String, default: "" },
       city: { type: String, default: "" },
       zipCode: { type: Number, default: null },
+      jobTitle: { type: String, default: "" },
+      organization: { type: String, default: "" },
     },
     userName: {
       type: String,
