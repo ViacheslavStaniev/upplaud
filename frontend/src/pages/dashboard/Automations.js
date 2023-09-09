@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useAuthContext } from '../../auth/AuthProvider';
-import { getRandomColor, getDateString } from '../../utils/common';
+import { getRandomColor, getDateString, pollTypeOptions } from '../../utils/common';
 import { getGuestsList, deleteGuest, deleteManyGuests } from '../../reducers/guestsSlice';
-import { Avatar, Button, Typography, Space, Table, Tag, Popconfirm, Tooltip } from 'antd';
+import { Avatar, Button, Typography, Space, Table, Tag, Popconfirm, Tooltip, Tabs } from 'antd';
 import {
   EditOutlined,
   MailOutlined,
@@ -25,22 +25,11 @@ export default function Automations() {
   const totalSelected = selectedRows.length;
 
   const { user } = useAuthContext();
-  const { guests = [] } = useSelector((state) => state.guests);
+  const { guests = [], isLoading = false } = useSelector((state) => state.guests);
 
   useEffect(() => {
     dispatch(getGuestsList(user.show?._id));
   }, [user.show?._id, dispatch]);
-
-  const data = guests.map(({ _id, guest, recordingDate }) => ({
-    guest,
-    id: _id,
-    key: _id,
-    name: guest ? `${guest.firstName} ${guest.lastName}` : '--',
-    recordingDate: new Date(recordingDate).getTime(),
-    status: { guest: null, host: null },
-    asqs: { g: 0, h: 0, n: 0 },
-    todo: '',
-  }));
 
   const columns = [
     {
@@ -67,10 +56,10 @@ export default function Automations() {
     {
       title: 'STATUS',
       key: 'status',
-      align: 'center',
+      // align: 'center',
       dataIndex: 'status',
       render: ({ guest, host }) => (
-        <Space direction="vertical">
+        <div className="flex-item gap-1">
           <Tag
             color="rgb(184 209 196 / 20%)"
             style={{
@@ -109,7 +98,7 @@ export default function Automations() {
               '--'
             )}
           </Tag>
-        </Space>
+        </div>
       ),
     },
     {
@@ -117,11 +106,11 @@ export default function Automations() {
       title: 'VOTES',
       dataIndex: 'asqs',
       render: ({ g = 0, h = 0, n = 0 }) => (
-        <Space direction="vertical">
+        <div className="flex-item gap-1">
           <Tag color="green">G: {g}</Tag>
           <Tag color="cyan">H: {h}</Tag>
           <Tag color="lime">N: {n}</Tag>
-        </Space>
+        </div>
       ),
     },
     {
@@ -163,33 +152,58 @@ export default function Automations() {
     },
   ];
 
-  const tableTitle = () => {
+  const getDataSource = (key) => {
+    return guests
+      .filter(({ guestType }) => guestType === key)
+      .map(({ _id, guest, recordingDate }) => ({
+        guest,
+        id: _id,
+        key: _id,
+        status: { guest: null, host: null },
+        recordingDate: new Date(recordingDate).getTime(),
+        name: guest ? `${guest.firstName} ${guest.lastName}` : '--',
+        asqs: { g: 0, h: 0, n: 0 },
+        todo: '',
+      }));
+  };
+
+  const SelectedItemsAction = () => {
+    if (totalSelected === 0) return null;
+
     return (
-      <div
-        className={`flex-item space-between w-100 p-1 pl-2 pr-2 br-5px ${
-          totalSelected === 0 ? 'bg-white visibility-hidden' : 'bg-E1BBE1'
-        }`}
-      >
-        <Text strong className="color-5D0578 font-16px">
-          {totalSelected} selected
+      <div className="flex-item br-5px gap-2">
+        <Text strong className="font-16px" type="danger">
+          {totalSelected} Automation{totalSelected > 1 ? 's' : ''} Selected
         </Text>
-        <Space>
-          <Popconfirm
-            placement="topLeft"
-            title="Are you sure?"
-            description={
-              <Text>
-                This action can't be undone. <br /> All the selected entries will be deleted.
-              </Text>
-            }
-            onConfirm={() => dispatch(deleteManyGuests(selectedRows.map((row) => row.id)))}
-          >
-            <Button type="text" className="color-5D0578" icon={<DeleteOutlined />} />
-          </Popconfirm>
-        </Space>
+
+        <Popconfirm
+          placement="topLeft"
+          title="Are you sure?"
+          okButtonProps={{ danger: true }}
+          description="All the selected entries will be deleted."
+          onConfirm={() => dispatch(deleteManyGuests(selectedRows.map((row) => row.id)))}
+        >
+          <Button danger type="primary" icon={<DeleteOutlined />} />
+        </Popconfirm>
       </div>
     );
   };
+
+  const items = pollTypeOptions.map(({ key, label }) => {
+    return {
+      key,
+      label,
+      children: (
+        <Table
+          columns={columns}
+          loading={isLoading}
+          dataSource={getDataSource(key)}
+          pagination={{ defaultPageSize: 5 }}
+          rowSelection={{ type: 'checkbox', onChange: (_, rows) => setSelectedRows(rows) }}
+        />
+      ),
+    };
+  });
 
   return (
     <>
@@ -210,12 +224,10 @@ export default function Automations() {
           </Button>
         </div>
 
-        <Table
-          columns={columns}
-          dataSource={data}
-          title={tableTitle}
-          pagination={{ defaultPageSize: 5 }}
-          rowSelection={{ type: 'checkbox', onChange: (_, rows) => setSelectedRows(rows) }}
+        <Tabs
+          items={items}
+          defaultActiveKey={pollTypeOptions[0]?.key}
+          tabBarExtraContent={{ right: <SelectedItemsAction /> }}
         />
       </div>
     </>

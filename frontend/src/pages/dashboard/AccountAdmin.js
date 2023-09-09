@@ -1,5 +1,6 @@
 import ShowInfo from './ShowInfo';
 import AppTitle from '../../components/AppTitle';
+import HeadshotImage from '../layouts/HeadshotImage';
 import SocialMediaConnect from './SocialMediaConnect';
 import { useAuthContext } from '../../auth/AuthProvider';
 import { Form, Input, Button, Divider, Typography, Space } from 'antd';
@@ -9,7 +10,8 @@ const { Text, Title, Paragraph } = Typography;
 export default function AccountAdmin() {
   const [form] = Form.useForm();
   const { user, isLoading, updateUser } = useAuthContext();
-  const { firstName, lastName, email, userName } = user;
+  const { firstName, lastName, email, userName, profile = {} } = user;
+  const pictureSrc = Form.useWatch(['profile', 'picture'], form);
 
   return (
     <>
@@ -25,10 +27,10 @@ export default function AccountAdmin() {
         <Form
           form={form}
           size="large"
-          className="w-80 "
+          className="w-80"
           layout="vertical"
           onFinish={updateUser}
-          initialValues={{ firstName, lastName, email }}
+          initialValues={{ email, lastName, firstName, profile: { ...profile } }}
         >
           <div className="flex-item gap-2">
             <Form.Item
@@ -52,6 +54,21 @@ export default function AccountAdmin() {
               ]}
             >
               <Input placeholder="EMAIL" />
+            </Form.Item>
+          </div>
+
+          <div className="flex-item align-baseline gap-2">
+            <Form.Item name={['profile', 'phone']} label="CELL PHONE" className="flex-1">
+              <Input placeholder="CELL PHONE" />
+            </Form.Item>
+            <Form.Item name={['profile', 'about']} label="BIO OR SOCIAL URL" className="flex-1">
+              <Input placeholder="BIO OR SOCIAL URL" />
+            </Form.Item>
+            <Form.Item name={['profile', 'picture']} label="HEADSHOT IMAGE" className="flex-1">
+              <HeadshotImage
+                picture={pictureSrc}
+                onChange={(picture) => form.setFieldValue('picture', picture)}
+              />
             </Form.Item>
           </div>
 

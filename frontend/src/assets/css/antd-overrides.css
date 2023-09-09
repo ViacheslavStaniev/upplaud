@@ -116,3 +116,15 @@ span.ant-tag {
   .ant-collapse-header-text {
   color: #893da0 !important;
 }
+
+.ant-collapse-header {
+  font-size: 16px;
+  font-weight: 600;
+}
+.ant-collapse-header .ant-collapse-header-text {
+  font-size: inherit;
+}
+
+/* .automation-form .ant-row.ant-form-item-row .ant-form-item-label-left {
+  padding-top: 12px;
+} */

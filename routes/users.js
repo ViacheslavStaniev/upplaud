@@ -1,6 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
+const { USER_TYPE } = require("../models/User");
 const { ServiceError } = require("./errors");
 const verifyAuth = require("../config/verifyAuth");
 const { createUsername } = require("../helpers/utills");
@@ -20,7 +21,7 @@ router.put("/", [check("email", "Please enter a valid email address").isEmail()]
     const user = await User.findById(req.userId);
     if (!user) return res.status(400).json({ errors: ["User doesn't exists. Please login again."] });
 
-    const { firstName, lastName, email, userName } = req.body;
+    const { firstName, lastName, email, userName, profile } = req.body;
 
     if (email) user.email = email;
     if (firstName) user.firstName = firstName;
@@ -31,6 +32,7 @@ router.put("/", [check("email", "Please enter a valid email address").isEmail()]
 
       user.userName = userName;
     }
+    if (profile) user.profile = { ...user.profile, ...profile };
 
     await user.save();
 
@@ -147,15 +149,15 @@ async function updateUserInfo(userId, info) {
   return await User.findByIdAndUpdate(userId, info);
 }
 
-async function createOrUpdateGuestUser(firstName, lastName, email, password) {
+async function createOrUpdateGuestUser(firstName, lastName, email, password, type = USER_TYPE.GUEST) {
   const userExists = await User.findOne({ email });
-  if (userExists) return await updateUserInfo(userExists._id, { firstName, lastName });
+  if (userExists) return await updateUserInfo(userExists._id, { firstName, lastName, type });
 
-  return await register(firstName, lastName, email, password);
+  return await register(firstName, lastName, email, password, "", type);
 }
 
-async function register(firstName, lastName, email, password, timezone = "") {
-  const user = new User({ firstName, lastName, email, password, timezone });
+async function register(firstName, lastName, email, password, timezone = "", type = USER_TYPE.GUEST) {
+  const user = new User({ firstName, lastName, email, password, timezone, type });
 
   const session = await User.startSession();
   const options = { session };

@@ -1,14 +1,10 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-// Guest Status
-const STATUS_INACTIVE = 0;
-const STATUS_ACTIVE = 1;
-const STATUS_DELETED = 2;
-
-// Automate State
-const AUTOMATED_NO = 0;
-const AUTOMATED_YES = 1;
+// Automated
+const AUTOMATED = { NO: 0, YES: 1 };
+// Status
+const STATUS = { ACTIVE: 1, INACTIVE: 0, DELETED: 2 };
 
 const PodcastSchema = new Schema(
   {
@@ -19,7 +15,7 @@ const PodcastSchema = new Schema(
     topic: String,
     status: {
       type: Number,
-      default: STATUS_ACTIVE,
+      default: STATUS.ACTIVE,
     },
     recordingDate: {
       type: Date,
@@ -27,7 +23,7 @@ const PodcastSchema = new Schema(
     },
     isAutomated: {
       type: Boolean,
-      default: AUTOMATED_NO,
+      default: AUTOMATED.NO,
     },
     guest: {
       ref: "User",

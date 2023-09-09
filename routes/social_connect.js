@@ -1,4 +1,3 @@
-const axios = require("axios");
 const express = require("express");
 const passport = require("passport");
 const FacebookStrategy = require("passport-facebook").Strategy;
@@ -7,11 +6,13 @@ const LinkedInStrategy = require("passport-linkedin-oauth2").Strategy;
 // const { sendEmail } = require("../helpers/email");
 const User = require("../models/User");
 const SocialAccount = require("./../models/SocialAccount");
+const { SOCIAL_TYPE } = require("./../models/SocialAccount");
 const { AuthClient, RestliClient } = require("linkedin-api-client");
-const { SOCIAL_TYPE_FACEBOOK, SOCIAL_TYPE_LINKEDIN } = require("./../models/SocialAccount");
+
 // const { updateUserInfo } = require("./users");
 
 const router = express.Router();
+const { LINKEDIN } = SOCIAL_TYPE;
 
 // const LINKEDIN_API_URL = "https://api.linkedin.com/rest/";
 const { REACT_APP_URL, FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, LINKEDIN_APP_ID, LINKEDIN_APP_SECRET, LINKEDIN_VERSION } = process.env;
@@ -79,7 +80,7 @@ const saveAccessTokens = async (profile, type, connectType, accessToken, refresh
         };
 
         // Save Public URL
-        const publicUrl = type === SOCIAL_TYPE_LINKEDIN && _json && _json.vanityName ? `www.linkedin.com/in/${_json.vanityName}` : "";
+        const publicUrl = type === LINKEDIN && _json && _json.vanityName ? `www.linkedin.com/in/${_json.vanityName}` : "";
 
         return await saveUserAccessTokens(user, type, connectType, info, publicUrl);
       }
@@ -126,7 +127,7 @@ const setLinkedinStrategy = async (req, res, next) => {
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
-          const updatedUser = await saveAccessTokens(profile, SOCIAL_TYPE_LINKEDIN, connectType, accessToken, refreshToken);
+          const updatedUser = await saveAccessTokens(profile, LINKEDIN, connectType, accessToken, refreshToken);
 
           // Fetch Pages if exists
           if (updatedUser && connectType === "page") {
@@ -250,7 +251,7 @@ async function initLinkedInPosting(req, res) {
       expiresInSeconds: tokenObj.refresh_token_expires_in,
     };
 
-    await saveUserAccessTokens(req.user, SOCIAL_TYPE_LINKEDIN, connectType, info);
+    await saveUserAccessTokens(req.user, LINKEDIN, connectType, info);
 
     // const res = await axios.post("https://api.linkedin.com/v2/ugcPosts", { headers }, post);
     await restliClient.create({ resourcePath: "/ugcPosts", entity: post, accessToken });

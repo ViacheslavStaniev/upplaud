@@ -22,10 +22,10 @@ const connectDB = async (max_attempts = 5) => {
       console.log("MongoDB Connected ...");
     } catch (err) {
       console.error(err.message);
-      console.log("retrying in 5 seconds");
+      console.log("retrying in 2 seconds");
       max_attempts--;
 
-      setTimeout(attempt, 5000);
+      setTimeout(attempt, 2000);
     }
   };
 

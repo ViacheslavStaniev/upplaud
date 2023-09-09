@@ -1,10 +1,8 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-// MEDIA_TYPE
-const TYPE_FACEBOOK = "FB";
-const TYPE_LINKEDIN = "LN";
-const TYPE_INSTAGRAM = "IN";
+// Social Type
+const SOCIAL_TYPE = { FACEBOOK: "FB", LINKEDIN: "LN", INSTAGRAM: "IN" };
 
 const subDefaultObj = { socialId: "", accessToken: null, refreshToken: null, expiresInSeconds: null, isConnected: false };
 
@@ -13,7 +11,7 @@ const SocialAccountSchema = new Schema(
     user: { ref: "User", type: Schema.Types.ObjectId },
     type: {
       type: String,
-      default: TYPE_FACEBOOK,
+      default: SOCIAL_TYPE.FACEBOOK,
     },
     page: {
       type: Object,
@@ -36,6 +34,4 @@ const SocialAccountSchema = new Schema(
 );
 
 module.exports = SocialAccount = mongoose.model("SocialAccount", SocialAccountSchema);
-module.exports.SOCIAL_TYPE_FACEBOOK = TYPE_FACEBOOK;
-module.exports.SOCIAL_TYPE_LINKEDIN = TYPE_LINKEDIN;
-module.exports.SOCIAL_TYPE_INSTAGRAM = TYPE_INSTAGRAM;
+module.exports.SOCIAL_TYPE = SOCIAL_TYPE;

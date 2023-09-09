@@ -1,15 +1,14 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-// Authentication status
-const STATUS_ACTIVE = 1;
-const STATUS_INACTIVE = 0;
-const STATUS_DELETED = -1;
+// User Type
+const USER_TYPE = { HOST: 1, GUEST: 2 };
 
 // Gender types
-const GENDER_MALE = 1;
-const GENDER_FEMALE = 2;
-const GENDER_UNKNOWN = 0;
+const GENDER = { MALE: 1, FEMALE: 2, UNKNOWN: 0 };
+
+// User Status
+const USER_STATUS = { ACTIVE: 1, INACTIVE: 0, DELETED: -1 };
 
 // ADMIN
 const IS_ADMIN_NO = 0;
@@ -44,13 +43,15 @@ const UserSchema = new Schema(
       dob: { type: Date, default: null },
       about: { type: String, default: "" },
       picture: { type: String, default: "" },
-      gender: { type: Number, default: GENDER_UNKNOWN },
+      gender: { type: Number, default: GENDER.UNKNOWN },
       phone: { type: String, default: "" },
       address: { type: String, default: "" },
       country: { type: String, default: "" },
       state: { type: String, default: "" },
       city: { type: String, default: "" },
       zipCode: { type: Number, default: null },
+      jobTitle: { type: String, default: "" },
+      organization: { type: String, default: "" },
     },
     userName: {
       type: String,
@@ -62,10 +63,14 @@ const UserSchema = new Schema(
     },
     status: {
       type: Number,
-      default: STATUS_ACTIVE,
+      default: USER_STATUS.ACTIVE,
     },
     resetToken: {
       type: String,
+    },
+    type: {
+      type: Number,
+      default: USER_TYPE.HOST,
     },
     isAdmin: {
       type: Number,
@@ -85,5 +90,6 @@ const UserSchema = new Schema(
 );
 
 module.exports = User = mongoose.model("User", UserSchema);
+module.exports.USER_TYPE = USER_TYPE;
 global.IS_ADMIN_NO = IS_ADMIN_NO;
 global.IS_ADMIN_YES = IS_ADMIN_YES;
