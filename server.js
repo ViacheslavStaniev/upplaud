@@ -37,7 +37,7 @@ const corsOptions = {
 
 // Passport Auth
 app.use(cookieParser());
-app.use(session({ secret: process.env.PASSPORT_SECERT, resave: true, saveUninitialized: true }));
+app.use(session({ secret: process.env.PASSPORT_SECERT, resave: true, saveUninitialized: true, cookie: { secure: true } }));
 app.use(passport.initialize());
 app.use(passport.session());
 

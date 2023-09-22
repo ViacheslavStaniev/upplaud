@@ -62,7 +62,7 @@ const saveUserAccessTokens = async (user, type, connectType, info, publicUrl = "
   return user;
 };
 
-const saveAccessTokens = async (profile, type, connectType, accessToken, refreshToken) => {
+const saveAccessTokens = async (profile, type, connectType, accessToken, refreshToken, accounts = []) => {
   try {
     const { id, emails, _json } = profile;
 
@@ -72,6 +72,7 @@ const saveAccessTokens = async (profile, type, connectType, accessToken, refresh
       if (user) {
         // Social Params
         const info = {
+          accounts,
           socialId: id,
           accessToken,
           refreshToken,
@@ -127,10 +128,10 @@ const setLinkedinStrategy = async (req, res, next) => {
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
-          const updatedUser = await saveAccessTokens(profile, LINKEDIN, connectType, accessToken, refreshToken);
+          let accounts = [];
 
           // Fetch Pages if exists
-          if (updatedUser && connectType === "page") {
+          if (connectType === "page") {
             const restliClient = new RestliClient();
             restliClient.setDebugParams({ enabled: true });
 
@@ -158,15 +159,34 @@ const setLinkedinStrategy = async (req, res, next) => {
 
             console.log(organizations);
 
-            req.session.linkedinPages = organizations.map(({ id, localizedName, localizedWebsite, localizedDescription }) => ({
-              id,
-              name: localizedName,
-              website: localizedWebsite,
-              description: localizedDescription,
-            }));
-
-            req.session.save(console.log);
+            accounts = organizations.map(
+              ({
+                id,
+                logoV2,
+                foundedOn,
+                vanityName,
+                coverPhotoV2,
+                localizedName,
+                localizedWebsite,
+                organizationType,
+                localizedDescription,
+                ...otherParams
+              }) => ({
+                id,
+                logoV2,
+                foundedOn,
+                vanityName,
+                coverPhotoV2,
+                organizationType,
+                name: localizedName,
+                urn: otherParams["$URN"],
+                website: localizedWebsite,
+                description: localizedDescription,
+              })
+            );
           }
+
+          const updatedUser = await saveAccessTokens(profile, LINKEDIN, connectType, accessToken, refreshToken, accounts);
 
           done(null, updatedUser);
         } catch (error) {

@@ -74,13 +74,18 @@ export function AuthProvider({ children }) {
   // REGISTER
   const register = useCallback(
     async (userData) => {
-      const response = await axios.post('/auth/register', userData);
+      try {
+        const response = await axios.post('/auth/register', userData);
 
-      const { accessToken, user } = response.data;
+        const { accessToken, user } = response.data;
 
-      localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('accessToken', accessToken);
 
-      dispatch(saveUser({ payload: { user } }));
+        dispatch(saveUser({ payload: { user } }));
+      } catch (error) {
+        console.log(error);
+        dispatch(updateState({ isLoading: false, errors: error?.errors }));
+      }
     },
     [dispatch]
   );

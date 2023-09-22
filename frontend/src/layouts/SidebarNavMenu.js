@@ -8,8 +8,7 @@ export default function SidebarNavMenu() {
 
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const { newAutomation, automations, postingTemplate, emailTemplates, guestingAdmin } =
-    PATH_DASHBOARD.dashboard;
+  const { newAutomation, automations, emailTemplates, guestingAdmin } = PATH_DASHBOARD.dashboard;
 
   const items = [
     {
@@ -56,9 +55,9 @@ export default function SidebarNavMenu() {
       theme="light"
       mode="inline"
       items={items}
+      selectedKeys={[pathname]}
       defaultOpenKeys={['manage']}
       onClick={({ key }) => navigate(key)}
-      selectedKeys={[pathname]}
     />
   );
 }

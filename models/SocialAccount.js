@@ -4,7 +4,14 @@ const Schema = mongoose.Schema;
 // Social Type
 const SOCIAL_TYPE = { FACEBOOK: "FB", LINKEDIN: "LN", INSTAGRAM: "IN" };
 
-const subDefaultObj = { socialId: "", accessToken: null, refreshToken: null, expiresInSeconds: null, isConnected: false };
+const subDefaultObj = {
+  socialId: "",
+  accounts: [],
+  accessToken: null,
+  refreshToken: null,
+  isConnected: false,
+  expiresInSeconds: null,
+};
 
 const SocialAccountSchema = new Schema(
   {

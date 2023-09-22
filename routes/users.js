@@ -132,6 +132,30 @@ router.post(
   initLinkedInPosting
 );
 
+// @route   POST api/users/connect/:type/:subType/:selected
+// @desc    Connect user with facebook/linkedin page/group account
+// @access  Public
+router.get("/connect/:type/:subType/:selected", verifyAuth, async (req, res) => {
+  const { type, subType, selected } = req.params;
+
+  try {
+    const user = await User.findById(req.userId).populate("socialAccounts");
+    if (!user) throw new Error("user not found.");
+
+    // Update social account
+    const socialAccount = user.socialAccounts.find((s) => s.type === type);
+    if (socialAccount) {
+      socialAccount[subType] = { ...socialAccount[subType], socialId: selected, isConnected: true };
+      await socialAccount.save();
+    }
+
+    res.status(200).json({ socialAccount, error: false, msg: "Account connected successfully." });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: true, msg: error?.message });
+  }
+});
+
 async function isUserNameTaken(userId, userName) {
   const user = await User.findOne({ userName: userName, _id: { $ne: userId } });
   return user !== null;
