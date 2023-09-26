@@ -4,6 +4,9 @@ const Schema = mongoose.Schema;
 // Social Type
 const SOCIAL_TYPE = { FACEBOOK: "FB", LINKEDIN: "LN", INSTAGRAM: "IN" };
 
+// Social Sub Type
+const SOCIAL_SUB_TYPE = { PROFILE: "profile", PAGE: "page", GROUP: "group" };
+
 const subDefaultObj = {
   socialId: "",
   accounts: [],
@@ -42,3 +45,4 @@ const SocialAccountSchema = new Schema(
 
 module.exports = SocialAccount = mongoose.model("SocialAccount", SocialAccountSchema);
 module.exports.SOCIAL_TYPE = SOCIAL_TYPE;
+module.exports.SOCIAL_SUB_TYPE = SOCIAL_SUB_TYPE;

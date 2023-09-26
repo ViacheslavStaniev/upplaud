@@ -3,6 +3,7 @@ const Guest = require("../models/Guest");
 const Image = require("../models/Image");
 const PollImage = require("../models/PollImage");
 const verifyAuth = require("../config/verifyAuth");
+const SocialPosting = require("../models/SocialPosting");
 const { USER_TYPE } = require("../models/User");
 const { uploadImage } = require("../helpers/s3Helper");
 const { randomString } = require("../helpers/utills");
@@ -31,6 +32,7 @@ router.get("/:guestId", verifyAuth, async (req, res) => {
 // @access  Public
 router.post("/", verifyAuth, async (req, res) => {
   const {
+    socials = [],
     guest = null,
     pollImageSrc = "",
     hostOfferUrl = "",
@@ -107,6 +109,17 @@ router.post("/", verifyAuth, async (req, res) => {
       await poll.save(options);
     }
 
+    // Save Social Accounts
+    if (socials.length) {
+      const socialAccounts = socials.map(({ type, subType, subTypeName, subTypeId, frequency, isActive = false }) => {
+        return { poll: poll._id, user: req.userId, type, subType, subTypeId, subTypeName, frequency, isActive };
+      });
+
+      const socialsIems = await SocialPosting.insertMany(socialAccounts, options);
+      poll.socials = socialsIems.map((item) => item._id);
+      await poll.save(options);
+    }
+
     await session.commitTransaction();
     session.endSession();
 
@@ -125,6 +138,7 @@ router.post("/", verifyAuth, async (req, res) => {
 // @access  Public
 router.put("/:pollId", verifyAuth, async (req, res) => {
   const {
+    socials = [],
     guest = null,
     pollImageSrc = "",
     hostOfferUrl = "",
@@ -199,6 +213,31 @@ router.put("/:pollId", verifyAuth, async (req, res) => {
 
       // Save pollImageInfo id to poll
       pollInfo.pollImageInfo = pollImageInfo._id;
+    }
+
+    // Save Social Accounts
+    if (socials.length) {
+      const socialsIds = socials.map(async ({ type, subType, subTypeName, subTypeId, frequency, isActive = false }) => {
+        let socialAccount = await SocialPosting.findOne({ poll: pollId, type, subType });
+        if (socialAccount) await SocialPosting.findByIdAndUpdate(socialAccount._id, { subTypeId, subTypeName, frequency, isActive });
+        else {
+          socialAccount = new SocialPosting({
+            poll: pollId,
+            user: req.userId,
+            type,
+            subType,
+            subTypeId,
+            subTypeName,
+            frequency,
+            isActive,
+          });
+          await socialAccount.save();
+        }
+
+        return socialAccount._id;
+      });
+
+      pollInfo.socials = await Promise.all(socialsIds);
     }
 
     // Update PollINfo
@@ -396,7 +435,7 @@ router.post("/generate-poll-image", verifyAuth, async (req, res) => {
 });
 
 async function getPoll(pollId) {
-  return await Guest.findById(pollId).populate("guest show pollImageInfo");
+  return await Guest.findById(pollId).populate("guest show pollImageInfo socials");
 }
 
 function getPollSharingInfoObj(obj) {

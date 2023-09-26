@@ -1,18 +1,21 @@
 const express = require("express");
 const passport = require("passport");
+const SocialPosting = require("./../models/SocialPosting");
 const FacebookStrategy = require("passport-facebook").Strategy;
 const LinkedInStrategy = require("passport-linkedin-oauth2").Strategy;
 // const verifyAuth = require("../config/verifyAuth");
 // const { sendEmail } = require("../helpers/email");
 const User = require("../models/User");
 const SocialAccount = require("./../models/SocialAccount");
-const { SOCIAL_TYPE } = require("./../models/SocialAccount");
+const { POLL_STATUS } = require("./../models/Guest");
+const { SOCIAL_TYPE, SOCIAL_SUB_TYPE } = require("./../models/SocialAccount");
 const { AuthClient, RestliClient } = require("linkedin-api-client");
 
 // const { updateUserInfo } = require("./users");
 
 const router = express.Router();
 const { LINKEDIN } = SOCIAL_TYPE;
+const { PROFILE, PAGE, GROUP } = SOCIAL_SUB_TYPE;
 
 // const LINKEDIN_API_URL = "https://api.linkedin.com/rest/";
 const { REACT_APP_URL, FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, LINKEDIN_APP_ID, LINKEDIN_APP_SECRET, LINKEDIN_VERSION } = process.env;
@@ -26,16 +29,7 @@ const getAuthCallbackURL = (req, urlFor) => {
 
 const redirectToWebapp = (req, res) => res.redirect(REACT_APP_URL);
 
-const responseBackToWebapp = (req, res) => {
-  console.log("rsp2", req.session);
-  res.json({ session: req.session, user: req.user });
-  //   const { accessToken } = req.user;
-  //   const params = accessToken
-  //     ? `#auth_token=${accessToken}`
-  //     : `#error=true&error_description=This social media login might not be working right now. Please use another way to login.
-  //   `;
-  //   res.redirect(REACT_APP_URL + params);
-};
+const responseBackToWebapp = (req, res) => res.redirect(REACT_APP_URL + "?isConnected=1");
 
 const saveUserAccessTokens = async (user, type, connectType, info, publicUrl = "") => {
   // find social account
@@ -76,8 +70,8 @@ const saveAccessTokens = async (profile, type, connectType, accessToken, refresh
           socialId: id,
           accessToken,
           refreshToken,
-          expiresInSeconds: 0,
-          isConnected: connectType === "profile",
+          isConnected: true,
+          expiresInSeconds: 24 * 60 * 60, // 24 hours
         };
 
         // Save Public URL
@@ -116,7 +110,7 @@ const setFacebookStrategy = async (req, res, next) => {
 
 const setLinkedinStrategy = async (req, res, next) => {
   const { connectType } = req.params;
-  const additionalScopes = connectType === "profile" ? ["w_member_social"] : ["rw_organization_admin", "w_organization_social"];
+  const additionalScopes = connectType === PROFILE ? ["w_member_social"] : ["rw_organization_admin", "w_organization_social"];
 
   passport.use(
     new LinkedInStrategy(
@@ -131,7 +125,7 @@ const setLinkedinStrategy = async (req, res, next) => {
           let accounts = [];
 
           // Fetch Pages if exists
-          if (connectType === "page") {
+          if (connectType === PAGE) {
             const restliClient = new RestliClient();
             restliClient.setDebugParams({ enabled: true });
 
@@ -156,8 +150,6 @@ const setLinkedinStrategy = async (req, res, next) => {
                 return result.data;
               })
             );
-
-            console.log(organizations);
 
             accounts = organizations.map(
               ({
@@ -220,68 +212,119 @@ router.get("/linkedin/:connectType", setLinkedinStrategy, passport.authenticate(
 // @access  Public
 router.get("/linkedin-callback", passport.authenticate("linkedin", AuthOptions), responseBackToWebapp);
 
-async function initLinkedInPosting(req, res) {
-  const { profile } = req.user.socialAccounts.find((s) => s.type === "LN");
-
-  const authClient = new AuthClient({
-    clientId: LINKEDIN_APP_ID,
-    clientSecret: LINKEDIN_APP_SECRET,
-    redirectUrl: getAuthCallbackURL(req, "linkedin"),
-  });
-  const restliClient = new RestliClient();
-  restliClient.setDebugParams({ enabled: true });
-
-  const timestamp = new Date().getTime();
-
-  const post = {
-    author: `urn:li:person:${profile?.socialId}`,
-    lifecycleState: "PUBLISHED",
-    specificContent: {
-      "com.linkedin.ugc.ShareContent": {
-        shareMediaCategory: "ARTICLE",
-        shareCommentary: { text: `Western Australia - ${timestamp}` },
-        media: [
-          {
-            status: "READY",
-            title: { text: "Western Australia" },
-            originalUrl: "https://likenoother.wa.gov.au/",
-            description: {
-              text: "Western Australia is an ancient, energetic land, brimming with opportunity ready for you to discover.",
-            },
-          },
-        ],
-      },
-    },
-    visibility: {
-      "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC",
-    },
-  };
-
+// @route GET auth/connect/init-auto-posting
+// @desc Initiate Social (Facebook/LinkedIn) Posting
+// @access Public
+router.get("/init-auto-posting", async (req, res) => {
   try {
-    // fetch new access token
-    const tokenObj = await authClient.exchangeRefreshTokenForAccessToken(profile?.refreshToken);
-    const accessToken = tokenObj?.access_token;
+    const activePostings = await SocialPosting.find({ isActive: true })
+      .populate("poll")
+      .populate({ path: "user", populate: { path: "socialAccounts" } });
+    if (activePostings.length === 0) return res.status(200).json({ error: false, msg: "No active posting found." });
 
-    // SAVE ACCESS_TOKEN
-    const connectType = "profile";
-    const info = {
-      accessToken: tokenObj.access_token,
-      refreshToken: tokenObj.refresh_token,
-      isConnected: connectType === "profile",
-      expiresInSeconds: tokenObj.refresh_token_expires_in,
+    // Initiate Postings
+    for (let i = 0; i < activePostings.length; i++) {
+      const posting = activePostings[i];
+      const { _id, poll, user, type, subType, subTypeId, frequency, frequencyPosted } = posting;
+
+      // Check is poll is published
+      if (!poll || poll.status === POLL_STATUS.DRAFT) continue;
+
+      // Check if social account is connected
+      const socialAccount = user.socialAccounts.find((s) => s.type === type);
+      if (!socialAccount) continue;
+
+      // Check if social account is active
+      const { isConnected, accessToken, refreshToken } = socialAccount[subType];
+      if (!isConnected) continue;
+
+      // Initiate Posting
+      if (type === SOCIAL_TYPE.FACEBOOK) {
+        // Initiate Facebook Posting
+      } else if (type === SOCIAL_TYPE.LINKEDIN) {
+        // Initiate LinkedIn Posting
+        const redirectUrl = getAuthCallbackURL(req, "linkedin");
+        try {
+          const tokenObj = await initLinkedInPosting(subTypeId, accessToken, refreshToken, subType, redirectUrl);
+
+          // SAVE ACCESS_TOKEN
+          const info = {
+            isConnected: true,
+            accessToken: tokenObj.access_token,
+            refreshToken: tokenObj.refresh_token,
+            expiresInSeconds: tokenObj.refresh_token_expires_in,
+          };
+          await saveUserAccessTokens(user, type, subType, info);
+        } catch (error) {
+          const urs = await saveUserAccessTokens(user, type, subType, {
+            isConnected: false,
+            accounts: [],
+            accessToken: "",
+            refreshToken: "",
+          });
+
+          console.log(error, urs);
+        }
+      }
+    }
+
+    res.status(200).json({ activePostings, error: false, msg: "Posting completed successfully." });
+  } catch (error) {
+    // console.log(error);
+    res.status(500).json({ error: true, msg: error?.response?.data?.error_description || error?.message });
+  }
+});
+
+// Initiate LinkedIn Posting
+async function initLinkedInPosting(id, accessToken, refreshToken, subType = PROFILE, redirectUrl) {
+  return new Promise(async (resolve, reject) => {
+    // Author
+    const author = subType === PROFILE ? `urn:li:person:${id}` : `urn:li:organization:${id}`;
+
+    // Auth Client
+    const authClient = new AuthClient({
+      clientId: LINKEDIN_APP_ID,
+      clientSecret: LINKEDIN_APP_SECRET,
+      redirectUrl: redirectUrl,
+    });
+    const restliClient = new RestliClient();
+    restliClient.setDebugParams({ enabled: true });
+
+    // Post Content
+    const post = {
+      author,
+      lifecycleState: "PUBLISHED",
+      specificContent: {
+        "com.linkedin.ugc.ShareContent": {
+          shareMediaCategory: "ARTICLE",
+          shareCommentary: { text: `Western Australia - ${new Date().getTime()}` },
+          media: [
+            {
+              status: "READY",
+              title: { text: "Western Australia" },
+              originalUrl: "https://likenoother.wa.gov.au/",
+              description: {
+                text: "Western Australia is an ancient, energetic land, brimming with opportunity ready for you to discover.",
+              },
+            },
+          ],
+        },
+      },
+      visibility: { "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC" },
     };
 
-    await saveUserAccessTokens(req.user, LINKEDIN, connectType, info);
+    try {
+      // fetch new access token
+      const tokenObj = await authClient.exchangeRefreshTokenForAccessToken(refreshToken);
+      const accessToken = tokenObj?.access_token;
 
-    // const res = await axios.post("https://api.linkedin.com/v2/ugcPosts", { headers }, post);
-    await restliClient.create({ resourcePath: "/ugcPosts", entity: post, accessToken });
-    // console.log(res, res?.createdEntityId);
-    res.status(200).json({ error: false, msg: "Post created successfully." });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: true, msg: error?.message });
-  }
+      await restliClient.create({ resourcePath: "/ugcPosts", entity: post, accessToken });
+      // console.log(res, res?.createdEntityId);
+      resolve(tokenObj);
+    } catch (error) {
+      reject({ error: true, msg: error?.response?.data?.error_description || error?.message });
+    }
+  });
 }
 
 module.exports = router;
-module.exports.initLinkedInPosting = initLinkedInPosting;

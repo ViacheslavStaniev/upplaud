@@ -152,7 +152,7 @@ export default function PollSharingImage() {
             </Button>
             <CustomUpload
               cropShape="rect"
-              aspect={1.9 / 1}
+              aspect={1.91 / 1}
               onComplete={(value) => form.setFieldValue('pollImageSrc', value)}
             >
               <Button type="primary">UPLOAD YOUR OWN</Button>

@@ -1,6 +1,7 @@
 import CustomIcon from '../components/CustomIcon';
 import { Dropdown, Avatar, Typography } from 'antd';
 import { useAuthContext } from '../auth/AuthProvider';
+import { HomeOutlined, LogoutOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
 
 const { Text } = Typography;
 
@@ -12,6 +13,7 @@ export default function UserNavMenu() {
     {
       key: 'name',
       disabled: true,
+      className: 'cursor-default',
       label: (
         <div className="d-flex flex-column">
           <Text strong>{userName}</Text>
@@ -20,11 +22,11 @@ export default function UserNavMenu() {
       ),
     },
     { type: 'divider' },
-    { key: 'home', label: 'Home' },
-    { key: 'profile', label: 'Profile' },
-    { key: 'settings', label: 'Settings' },
+    { key: 'home', label: 'Home', icon: <HomeOutlined /> },
+    { key: 'profile', label: 'Profile', icon: <UserOutlined /> },
+    { key: 'settings', label: 'Settings', icon: <SettingOutlined /> },
     { type: 'divider' },
-    { key: 'logout', label: 'Logout', danger: true, onClick: logout },
+    { key: 'logout', label: 'Logout', danger: true, onClick: logout, icon: <LogoutOutlined /> },
   ];
 
   return (

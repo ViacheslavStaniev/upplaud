@@ -178,6 +178,9 @@
 .pointer {
   cursor: pointer;
 }
+.cursor-default {
+  cursor: default !important;
+}
 .br-5px {
   border-radius: 5px !important;
 }
@@ -273,6 +276,9 @@
 }
 .color-0AB6B6 {
   color: #0ab6b6 !important;
+}
+.color-red {
+  color: red !important;
 }
 .border-E0E0E0 {
   border: 1px solid #e0e0e0;

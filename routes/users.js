@@ -6,7 +6,6 @@ const { ServiceError } = require("./errors");
 const verifyAuth = require("../config/verifyAuth");
 const { createUsername } = require("../helpers/utills");
 const { check, validationResult } = require("express-validator");
-const { initLinkedInPosting } = require("./social_connect");
 
 const router = express.Router();
 
@@ -110,26 +109,6 @@ router.post(
       else throw err;
     }
   }
-);
-
-router.post(
-  "/samplepost",
-  verifyAuth,
-  async (req, res, next) => {
-    try {
-      let user = await getUserInfo(req.userId);
-
-      req.user = user;
-
-      // await initLinkedInPosting(user);
-      next();
-    } catch (err) {
-      // throw err;
-      console.error({ msg: err.message });
-      res.status(500).send("Internal Server Error");
-    }
-  },
-  initLinkedInPosting
 );
 
 // @route   POST api/users/connect/:type/:subType/:selected

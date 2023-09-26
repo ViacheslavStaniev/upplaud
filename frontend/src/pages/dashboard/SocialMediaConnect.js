@@ -2,16 +2,13 @@ import axios from '../../utils/axios';
 import CustomIcon from '../../components/CustomIcon';
 import { useState, useEffect } from 'react';
 import { APP_BASEURL } from '../../config-global';
-import { CheckCircleFilled } from '@ant-design/icons';
 import { useAuthContext } from '../../auth/AuthProvider';
-import { Radio, Button, Space, Typography, Dropdown, notification, Modal, List } from 'antd';
+import { SOCIAL_TYPE, SOCIAL_TITLES } from '../../utils/types';
+import { CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
+import { Radio, Button, Space, Typography, Dropdown, notification, Modal, List, Badge } from 'antd';
 
 const { Title, Link, Text, Paragraph } = Typography;
-
-const FACEBOOK = 'FB';
-const LINKEDIN = 'LN';
-const INSTAGRAM = 'IN';
-const SocialTitles = { [FACEBOOK]: 'Facebook', [LINKEDIN]: 'LinkedIn', [INSTAGRAM]: 'Instagram' };
+const { FACEBOOK, LINKEDIN } = SOCIAL_TYPE;
 
 export default function SocialMediaConnect({ showTitle = true, className = '' }) {
   const { user } = useAuthContext();
@@ -28,7 +25,7 @@ export default function SocialMediaConnect({ showTitle = true, className = '' })
 
   useEffect(() => {
     // Show Page/Group Selection if not selected
-    const fbItem = getItem(FACEBOOK);
+    // const fbItem = getItem(FACEBOOK);
 
     // Show Page Selection if not selected
     const lnItem = getItem(LINKEDIN);
@@ -43,8 +40,19 @@ export default function SocialMediaConnect({ showTitle = true, className = '' })
     }
   }, [socialAccounts]);
 
-  console.log('modalConfig', modalConfig);
+  const urlParams = new URLSearchParams(window.location.search);
+  const isConnected = urlParams.get('isConnected') || '0';
 
+  useEffect(() => {
+    if (isConnected === '1' && modalConfig?.open === false && modalConfig?.type === null) {
+      notification.success({
+        message: 'Success',
+        description: 'You have successfully connected your social media account.',
+      });
+    }
+  }, [isConnected, modalConfig]);
+
+  //
   const isSocialConnected = (type) => {
     const item = getItem(type);
     if (item) {
@@ -55,57 +63,41 @@ export default function SocialMediaConnect({ showTitle = true, className = '' })
     return false;
   };
 
+  const getConnectIcon = (isConnected = false) => {
+    return isConnected ? (
+      <CheckCircleFilled className="color-0AB6B6" />
+    ) : (
+      <CloseCircleFilled className="color-red" />
+    );
+  };
+
+  // getItems
   const getItems = (type = FACEBOOK) => {
     const item = getItem(type) || {};
 
-    const title = SocialTitles[type];
+    const title = SOCIAL_TITLES[type];
     const { page, group, profile } = item;
     const getURL = (subType) => `${APP_BASEURL}/auth/connect/${title.toLowerCase()}/${subType}`;
 
     const items = [
       {
         key: 'page',
+        icon: getConnectIcon(page?.isConnected),
         label: <LinkItem title={title} subTitle="Page" href={getURL('page')} item={page} />,
       },
       {
         key: 'group',
+        icon: getConnectIcon(group?.isConnected),
         label: <LinkItem title={title} subTitle="Group" href={getURL('group')} item={group} />,
       },
       {
         key: 'profile',
+        icon: getConnectIcon(profile?.isConnected),
         label: (
           <LinkItem title={title} subTitle="Profile" href={getURL('profile')} item={profile} />
         ),
       },
     ];
-
-    if (type === LINKEDIN) {
-      const isConnected = isSocialConnected(LINKEDIN);
-      items.push({
-        key: 'try',
-        label: (
-          <>
-            {!isConnected && (
-              <Text style={{ display: 'block' }}>Please connect the account first.</Text>
-            )}
-
-            <Button block type="primary" disabled={!isConnected}>
-              Try Sample Post Testing{' '}
-            </Button>
-          </>
-        ),
-        onClick: async (e) => {
-          try {
-            const res = await axios.post(`users/samplepost`);
-            console.log(res);
-            notification.success({ message: 'Success', description: res.data?.msg });
-          } catch (error) {
-            console.log(error);
-            notification.error({ message: 'Error', description: error?.msg });
-          }
-        },
-      });
-    }
 
     return type === FACEBOOK ? items : items.filter((item) => item.key !== 'group');
   };
@@ -128,35 +120,57 @@ export default function SocialMediaConnect({ showTitle = true, className = '' })
     }
   };
 
+  // socialsBtns
+  const socialsBtns = [
+    {
+      key: 'facebook',
+      disabled: true,
+      title: 'Facebook',
+      items: getItems(FACEBOOK),
+      isAccountConnected: isSocialConnected(FACEBOOK),
+    },
+    {
+      key: 'linkedin',
+      disabled: false,
+      title: 'LinkedIn',
+      items: getItems(LINKEDIN),
+      isAccountConnected: isSocialConnected(LINKEDIN),
+    },
+  ];
+
   return (
     <div className={`social-media ${className}`}>
       {showTitle && <Title level={3}>Connect with social media</Title>}
 
       <Space size={16}>
-        <Dropdown arrow trigger={['click']} menu={{ items: getItems(FACEBOOK) }}>
-          <Button size="large" shape="round" type="facebook" icon={<CustomIcon name="facebook" />}>
-            {isSocialConnected(FACEBOOK) ? 'Connected' : 'Connect'} with Facebook
-          </Button>
-        </Dropdown>
+        {socialsBtns.map(({ key, title, items, disabled, isAccountConnected }) => (
+          <Dropdown arrow key={key} trigger={['click']} menu={{ items }} disabled={disabled}>
+            <Badge count={getConnectIcon(isAccountConnected)}>
+              <Button
+                type={key}
+                size="large"
+                shape="round"
+                disabled={disabled}
+                icon={<CustomIcon name={key} />}
+              >
+                {isAccountConnected ? 'Connected' : 'Connect'} with {title}
+              </Button>
+            </Badge>
+          </Dropdown>
+        ))}
 
         {/* <Button hidden size="large" shape="round" type="instagram" icon={<CustomIcon name="instagram" />}>
           Connect with Instagram
         </Button> */}
-
-        <Dropdown arrow trigger={['click']} menu={{ items: getItems(LINKEDIN) }}>
-          <Button size="large" shape="round" type="linkedin" icon={<CustomIcon name="linkedin" />}>
-            {isSocialConnected(LINKEDIN) ? 'Connected' : 'Connect'} with LinkedIn
-          </Button>
-        </Dropdown>
       </Space>
 
       <Modal
         width={600}
         closable={false}
         keyboard={false}
+        okText="Connect"
         maskClosable={false}
         open={modalConfig.open}
-        okText="Connect"
         onOk={onPageGroupSelect}
         cancelButtonProps={{ disabled: modalConfig.loading }}
         onCancel={() => setModalConfig((c) => ({ ...c, open: false }))}
@@ -201,23 +215,10 @@ export default function SocialMediaConnect({ showTitle = true, className = '' })
   );
 }
 
-function LinkItem({ href, title, subTitle, item }) {
-  const isConnected = item?.isConnected;
-
+function LinkItem({ href, title, subTitle }) {
   return (
-    // <Space className={isConnected ? 'disabled opacity-85' : ''}>
-    <Space>
-      <Link className="capitalize" href={href}>
-        {title} {subTitle}
-      </Link>
-      {isConnected && (
-        <div>
-          <CheckCircleFilled className="color-0AB6B6" />
-          <Text className="color-0AB6B6" style={{ marginLeft: 2.5 }}>
-            Connected
-          </Text>
-        </div>
-      )}
-    </Space>
+    <Link className="capitalize" href={href}>
+      {title} {subTitle}
+    </Link>
   );
 }

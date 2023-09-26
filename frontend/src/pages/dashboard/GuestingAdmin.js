@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useAuthContext } from '../../auth/AuthProvider';
 import { getShowsList } from '../../reducers/guestsSlice';
 import { Button, Typography, Space, Table, Tag, Popconfirm } from 'antd';
-import { FormOutlined, LinkOutlined, DeleteOutlined, PauseCircleOutlined } from '@ant-design/icons';
+import { EditOutlined, LinkOutlined, DeleteOutlined, PauseCircleOutlined } from '@ant-design/icons';
 import AppTitle from '../../components/AppTitle';
 
 const { Text, Title } = Typography;
@@ -66,7 +66,7 @@ export default function GuestingAdmin() {
       render: (_, record) => (
         <Space>
           <Button icon={<LinkOutlined />} />
-          <Button icon={<FormOutlined />} />
+          <Button icon={<EditOutlined />} />
           <Button icon={<PauseCircleOutlined />} />
           <Popconfirm
             placement="topLeft"

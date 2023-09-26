@@ -5,3 +5,13 @@ export const GUEST_TYPE = {
 };
 
 export const POLL_STATUS = { DRAFT: 'DRAFT', PUBLISHED: 'PUBLISHED' };
+
+export const SOCIAL_TYPE = { FACEBOOK: 'FB', LINKEDIN: 'LN', INSTAGRAM: 'IN' };
+
+export const SOCIAL_SUB_TYPE = { PROFILE: 'profile', PAGE: 'page', GROUP: 'group' };
+
+export const SOCIAL_TITLES = {
+  [SOCIAL_TYPE.FACEBOOK]: 'Facebook',
+  [SOCIAL_TYPE.LINKEDIN]: 'LinkedIn',
+  [SOCIAL_TYPE.INSTAGRAM]: 'Instagram',
+};

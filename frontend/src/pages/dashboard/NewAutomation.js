@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { useAuthContext } from '../../auth/AuthProvider';
 import { GUEST_TYPE, POLL_STATUS } from '../../utils/types';
-import { pollTypeOptions, getPollType } from '../../utils/common';
+import { pollTypeOptions, getPollType, getSocialsItems } from '../../utils/common';
 import { addGuest, fetchGuest, updateGuest, updateState } from '../../reducers/guestsSlice';
 import { Form, Space, Input, Button, DatePicker, Typography, Radio, Switch } from 'antd';
 import AppTitle from '../../components/AppTitle';
@@ -103,7 +103,11 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
   const isSoloSession = guestTypeValue === SOLO_SESSION;
   const { guest, isLoading } = useSelector((state) => state.guests);
 
+  // Default Socials Items
+  const defaultSocials = getSocialsItems(user?.socialAccounts);
+
   const {
+    socials = [],
     guest: guestUser,
     pollImageSrc = '',
     pollImageInfo = null,
@@ -148,6 +152,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
     guestSpeakerLabel,
     startHostAutomation,
     guest: getGuesUsertObj(guestUser),
+    socials: socials.length > 0 ? socials : defaultSocials,
     pollSharingImage: getPostSharingImageInfo(pollImageInfo),
     recordingDate: recordingDate ? dayjs(recordingDate, 'YYYY/MM/DD') : null,
   };
@@ -205,7 +210,12 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
           label="Poll End Date"
           rules={[{ required: true }]}
         >
-          <DatePicker className="w-75 ml-0" />
+          <DatePicker
+            className="w-75 ml-0"
+            disabledDate={(d) =>
+              d && (d < dayjs().subtract(1, 'day') || d > dayjs().add(1, 'years'))
+            }
+          />
         </Form.Item>
 
         <div className="d-flex gap-2">

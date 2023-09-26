@@ -24,6 +24,7 @@ const GuestSchema = new Schema(
     pollImageInfo: { ref: "PollImage", type: Schema.Types.ObjectId },
     status: { type: String, enum: Object.values(POLL_STATUS), default: POLL_STATUS.DRAFT },
     guestType: { type: String, enum: Object.values(GUEST_TYPE), default: GUEST_TYPE.HOST_GUEST },
+    socials: [{ ref: "SocialPosting", type: Schema.Types.ObjectId }],
   },
   { timestamps: true, autoCreate: true }
 );
