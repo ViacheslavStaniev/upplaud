@@ -8,6 +8,7 @@ const LinkedInStrategy = require("passport-linkedin-oauth2").Strategy;
 const User = require("../models/User");
 const SocialAccount = require("./../models/SocialAccount");
 const { POLL_STATUS } = require("./../models/Guest");
+const { getBaseDomain } = require("./../helpers/utills");
 const { SOCIAL_TYPE, SOCIAL_SUB_TYPE } = require("./../models/SocialAccount");
 const { AuthClient, RestliClient } = require("linkedin-api-client");
 
@@ -21,11 +22,7 @@ const { PROFILE, PAGE, GROUP } = SOCIAL_SUB_TYPE;
 const { REACT_APP_URL, FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, LINKEDIN_APP_ID, LINKEDIN_APP_SECRET, LINKEDIN_VERSION } = process.env;
 const AuthOptions = { failureRedirect: "/auth/error", failureFlash: false, session: true, failureMessage: true };
 
-const getAuthCallbackURL = (req, urlFor) => {
-  const hostname = req.protocol + "://" + req.headers.host;
-
-  return `${hostname}/auth/connect/${urlFor}-callback`;
-};
+const getAuthCallbackURL = (req, urlFor) => getBaseDomain(req, `auth/connect/${urlFor}-callback`);
 
 const redirectToWebapp = (req, res) => res.redirect(REACT_APP_URL);
 
@@ -225,7 +222,7 @@ router.get("/init-auto-posting", async (req, res) => {
     // Initiate Postings
     for (let i = 0; i < activePostings.length; i++) {
       const posting = activePostings[i];
-      const { _id, poll, user, type, subType, subTypeId, frequency, frequencyPosted } = posting;
+      const { poll, user, type, subType, subTypeId, frequency, frequencyPosted } = posting;
 
       // Check is poll is published
       if (!poll || poll.status === POLL_STATUS.DRAFT) continue;
@@ -235,17 +232,23 @@ router.get("/init-auto-posting", async (req, res) => {
       if (!socialAccount) continue;
 
       // Check if social account is active
-      const { isConnected, accessToken, refreshToken } = socialAccount[subType];
+      const { isConnected, refreshToken } = socialAccount[subType];
       if (!isConnected) continue;
 
       // Initiate Posting
       if (type === SOCIAL_TYPE.FACEBOOK) {
         // Initiate Facebook Posting
       } else if (type === SOCIAL_TYPE.LINKEDIN) {
-        // Initiate LinkedIn Posting
-        const redirectUrl = getAuthCallbackURL(req, "linkedin");
         try {
-          const tokenObj = await initLinkedInPosting(subTypeId, accessToken, refreshToken, subType, redirectUrl);
+          // Initiate LinkedIn Posting
+          const redirectUrl = getAuthCallbackURL(req, "linkedin");
+
+          const postInfo = {
+            title: "This is title - " + Date.now(),
+            description: "This is description text.",
+            url: getBaseDomain(req, `poll/${poll._id}`),
+          };
+          const tokenObj = await initLinkedInPosting(subTypeId, postInfo, refreshToken, subType, redirectUrl);
 
           // SAVE ACCESS_TOKEN
           const info = {
@@ -276,7 +279,7 @@ router.get("/init-auto-posting", async (req, res) => {
 });
 
 // Initiate LinkedIn Posting
-async function initLinkedInPosting(id, accessToken, refreshToken, subType = PROFILE, redirectUrl) {
+async function initLinkedInPosting(id, postInfo, refreshToken, subType = PROFILE, redirectUrl) {
   return new Promise(async (resolve, reject) => {
     // Author
     const author = subType === PROFILE ? `urn:li:person:${id}` : `urn:li:organization:${id}`;
@@ -291,21 +294,20 @@ async function initLinkedInPosting(id, accessToken, refreshToken, subType = PROF
     restliClient.setDebugParams({ enabled: true });
 
     // Post Content
+    const { title, description, url } = postInfo;
     const post = {
       author,
       lifecycleState: "PUBLISHED",
       specificContent: {
         "com.linkedin.ugc.ShareContent": {
           shareMediaCategory: "ARTICLE",
-          shareCommentary: { text: `Western Australia - ${new Date().getTime()}` },
+          shareCommentary: { text: title },
           media: [
             {
               status: "READY",
-              title: { text: "Western Australia" },
-              originalUrl: "https://likenoother.wa.gov.au/",
-              description: {
-                text: "Western Australia is an ancient, energetic land, brimming with opportunity ready for you to discover.",
-              },
+              originalUrl: url,
+              title: { text: title },
+              description: { text: description },
             },
           ],
         },

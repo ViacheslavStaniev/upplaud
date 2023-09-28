@@ -52,6 +52,7 @@ app.options("*", cors());
 app.get("/", (req, res) => res.send("API running"));
 
 // Define Routes
+app.use("/poll", require("./routes/poll"));
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/show", require("./routes/show"));
 app.use("/api/users", require("./routes/users"));
@@ -59,26 +60,6 @@ app.use("/api/images", require("./routes/images"));
 app.use("/api/guests", require("./routes/guests"));
 app.use("/auth/login", require("./routes/social_auth"));
 app.use("/auth/connect", require("./routes/social_connect"));
-
-app.get("/poll/:id", (req, res) => {
-  //Query on this poll id
-  let pollId = req.params.id;
-
-  let responseData = {
-    title: "Dynamic Title",
-    description: "Dynamic title",
-    openGraph: {
-      title: "OG title",
-      description: "OG description",
-      image: {
-        url: "https://fastly.picsum.photos/id/866/200/300.jpg?hmac=rcadCENKh4rD6MAp6V_ma-AyWv641M4iiOpe1RyFHeI",
-        alt: "OG image alt",
-      },
-    },
-  };
-  console.log("req.params.id", req.params.id);
-  res.render("index", { data: responseData });
-});
 
 const PORT = process.env.PORT || 5000;
 

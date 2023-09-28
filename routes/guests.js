@@ -5,9 +5,9 @@ const PollImage = require("../models/PollImage");
 const verifyAuth = require("../config/verifyAuth");
 const SocialPosting = require("../models/SocialPosting");
 const { USER_TYPE } = require("../models/User");
-const { uploadImage } = require("../helpers/s3Helper");
-const { randomString } = require("../helpers/utills");
 const { POLL_STATUS, GUEST_TYPE } = require("../models/Guest");
+const { getS3Path, uploadImage } = require("../helpers/s3Helper");
+const { randomString, generateImage } = require("../helpers/utills");
 const { createOrUpdateGuestUser, getBasicUserInfo, updateUserInfo } = require("./users");
 
 const router = express.Router();
@@ -413,18 +413,31 @@ router.put("/poll-image-info/:pollImageId", verifyAuth, async (req, res) => {
 // @access  Public
 router.post("/generate-poll-image", verifyAuth, async (req, res) => {
   try {
-    const { footerBgColor, footerText, footerTextColor, headerBgColor, headerText, headerTextColor, logo } = req.body;
+    const { footerBgColor, footerText, footerTextColor, headerBgColor, headerText, headerTextColor, userLogo, showLogo, host, guest } =
+      req.body;
 
-    let logoDetails = null;
-    if (logo) logoDetails = await Image.findById(logo);
+    const info = {
+      host,
+      guest,
+      showLogo: getS3Path(showLogo),
+      userLogo: getS3Path(userLogo),
+      header: {
+        text: headerText,
+        bgColor: headerBgColor,
+        fontColor: headerTextColor,
+      },
+      footer: {
+        text: footerText,
+        bgColor: footerBgColor,
+        fontColor: footerTextColor,
+      },
+    };
 
-    // Write code to generate the poll sharing image @ankit sir
+    // Generate Image
+    const { imageBase64 } = await generateImage(info);
 
-    // blah blah blah
-
-    // you can use the "uploadImage" function form s3helper file for uploading the image to s3
-    // return just the S3 path of the generated image like the following
-    const s3Path = "63f741756837d73eb66215fb/images/pictures/1694274752472.png";
+    // Upload Image to S3
+    const s3Path = await uploadImage(imageBase64, `${req.userId}/images`, true);
 
     res.json({ s3Path });
   } catch (err) {

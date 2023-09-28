@@ -16,14 +16,14 @@ const client = new S3Client({
 
 const getS3Path = (key = "") => `${S3_BASE_URL}/${S3_BUCKET}/${key}`;
 
-const uploadImage = async (base64, filePath = "") => {
+const uploadImage = async (base64, filePath = "", isAlreadyEncoded = false) => {
   // Create an s3 instance
   // Ensure that you POST a base64 data to your server.
   // Let's assume the variable "base64" is one.
-  const base64Data = new Buffer.from(base64.replace(/^data:image\/\w+;base64,/, ""), "base64");
+  const base64Data = new Buffer.from(isAlreadyEncoded ? base64 : base64.replace(/^data:image\/\w+;base64,/, ""), "base64");
 
   // Getting the file type, ie: jpeg, png or gif
-  const type = base64.split(";")[0].split("/")[1];
+  const type = isAlreadyEncoded ? "png" : base64.split(";")[0].split("/")[1];
   const key = `${filePath}/${new Date().getTime()}.${type}`;
 
   const params = {
