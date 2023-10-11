@@ -35,28 +35,28 @@
   background-color: #f3e5f5 !important;
 }
 .ant-btn.ant-btn-facebook {
-  color: white;
-  background-color: #1877f2;
+  color: white !important;
+  background-color: #1877f2 !important;
 }
 .ant-btn.ant-btn-facebook:hover {
-  background-color: #2e89ff;
+  background-color: #2e89ff !important;
 }
 .ant-btn.ant-btn-linkedin {
-  color: white;
-  background-color: #0a66c2;
+  color: white !important;
+  background-color: #0a66c2 !important;
 }
 .ant-btn.ant-btn-linkedin:hover {
-  background-color: #1e8eff;
+  background-color: #1e8eff !important;
 }
 .ant-btn.ant-btn-instagram {
   border: 0;
-  color: white;
+  color: white !important;
   background: radial-gradient(
     128.57% 128.57% at 10.71% 105.36%,
     #ffcb52 0%,
     #e34677 56.25%,
     #c938ac 100%
-  );
+  ) !important;
 }
 .ant-btn.ant-btn-instagram:hover {
   opacity: 0.75;

@@ -7,7 +7,7 @@ import { SOCIAL_TYPE, SOCIAL_TITLES } from '../../utils/types';
 import { CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
 import { Radio, Button, Space, Typography, Dropdown, notification, Modal, List, Badge } from 'antd';
 
-const { Title, Link, Text, Paragraph } = Typography;
+const { Title, Text, Paragraph } = Typography;
 const { FACEBOOK, LINKEDIN } = SOCIAL_TYPE;
 
 export default function SocialMediaConnect({ showTitle = true, className = '' }) {
@@ -29,7 +29,7 @@ export default function SocialMediaConnect({ showTitle = true, className = '' })
 
     // Show Page Selection if not selected
     const lnItem = getItem(LINKEDIN);
-    if (lnItem && lnItem?.page?.isConnected === false && lnItem?.page?.accounts.length > 0) {
+    if (lnItem && lnItem?.isConnected && lnItem?.page?.askToChoose) {
       setModalConfig((c) => ({
         ...c,
         open: true,
@@ -52,16 +52,11 @@ export default function SocialMediaConnect({ showTitle = true, className = '' })
     }
   }, [isConnected, modalConfig]);
 
-  //
-  const isSocialConnected = (type) => {
-    const item = getItem(type);
-    if (item) {
-      const { page, group, profile } = item;
-      return page?.isConnected || group?.isConnected || profile?.isConnected;
-    }
+  // isSocialConnected
+  const isSocialConnected = (type) => getItem(type)?.isConnected || false;
 
-    return false;
-  };
+  // Get Social Connect Url
+  const getSocialConnectUrl = (type) => `${APP_BASEURL}/auth/connect/${type}`;
 
   const getConnectIcon = (isConnected = false) => {
     return isConnected ? (
@@ -74,32 +69,66 @@ export default function SocialMediaConnect({ showTitle = true, className = '' })
   // getItems
   const getItems = (type = FACEBOOK) => {
     const item = getItem(type) || {};
-
     const title = SOCIAL_TITLES[type];
-    const { page, group, profile } = item;
-    const getURL = (subType) => `${APP_BASEURL}/auth/connect/${title.toLowerCase()}/${subType}`;
+    const { isConnected, page, group } = item;
+    const key = type === FACEBOOK ? 'facebook' : 'linkedin';
+
+    const LinkItem = ({ subTitle, item }) => {
+      const { socialId = '', accounts = [], askToChoose = false } = item || {};
+      const subText =
+        askToChoose === false && socialId
+          ? `(${accounts.find(({ id }) => id === socialId)?.name})`
+          : '';
+
+      const noAccounts = accounts?.length === 0 && item;
+
+      return (
+        <Text className="capitalize">
+          {title} {subTitle} {subText} {noAccounts && item && '(No accounts found)'}
+        </Text>
+      );
+    };
 
     const items = [
       {
+        key: 'profile',
+        icon: getConnectIcon(isConnected),
+        label: <LinkItem subTitle="Profile" />,
+      },
+      {
         key: 'page',
-        icon: getConnectIcon(page?.isConnected),
-        label: <LinkItem title={title} subTitle="Page" href={getURL('page')} item={page} />,
+        disabled: page?.accounts?.length === 0,
+        icon: getConnectIcon(isConnected && page?.socialId),
+        label: <LinkItem subTitle="Page" item={page} />,
       },
       {
         key: 'group',
-        icon: getConnectIcon(group?.isConnected),
-        label: <LinkItem title={title} subTitle="Group" href={getURL('group')} item={group} />,
-      },
-      {
-        key: 'profile',
-        icon: getConnectIcon(profile?.isConnected),
-        label: (
-          <LinkItem title={title} subTitle="Profile" href={getURL('profile')} item={profile} />
-        ),
+        disabled: group?.accounts?.length === 0,
+        icon: getConnectIcon(isConnected && group?.socialId),
+        label: <LinkItem subTitle="Group" item={group} />,
       },
     ];
 
-    return type === FACEBOOK ? items : items.filter((item) => item.key !== 'group');
+    return [
+      {
+        type: 'group',
+        key: 'account',
+        label: 'Connected Accounts',
+        children: type === FACEBOOK ? items : items.filter((item) => item.key !== 'group'),
+      },
+      {
+        key: 'divider',
+        type: 'divider',
+      },
+      {
+        key: 'reconect',
+        label: (
+          <Button block type={key} href={getSocialConnectUrl(key)} icon={<CustomIcon name={key} />}>
+            Reconnect with {title}
+          </Button>
+        ),
+      },
+    ];
   };
 
   // onPageGroupSelect
@@ -124,17 +153,17 @@ export default function SocialMediaConnect({ showTitle = true, className = '' })
   const socialsBtns = [
     {
       key: 'facebook',
-      disabled: true,
+      disabled: false,
       title: 'Facebook',
       items: getItems(FACEBOOK),
-      isAccountConnected: isSocialConnected(FACEBOOK),
+      isConnected: isSocialConnected(FACEBOOK),
     },
     {
       key: 'linkedin',
       disabled: false,
       title: 'LinkedIn',
       items: getItems(LINKEDIN),
-      isAccountConnected: isSocialConnected(LINKEDIN),
+      isConnected: isSocialConnected(LINKEDIN),
     },
   ];
 
@@ -143,17 +172,19 @@ export default function SocialMediaConnect({ showTitle = true, className = '' })
       {showTitle && <Title level={3}>Connect with social media</Title>}
 
       <Space size={16}>
-        {socialsBtns.map(({ key, title, items, disabled, isAccountConnected }) => (
-          <Dropdown arrow key={key} trigger={['click']} menu={{ items }} disabled={disabled}>
-            <Badge count={getConnectIcon(isAccountConnected)}>
+        {socialsBtns.map(({ key, title, items, disabled, isConnected }) => (
+          <Dropdown arrow key={key} menu={{ items }} disabled={!isConnected}>
+            <Badge count={getConnectIcon(isConnected)}>
               <Button
                 type={key}
                 size="large"
                 shape="round"
                 disabled={disabled}
+                href={getSocialConnectUrl(key)}
                 icon={<CustomIcon name={key} />}
+                className={isConnected ? 'pointer-none' : ''}
               >
-                {isAccountConnected ? 'Connected' : 'Connect'} with {title}
+                {isConnected ? 'Connected' : 'Connect'} with {title}
               </Button>
             </Badge>
           </Dropdown>
@@ -212,13 +243,5 @@ export default function SocialMediaConnect({ showTitle = true, className = '' })
         />
       </Modal>
     </div>
-  );
-}
-
-function LinkItem({ href, title, subTitle }) {
-  return (
-    <Link className="capitalize" href={href}>
-      {title} {subTitle}
-    </Link>
   );
 }

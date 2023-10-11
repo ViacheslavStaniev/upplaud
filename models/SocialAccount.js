@@ -10,10 +10,7 @@ const SOCIAL_SUB_TYPE = { PROFILE: "profile", PAGE: "page", GROUP: "group" };
 const subDefaultObj = {
   socialId: "",
   accounts: [],
-  accessToken: null,
-  refreshToken: null,
-  isConnected: false,
-  expiresInSeconds: null,
+  askToChoose: false,
 };
 
 const SocialAccountSchema = new Schema(
@@ -23,15 +20,31 @@ const SocialAccountSchema = new Schema(
       type: String,
       default: SOCIAL_TYPE.FACEBOOK,
     },
+    socialId: {
+      type: String,
+      default: "",
+    },
+    accessToken: {
+      type: String,
+      default: "",
+    },
+    refreshToken: {
+      type: String,
+      default: "",
+    },
+    expiresInSeconds: {
+      type: Number,
+      default: 0,
+    },
+    isConnected: {
+      type: Boolean,
+      default: false,
+    },
     page: {
       type: Object,
       default: subDefaultObj,
     },
     group: {
-      type: Object,
-      default: subDefaultObj,
-    },
-    profile: {
       type: Object,
       default: subDefaultObj,
     },

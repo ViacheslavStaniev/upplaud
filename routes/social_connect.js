@@ -1,3 +1,4 @@
+const axios = require("axios");
 const express = require("express");
 const passport = require("passport");
 const SocialPosting = require("./../models/SocialPosting");
@@ -7,41 +8,75 @@ const LinkedInStrategy = require("passport-linkedin-oauth2").Strategy;
 // const { sendEmail } = require("../helpers/email");
 const User = require("../models/User");
 const SocialAccount = require("./../models/SocialAccount");
+// const SocialAccounts = require("./../models/SocialAccounts");
 const { POLL_STATUS } = require("./../models/Guest");
-const { getBaseDomain } = require("./../helpers/utills");
+const { getBaseDomain } = require("../helpers/utills");
 const { SOCIAL_TYPE, SOCIAL_SUB_TYPE } = require("./../models/SocialAccount");
 const { AuthClient, RestliClient } = require("linkedin-api-client");
 
 // const { updateUserInfo } = require("./users");
 
 const router = express.Router();
-const { LINKEDIN } = SOCIAL_TYPE;
+const { LINKEDIN, FACEBOOK } = SOCIAL_TYPE;
 const { PROFILE, PAGE, GROUP } = SOCIAL_SUB_TYPE;
 
 // const LINKEDIN_API_URL = "https://api.linkedin.com/rest/";
 const { REACT_APP_URL, FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, LINKEDIN_APP_ID, LINKEDIN_APP_SECRET, LINKEDIN_VERSION } = process.env;
-const AuthOptions = { failureRedirect: "/auth/error", failureFlash: false, session: true, failureMessage: true };
+const AuthOptions = { failureRedirect: "/auth/connect/error", failureFlash: false, session: true, failureMessage: true };
 
-const getAuthCallbackURL = (req, urlFor) => getBaseDomain(req, `auth/connect/${urlFor}-callback`);
+const getAuthCallbackURL = (urlFor) => getBaseDomain(`auth/connect/${urlFor}-callback`);
+
+// LinkedIn Auth/Rest Clients
+const getLinkedInAuthRestClients = () => {
+  const authClient = new AuthClient({
+    clientId: LINKEDIN_APP_ID,
+    clientSecret: LINKEDIN_APP_SECRET,
+    redirectUrl: getAuthCallbackURL("linkedin"),
+  });
+
+  const restliClient = new RestliClient();
+  restliClient.setDebugParams({ enabled: true });
+
+  return { authClient, restliClient };
+};
 
 const redirectToWebapp = (req, res) => res.redirect(REACT_APP_URL);
 
 const responseBackToWebapp = (req, res) => res.redirect(REACT_APP_URL + "?isConnected=1");
 
-const saveUserAccessTokens = async (user, type, connectType, info, publicUrl = "") => {
+const saveUserAccessTokens = async (user, infoObj) => {
+  const {
+    type,
+    page = null,
+    group = null,
+    socialId = "",
+    publicUrl = "",
+    accessToken = "",
+    refreshToken = "",
+    isConnected = true,
+    expiresInSeconds = 24 * 60 * 60 * 30, // 30 days
+  } = infoObj;
+
   // find social account
   let isNew = false;
   let socialAccount = await SocialAccount.findOne({ user: user._id });
   if (!socialAccount) {
     isNew = true;
-    socialAccount = new SocialAccount({ user: user._id, type });
+    socialAccount = new SocialAccount({ user: user._id });
   }
 
-  // update connect info
-  socialAccount[connectType] = { ...socialAccount[connectType], ...info };
+  // Update Social Info
+  socialAccount.type = type;
+  socialAccount.socialId = socialId;
+  socialAccount.publicUrl = publicUrl;
+  socialAccount.isConnected = isConnected;
+  socialAccount.accessToken = accessToken;
+  socialAccount.refreshToken = refreshToken;
+  socialAccount.expiresInSeconds = expiresInSeconds;
 
-  // Public URL
-  if (publicUrl !== "") socialAccount.publicUrl = publicUrl;
+  // Update Page/Group Info
+  if (page) socialAccount.page = { ...socialAccount.page, ...page };
+  if (group) socialAccount.group = { ...socialAccount.group, ...group };
 
   await socialAccount.save();
 
@@ -53,36 +88,11 @@ const saveUserAccessTokens = async (user, type, connectType, info, publicUrl = "
   return user;
 };
 
-const saveAccessTokens = async (profile, type, connectType, accessToken, refreshToken, accounts = []) => {
-  try {
-    const { id, emails, _json } = profile;
-
-    if (emails && emails[0]?.value) {
-      const email = emails[0]?.value;
-      const user = await User.findOne({ email }).populate("socialAccounts");
-      if (user) {
-        // Social Params
-        const info = {
-          accounts,
-          socialId: id,
-          accessToken,
-          refreshToken,
-          isConnected: true,
-          expiresInSeconds: 24 * 60 * 60, // 24 hours
-        };
-
-        // Save Public URL
-        const publicUrl = type === LINKEDIN && _json && _json.vanityName ? `www.linkedin.com/in/${_json.vanityName}` : "";
-
-        return await saveUserAccessTokens(user, type, connectType, info, publicUrl);
-      }
-    }
-
-    return null;
-  } catch (error) {
-    console.log("error", error);
-    return null;
-  }
+const getFacebookAuthClient = () => {
+  return axios.create({
+    baseURL: "https://graph.facebook.com",
+    headers: { "Content-Type": "application/json" },
+  });
 };
 
 const setFacebookStrategy = async (req, res, next) => {
@@ -91,93 +101,45 @@ const setFacebookStrategy = async (req, res, next) => {
       {
         clientID: FACEBOOK_APP_ID,
         clientSecret: FACEBOOK_APP_SECRET,
-        callbackURL: getAuthCallbackURL(req, "facebook"),
+        callbackURL: getAuthCallbackURL("facebook"),
         profileFields: ["id", "emails", "name", "picture", "gender"],
-      },
-      async (accessToken, refreshToken, profile, done) => {
-        console.log(await saveAccessTokens(profile));
-
-        done(null, profile);
-      }
-    )
-  );
-
-  next();
-};
-
-const setLinkedinStrategy = async (req, res, next) => {
-  const { connectType } = req.params;
-  const additionalScopes = connectType === PROFILE ? ["w_member_social"] : ["rw_organization_admin", "w_organization_social"];
-
-  passport.use(
-    new LinkedInStrategy(
-      {
-        clientID: LINKEDIN_APP_ID,
-        clientSecret: LINKEDIN_APP_SECRET,
-        callbackURL: getAuthCallbackURL(req, "linkedin"),
-        scope: ["r_emailaddress", "r_basicprofile", ...additionalScopes],
+        scope: ["email", "public_profile", "publish_actions", "publish_to_groups", "pages_manage_posts", "pages_read_engagement"],
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
-          let accounts = [];
+          const { id, emails, profileUrl } = profile;
+          if (emails && emails[0]?.value) {
+            const email = emails[0]?.value;
+            const user = await User.findOne({ email }).populate("socialAccounts");
+            if (user) {
+              const authClient = getFacebookAuthClient();
 
-          // Fetch Pages if exists
-          if (connectType === PAGE) {
-            const restliClient = new RestliClient();
-            restliClient.setDebugParams({ enabled: true });
+              // get groups
+              const groupResult = await authClient.get(`/me/groups?access_token=${accessToken}`);
+              const groups = groupResult.data.data;
+              const group = { socialId: groups[0]?.id, accounts: groups, askToChoose: groups.length > 1 };
 
-            const result = await restliClient.finder({
-              accessToken,
-              finderName: "search",
-              versionString: LINKEDIN_VERSION,
-              resourcePath: "/organizationAcls",
-              queryParams: { q: "roleAssignee", state: "APPROVED", role: "ADMINISTRATOR" },
-            });
+              // get pages
+              const pageResult = await authClient.get(`/me/accounts?access_token=${accessToken}`);
+              const pages = pageResult.data.data;
+              const page = { socialId: pages[0]?.id, accounts: pages, askToChoose: pages.length > 1 };
 
-            // Fetch Organisation
-            const organizations = await Promise.all(
-              result.data.elements.map(async ({ organization }) => {
-                const orgId = Number(organization.split("urn:li:organization:")[1]);
-                const result = await restliClient.get({
-                  accessToken,
-                  versionString: LINKEDIN_VERSION,
-                  resourcePath: `/organizations/${orgId}`,
-                });
+              const updateInfo = {
+                page,
+                group,
+                accessToken,
+                refreshToken,
+                socialId: id,
+                type: FACEBOOK,
+                isConnected: true,
+                publicUrl: profileUrl,
+              };
 
-                return result.data;
-              })
-            );
+              const updatedUser = await saveUserAccessTokens(user, updateInfo);
 
-            accounts = organizations.map(
-              ({
-                id,
-                logoV2,
-                foundedOn,
-                vanityName,
-                coverPhotoV2,
-                localizedName,
-                localizedWebsite,
-                organizationType,
-                localizedDescription,
-                ...otherParams
-              }) => ({
-                id,
-                logoV2,
-                foundedOn,
-                vanityName,
-                coverPhotoV2,
-                organizationType,
-                name: localizedName,
-                urn: otherParams["$URN"],
-                website: localizedWebsite,
-                description: localizedDescription,
-              })
-            );
-          }
-
-          const updatedUser = await saveAccessTokens(profile, LINKEDIN, connectType, accessToken, refreshToken, accounts);
-
-          done(null, updatedUser);
+              done(null, updatedUser);
+            } else done(null, null);
+          } else done(null, null);
         } catch (error) {
           console.log(error);
           done(null, null);
@@ -189,20 +151,122 @@ const setLinkedinStrategy = async (req, res, next) => {
   next();
 };
 
-// @route   GET auth/connect/facebook/:connectType
+const setLinkedinStrategy = async (req, res, next) => {
+  passport.use(
+    new LinkedInStrategy(
+      {
+        clientID: LINKEDIN_APP_ID,
+        clientSecret: LINKEDIN_APP_SECRET,
+        callbackURL: getAuthCallbackURL("linkedin"),
+        scope: ["r_emailaddress", "r_basicprofile", "w_member_social", "rw_organization_admin", "w_organization_social"],
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          const { id, emails, _json } = profile;
+          if (emails && emails[0]?.value) {
+            const email = emails[0]?.value;
+            const user = await User.findOne({ email }).populate("socialAccounts");
+            if (user) {
+              // Fetch Pages if exists
+              const restliClient = new RestliClient();
+              restliClient.setDebugParams({ enabled: true });
+
+              const result = await restliClient.finder({
+                accessToken,
+                finderName: "search",
+                versionString: LINKEDIN_VERSION,
+                resourcePath: "/organizationAcls",
+                queryParams: { q: "roleAssignee", state: "APPROVED", role: "ADMINISTRATOR" },
+              });
+
+              // Fetch Organisation
+              const organizations = await Promise.all(
+                result.data.elements.map(async ({ organization }) => {
+                  const orgId = Number(organization.split("urn:li:organization:")[1]);
+                  const result = await restliClient.get({
+                    accessToken,
+                    versionString: LINKEDIN_VERSION,
+                    resourcePath: `/organizations/${orgId}`,
+                  });
+
+                  return result.data;
+                })
+              );
+
+              const accounts = organizations.map(
+                ({
+                  id,
+                  logoV2,
+                  foundedOn,
+                  vanityName,
+                  coverPhotoV2,
+                  localizedName,
+                  localizedWebsite,
+                  organizationType,
+                  localizedDescription,
+                  ...otherParams
+                }) => ({
+                  id,
+                  logoV2,
+                  foundedOn,
+                  vanityName,
+                  coverPhotoV2,
+                  organizationType,
+                  name: localizedName,
+                  urn: otherParams["$URN"],
+                  website: localizedWebsite,
+                  description: localizedDescription,
+                })
+              );
+
+              // Public URL
+              const publicUrl = _json && _json.vanityName ? `www.linkedin.com/in/${_json.vanityName}` : "";
+
+              const updateInfo = {
+                publicUrl,
+                accessToken,
+                refreshToken,
+                socialId: id,
+                type: LINKEDIN,
+                isConnected: true,
+                page: { socialId: accounts[0]?.id, accounts, askToChoose: accounts.length > 1 },
+              };
+
+              const updatedUser = await saveUserAccessTokens(user, updateInfo);
+
+              done(null, updatedUser);
+            } else done(null, null);
+          } else done(null, null);
+        } catch (error) {
+          console.log(error);
+          done(null, null);
+        }
+      }
+    )
+  );
+
+  next();
+};
+
+// @route   GET auth/connect/error
+// @desc    Auth error
+// @access  Public
+router.get("/error", redirectToWebapp);
+
+// @route   GET auth/connect/facebook
 // @desc    Connnect user with facebook account
 // @access  Public
-router.get("/facebook/:connectType", setFacebookStrategy, passport.authenticate("facebook"), redirectToWebapp);
+router.get("/facebook", setFacebookStrategy, passport.authenticate("facebook"), redirectToWebapp);
 
 // @route   GET auth/connect/facebook-callback
 // @desc    Handle response from facebook
 // @access  Public
 router.get("/facebook-callback", passport.authenticate("facebook", AuthOptions), responseBackToWebapp);
 
-// @route   GET auth/connect/linkedin/:connectType
+// @route   GET auth/connect/linkedin
 // @desc    Connect user with linkedin account
 // @access  Public
-router.get("/linkedin/:connectType", setLinkedinStrategy, passport.authenticate("linkedin"), redirectToWebapp);
+router.get("/linkedin", setLinkedinStrategy, passport.authenticate("linkedin"), redirectToWebapp);
 
 // @route   GET auth/connect/linkedin-callback
 // @desc    Handle response from linkedin
@@ -232,39 +296,39 @@ router.get("/init-auto-posting", async (req, res) => {
       if (!socialAccount) continue;
 
       // Check if social account is active
-      const { isConnected, refreshToken } = socialAccount[subType];
+      const { isConnected, accessToken, refreshToken, page } = socialAccount;
       if (!isConnected) continue;
+
+      // Post Info
+      const postInfo = {
+        title: "This is title - " + Date.now(),
+        description: "This is description text.",
+        url: getBaseDomain(`poll/${poll._id}`),
+      };
 
       // Initiate Posting
       if (type === SOCIAL_TYPE.FACEBOOK) {
-        // Initiate Facebook Posting
+        try {
+          const access_token = subType === PAGE ? page?.accounts.find((a) => a.id === subTypeId)?.access_token : accessToken;
+          const tokenObj = await initFacebookPosting(subTypeId, postInfo, access_token, subType);
+          console.log(tokenObj);
+        } catch (error) {
+          console.log(error);
+        }
       } else if (type === SOCIAL_TYPE.LINKEDIN) {
         try {
-          // Initiate LinkedIn Posting
-          const redirectUrl = getAuthCallbackURL(req, "linkedin");
-
-          const postInfo = {
-            title: "This is title - " + Date.now(),
-            description: "This is description text.",
-            url: getBaseDomain(req, `poll/${poll._id}`),
-          };
-          const tokenObj = await initLinkedInPosting(subTypeId, postInfo, refreshToken, subType, redirectUrl);
+          const tokenObj = await initLinkedInPosting(subTypeId, postInfo, refreshToken, subType);
 
           // SAVE ACCESS_TOKEN
-          const info = {
-            isConnected: true,
+          await saveUserAccessTokens(user, {
+            type,
+            subType,
             accessToken: tokenObj.access_token,
             refreshToken: tokenObj.refresh_token,
             expiresInSeconds: tokenObj.refresh_token_expires_in,
-          };
-          await saveUserAccessTokens(user, type, subType, info);
-        } catch (error) {
-          const urs = await saveUserAccessTokens(user, type, subType, {
-            isConnected: false,
-            accounts: [],
-            accessToken: "",
-            refreshToken: "",
           });
+        } catch (error) {
+          const urs = await saveUserAccessTokens(user, { type, subType, isConnected: false, expiresInSeconds: 0 });
 
           console.log(error, urs);
         }
@@ -279,19 +343,12 @@ router.get("/init-auto-posting", async (req, res) => {
 });
 
 // Initiate LinkedIn Posting
-async function initLinkedInPosting(id, postInfo, refreshToken, subType = PROFILE, redirectUrl) {
+async function initLinkedInPosting(id, postInfo, refreshToken, subType = PROFILE) {
   return new Promise(async (resolve, reject) => {
     // Author
     const author = subType === PROFILE ? `urn:li:person:${id}` : `urn:li:organization:${id}`;
 
-    // Auth Client
-    const authClient = new AuthClient({
-      clientId: LINKEDIN_APP_ID,
-      clientSecret: LINKEDIN_APP_SECRET,
-      redirectUrl: redirectUrl,
-    });
-    const restliClient = new RestliClient();
-    restliClient.setDebugParams({ enabled: true });
+    const { authClient, restliClient } = getLinkedInAuthRestClients();
 
     // Post Content
     const { title, description, url } = postInfo;
@@ -325,6 +382,34 @@ async function initLinkedInPosting(id, postInfo, refreshToken, subType = PROFILE
       resolve(tokenObj);
     } catch (error) {
       reject({ error: true, msg: error?.response?.data?.error_description || error?.message });
+    }
+  });
+}
+
+// Initiate Facebook Posting
+async function initFacebookPosting(id, postInfo, accessToken, subType = PROFILE) {
+  return new Promise(async (resolve, reject) => {
+    // Post Content
+    const { title, description, url } = postInfo;
+
+    const authClient = getFacebookAuthClient();
+
+    // Get refresh token
+    const res = await authClient.get(
+      `/oauth/access_token?grant_type=fb_exchange_token&client_id=${FACEBOOK_APP_ID}&client_secret=${FACEBOOK_APP_SECRET}&fb_exchange_token=${accessToken}`
+    );
+
+    const { access_token } = res.data;
+
+    // Post
+    const post = { access_token, message: title, link: url, caption: description };
+
+    try {
+      // Post on Facebook
+      const response = await authClient.post(`v18.0/${id}/feed`, post);
+      resolve(response.data);
+    } catch (error) {
+      reject({ error: true, msg: error?.response?.data?.error?.message || error?.message });
     }
   });
 }

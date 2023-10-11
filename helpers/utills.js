@@ -58,7 +58,7 @@ const generateImage = (info) => {
 };
 
 // Get Base Domain URL
-const getBaseDomain = (req, path = "") => `${req.protocol}://${req.headers.host}/${path}`;
+const getBaseDomain = (path = "") => `${process.env.SERVER_URL}/${path}`;
 
 module.exports.randomString = randomString;
 module.exports.getBaseDomain = getBaseDomain;

@@ -22,17 +22,22 @@ export default function SocialLogin() {
   return (
     <div className="flex-center flex-item">
       <Button
-        type="text"
-        shape="circle"
+        shape="round"
+        type="facebook"
+        icon={<CustomIcon name="facebook" />}
         href={`${APP_BASEURL}/auth/login/facebook`}
-        icon={<CustomIcon name="facebook" className="color-facebook" />}
-      />
+      >
+        Facebook
+      </Button>
+
       <Button
-        type="text"
-        shape="circle"
+        shape="round"
+        type="linkedin"
+        icon={<CustomIcon name="linkedin" />}
         href={`${APP_BASEURL}/auth/login/linkedin`}
-        icon={<CustomIcon name="linkedin" className="color-linkedin" />}
-      />
+      >
+        LinkedIn
+      </Button>
     </div>
   );
 }

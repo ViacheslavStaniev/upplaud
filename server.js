@@ -63,5 +63,7 @@ app.use("/auth/connect", require("./routes/social_connect"));
 
 const PORT = process.env.PORT || 5000;
 
+app.enable("trust proxy");
+
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
 module.exports = app;

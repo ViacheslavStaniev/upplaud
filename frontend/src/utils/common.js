@@ -45,45 +45,48 @@ export const getSocialLabel = (type, subType, subTypeName = '') => {
 };
 
 export const getSocialsItems = (socialAccounts = []) => {
+  console.log('socialAccounts', socialAccounts);
   return socialAccounts.reduce((items, item) => {
-    const { type, page, group, profile } = item;
+    const { type, socialId, page, group, isConnected } = item;
+
+    if (!isConnected) return items;
 
     // Profile
-    if (profile?.isConnected) {
-      items.push({
-        _id: `${type}-profile`,
-        type,
-        frequency: 4,
-        subType: PROFILE,
-        isActive: false,
-        subTypeId: profile?.socialId,
-        subTypeName: '',
-      });
-    }
+    items.push({
+      type,
+      frequency: 4,
+      isActive: false,
+      subType: PROFILE,
+      subTypeId: socialId,
+      subTypeName: '',
+      _id: `${type}-profile`,
+    });
 
     // Page
-    if (page?.isConnected) {
+    if (page?.socialId) {
       items.push({
-        _id: `${type}-page`,
         type,
         frequency: 4,
         subType: PAGE,
         isActive: false,
+        _id: `${type}-page`,
         subTypeId: page?.socialId,
-        subTypeName: page?.accounts?.find((item) => item.id === Number(page?.socialId))?.name,
+        subTypeName: page?.accounts?.find((item) => Number(item.id) === Number(page?.socialId))
+          ?.name,
       });
     }
 
     // Group
-    if (type === FACEBOOK && group?.isConnected) {
+    if (type === FACEBOOK && group?.socialId) {
       items.push({
-        _id: `${type}-group`,
         type,
         frequency: 4,
         subType: GROUP,
         isActive: false,
+        _id: `${type}-group`,
         subTypeId: group?.socialId,
-        subTypeName: group?.accounts?.find((item) => item.id === Number(group?.socialId))?.name,
+        subTypeName: group?.accounts?.find((item) => Number(item.id) === Number(group?.socialId))
+          ?.name,
       });
     }
 

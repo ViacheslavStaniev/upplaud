@@ -19,18 +19,14 @@ const {
   INSTAGRAM_APP_ID,
   INSTAGRAM_APP_SECRET,
 } = process.env;
-const AuthOptions = { failureRedirect: "/auth/error", failureFlash: false, session: false, failureMessage: true };
+const AuthOptions = { failureRedirect: "/auth/login/error", failureFlash: false, session: false, failureMessage: true };
 
-const getAuthCallbackURL = (req, urlFor) => {
-  const hostname = req.protocol + "://" + req.headers.host;
-
-  return `${hostname}/auth/login/${urlFor}-callback`;
-};
+const getAuthCallbackURL = (urlFor) => `auth/login/${urlFor}-callback`;
 
 const redirectToWebapp = (req, res) => res.redirect(REACT_APP_URL);
 
 const responseBackToWebapp = (req, res) => {
-  const { accessToken } = req.user;
+  const { accessToken = null } = req?.user || {};
   const params = accessToken
     ? `#auth_token=${accessToken}`
     : `#error=true&error_description=This social media login might not be working right now. Please use another way to login. 
@@ -38,6 +34,7 @@ const responseBackToWebapp = (req, res) => {
   res.redirect(REACT_APP_URL + params);
 };
 
+// Get User
 const getUser = async (profile) => {
   const { name, photos, emails } = profile;
 
@@ -58,19 +55,21 @@ const getUser = async (profile) => {
   return null;
 };
 
+// Set Facebook Strategy
 const setFacebookStrategy = async (req, res, next) => {
   passport.use(
     new FacebookStrategy(
       {
         clientID: FACEBOOK_APP_ID,
         clientSecret: FACEBOOK_APP_SECRET,
-        callbackURL: getAuthCallbackURL(req, "facebook"),
-        profileFields: ["id", "emails", "name", "picture", "gender"],
+        callbackURL: getAuthCallbackURL("facebook"),
+        scope: ["email", "public_profile"],
+        profileFields: ["id", "emails", "name", "picture", "gender", "displayName"],
       },
       async (accessToken, refreshToken, profile, done) => {
-        console.log(await getUser(profile));
-
-        done(null, profile);
+        console.log("profile", profile, profile.emails, profile._json);
+        profile.emails = [{ value: "tikamchand06@gmail.com" }];
+        done(null, await getUser(profile));
       }
     )
   );
@@ -78,13 +77,14 @@ const setFacebookStrategy = async (req, res, next) => {
   next();
 };
 
+// Set Linkedin Strategy
 const setLinkedinStrategy = async (req, res, next) => {
   passport.use(
     new LinkedInStrategy(
       {
         clientID: LINKEDIN_APP_ID,
         clientSecret: LINKEDIN_APP_SECRET,
-        callbackURL: getAuthCallbackURL(req, "linkedin"),
+        callbackURL: getAuthCallbackURL("linkedin"),
         scope: ["r_emailaddress", "r_liteprofile"],
       },
       async (accessToken, refreshToken, profile, done) => done(null, await getUser(profile))
@@ -94,13 +94,14 @@ const setLinkedinStrategy = async (req, res, next) => {
   next();
 };
 
+// Set Instagram Strategy
 const setInstagramStrategy = async (req, res, next) => {
   passport.use(
     new InstagramStrategy(
       {
         clientID: INSTAGRAM_APP_ID,
         clientSecret: INSTAGRAM_APP_SECRET,
-        callbackURL: getAuthCallbackURL(req, "instagram"),
+        callbackURL: getAuthCallbackURL("instagram"),
       },
       (accessToken, refreshToken, profile, done) => {
         // Here, you can check if the user exists in your database
@@ -114,6 +115,11 @@ const setInstagramStrategy = async (req, res, next) => {
 
   next();
 };
+
+// @route   GET auth/login/error
+// @desc    Auth error
+// @access  Public
+router.get("/error", responseBackToWebapp);
 
 // @route   GET auth/login/facebook
 // @desc    Login user via facebook
