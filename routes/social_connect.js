@@ -1,4 +1,3 @@
-const axios = require("axios");
 const express = require("express");
 const passport = require("passport");
 const SocialPosting = require("./../models/SocialPosting");
@@ -8,39 +7,21 @@ const LinkedInStrategy = require("passport-linkedin-oauth2").Strategy;
 // const { sendEmail } = require("../helpers/email");
 const User = require("../models/User");
 const SocialAccount = require("./../models/SocialAccount");
-// const SocialAccounts = require("./../models/SocialAccounts");
 const { POLL_STATUS } = require("./../models/Guest");
-const { getBaseDomain } = require("../helpers/utills");
 const { SOCIAL_TYPE, SOCIAL_SUB_TYPE } = require("./../models/SocialAccount");
-const { AuthClient, RestliClient } = require("linkedin-api-client");
+const { getBaseDomain, redirectToWebapp, getFBAuthClient, getLNAuthRestClients } = require("../helpers/utills");
 
 // const { updateUserInfo } = require("./users");
 
 const router = express.Router();
 const { LINKEDIN, FACEBOOK } = SOCIAL_TYPE;
-const { PROFILE, PAGE, GROUP } = SOCIAL_SUB_TYPE;
+const { PROFILE, PAGE } = SOCIAL_SUB_TYPE;
 
 // const LINKEDIN_API_URL = "https://api.linkedin.com/rest/";
 const { REACT_APP_URL, FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, LINKEDIN_APP_ID, LINKEDIN_APP_SECRET, LINKEDIN_VERSION } = process.env;
 const AuthOptions = { failureRedirect: "/auth/connect/error", failureFlash: false, session: true, failureMessage: true };
 
 const getAuthCallbackURL = (urlFor) => getBaseDomain(`auth/connect/${urlFor}-callback`);
-
-// LinkedIn Auth/Rest Clients
-const getLinkedInAuthRestClients = () => {
-  const authClient = new AuthClient({
-    clientId: LINKEDIN_APP_ID,
-    clientSecret: LINKEDIN_APP_SECRET,
-    redirectUrl: getAuthCallbackURL("linkedin"),
-  });
-
-  const restliClient = new RestliClient();
-  restliClient.setDebugParams({ enabled: true });
-
-  return { authClient, restliClient };
-};
-
-const redirectToWebapp = (req, res) => res.redirect(REACT_APP_URL);
 
 const responseBackToWebapp = (req, res) => res.redirect(REACT_APP_URL + "?isConnected=1");
 
@@ -59,7 +40,7 @@ const saveUserAccessTokens = async (user, infoObj) => {
 
   // find social account
   let isNew = false;
-  let socialAccount = await SocialAccount.findOne({ user: user._id });
+  let socialAccount = await SocialAccount.findOne({ user: user._id, type });
   if (!socialAccount) {
     isNew = true;
     socialAccount = new SocialAccount({ user: user._id });
@@ -88,13 +69,7 @@ const saveUserAccessTokens = async (user, infoObj) => {
   return user;
 };
 
-const getFacebookAuthClient = () => {
-  return axios.create({
-    baseURL: "https://graph.facebook.com",
-    headers: { "Content-Type": "application/json" },
-  });
-};
-
+// Set Facebook Strategy for connect
 const setFacebookStrategy = async (req, res, next) => {
   passport.use(
     new FacebookStrategy(
@@ -102,27 +77,33 @@ const setFacebookStrategy = async (req, res, next) => {
         clientID: FACEBOOK_APP_ID,
         clientSecret: FACEBOOK_APP_SECRET,
         callbackURL: getAuthCallbackURL("facebook"),
-        profileFields: ["id", "emails", "name", "picture", "gender"],
-        scope: ["email", "public_profile", "publish_actions", "publish_to_groups", "pages_manage_posts", "pages_read_engagement"],
+        profileFields: ["id", "emails", "gender", "name", "displayName", "profileUrl"],
+        scope: ["email", "public_profile", "publish_to_groups", "pages_manage_posts", "pages_read_engagement"],
       },
       async (accessToken, refreshToken, profile, done) => {
+        // console.log("accessToken", accessToken);
+        // console.log("profile", profile);
+
+        // Temporary Email
+        // profile.emails = [{ value: "tikamchand06@gmail.com" }];
+
         try {
           const { id, emails, profileUrl } = profile;
           if (emails && emails[0]?.value) {
             const email = emails[0]?.value;
             const user = await User.findOne({ email }).populate("socialAccounts");
             if (user) {
-              const authClient = getFacebookAuthClient();
+              const authClient = getFBAuthClient();
 
-              // get groups
-              const groupResult = await authClient.get(`/me/groups?access_token=${accessToken}`);
-              const groups = groupResult.data.data;
-              const group = { socialId: groups[0]?.id, accounts: groups, askToChoose: groups.length > 1 };
-
-              // get pages
-              const pageResult = await authClient.get(`/me/accounts?access_token=${accessToken}`);
-              const pages = pageResult.data.data;
-              const page = { socialId: pages[0]?.id, accounts: pages, askToChoose: pages.length > 1 };
+              // Fetch user's pages and groups
+              const [page, group] = await Promise.all(
+                ["page", "group"].map(async (type) => {
+                  const {
+                    data: { data },
+                  } = await authClient.get(`/me/${type === "page" ? "accounts" : "groups"}?admin_only=1&access_token=${accessToken}`);
+                  return { socialId: data.length > 1 ? "" : data[0]?.id, accounts: data, askToChoose: data.length > 1 };
+                })
+              );
 
               const updateInfo = {
                 page,
@@ -141,7 +122,7 @@ const setFacebookStrategy = async (req, res, next) => {
             } else done(null, null);
           } else done(null, null);
         } catch (error) {
-          console.log(error);
+          console.log(error?.response?.data || error?.message);
           done(null, null);
         }
       }
@@ -151,6 +132,7 @@ const setFacebookStrategy = async (req, res, next) => {
   next();
 };
 
+// Set Linkedin Strategy for connect
 const setLinkedinStrategy = async (req, res, next) => {
   passport.use(
     new LinkedInStrategy(
@@ -168,8 +150,7 @@ const setLinkedinStrategy = async (req, res, next) => {
             const user = await User.findOne({ email }).populate("socialAccounts");
             if (user) {
               // Fetch Pages if exists
-              const restliClient = new RestliClient();
-              restliClient.setDebugParams({ enabled: true });
+              const { restliClient } = getLNAuthRestClients();
 
               const result = await restliClient.finder({
                 accessToken,
@@ -222,6 +203,8 @@ const setLinkedinStrategy = async (req, res, next) => {
               // Public URL
               const publicUrl = _json && _json.vanityName ? `www.linkedin.com/in/${_json.vanityName}` : "";
 
+              const moreThanOnePages = accounts.length > 1;
+
               const updateInfo = {
                 publicUrl,
                 accessToken,
@@ -229,7 +212,7 @@ const setLinkedinStrategy = async (req, res, next) => {
                 socialId: id,
                 type: LINKEDIN,
                 isConnected: true,
-                page: { socialId: accounts[0]?.id, accounts, askToChoose: accounts.length > 1 },
+                page: { socialId: moreThanOnePages ? "" : accounts[0]?.id, accounts, askToChoose: moreThanOnePages },
               };
 
               const updatedUser = await saveUserAccessTokens(user, updateInfo);
@@ -296,7 +279,7 @@ router.get("/init-auto-posting", async (req, res) => {
       if (!socialAccount) continue;
 
       // Check if social account is active
-      const { isConnected, accessToken, refreshToken, page } = socialAccount;
+      const { isConnected, accessToken, refreshToken, page, group } = socialAccount;
       if (!isConnected) continue;
 
       // Post Info
@@ -348,7 +331,7 @@ async function initLinkedInPosting(id, postInfo, refreshToken, subType = PROFILE
     // Author
     const author = subType === PROFILE ? `urn:li:person:${id}` : `urn:li:organization:${id}`;
 
-    const { authClient, restliClient } = getLinkedInAuthRestClients();
+    const { authClient, restliClient } = getLNAuthRestClients();
 
     // Post Content
     const { title, description, url } = postInfo;
@@ -387,26 +370,27 @@ async function initLinkedInPosting(id, postInfo, refreshToken, subType = PROFILE
 }
 
 // Initiate Facebook Posting
-async function initFacebookPosting(id, postInfo, accessToken, subType = PROFILE) {
+async function initFacebookPosting(id, postInfo, access_token, subType = PROFILE) {
+  console.log("Posting on ", subType, id);
   return new Promise(async (resolve, reject) => {
     // Post Content
     const { title, description, url } = postInfo;
 
-    const authClient = getFacebookAuthClient();
+    const authClient = getFBAuthClient();
 
     // Get refresh token
-    const res = await authClient.get(
-      `/oauth/access_token?grant_type=fb_exchange_token&client_id=${FACEBOOK_APP_ID}&client_secret=${FACEBOOK_APP_SECRET}&fb_exchange_token=${accessToken}`
-    );
-
-    const { access_token } = res.data;
+    // const res = await authClient.get(
+    //   `/oauth/access_token?grant_type=fb_exchange_token&client_id=${FACEBOOK_APP_ID}&client_secret=${FACEBOOK_APP_SECRET}&fb_exchange_token=${accessToken}`
+    // );
+    // const { access_token } = res.data;
+    // console.log("access_token", access_token);
 
     // Post
     const post = { access_token, message: title, link: url, caption: description };
 
     try {
       // Post on Facebook
-      const response = await authClient.post(`v18.0/${id}/feed`, post);
+      const response = await authClient.post(`/${subType === PROFILE ? "me" : id}/feed`, post);
       resolve(response.data);
     } catch (error) {
       reject({ error: true, msg: error?.response?.data?.error?.message || error?.message });

@@ -5,9 +5,7 @@ import PropTypes from 'prop-types';
 import LoginPage from '../pages/auth/LoginPage';
 import LoadingScreen from '../components/LoadingScreen';
 
-AuthGuard.propTypes = {
-  children: PropTypes.node,
-};
+AuthGuard.propTypes = { children: PropTypes.node };
 
 export default function AuthGuard({ children }) {
   const { pathname } = useLocation();

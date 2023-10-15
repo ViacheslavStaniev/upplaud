@@ -1,20 +1,20 @@
 import SocialLogin from './SocialLogin';
 import LoginLayout from '../../layouts/LoginLayout';
+import { Link } from 'react-router-dom';
 import { useAuthContext } from '../../auth/AuthProvider';
 import { Form, Typography, Button, Input, Divider, Alert } from 'antd';
 
-const { Title, Paragraph, Link } = Typography;
+const { Title, Paragraph } = Typography;
 
 export default function LoginPage() {
   const [form] = Form.useForm();
   const { login, update, errors, isLoading } = useAuthContext();
-  console.log(errors);
 
   return (
     <LoginLayout title="Login">
       <Title level={3}>Sign in to mic.vote</Title>
       <Paragraph>
-        New User? <Link href="/auth/register">Create an account</Link>
+        New User? <Link to="/auth/register">Create an account</Link>
       </Paragraph>
 
       {errors &&
@@ -35,7 +35,7 @@ export default function LoginPage() {
         size="large"
         layout="vertical"
         onFinish={login}
-        initialValues={{ email: 'tcmhack@gmail.com', password: '12345678' }}
+        initialValues={{ email: '', password: '' }}
       >
         <Form.Item
           name="email"
@@ -45,7 +45,7 @@ export default function LoginPage() {
             { required: true, message: 'Please fill the email address.' },
           ]}
         >
-          <Input type="email" placeholder="Email Address" />
+          <Input autoFocus type="email" placeholder="Email Address" />
         </Form.Item>
 
         <Form.Item
@@ -57,7 +57,7 @@ export default function LoginPage() {
         </Form.Item>
 
         <Paragraph className="text-right">
-          <Link href="/auth/forgot-password">Forgot Password?</Link>
+          <Link to="/auth/forgot-password">Forgot Password?</Link>
         </Paragraph>
 
         <Button block type="primary" htmlType="submit" loading={isLoading}>

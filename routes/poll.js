@@ -31,7 +31,7 @@ router.get("/:id", async (req, res) => {
       },
     };
 
-    console.log("req.params.id", req.params.id);
+    // console.log("req.params.id", req.params.id);
     res.render("index", { data: responseData });
   } catch (err) {
     console.error(err.message);

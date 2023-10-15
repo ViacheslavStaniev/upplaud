@@ -1,13 +1,17 @@
 const fs = require("fs");
 const path = require("path");
+const axios = require("axios");
 const jwt = require("jsonwebtoken");
 const { exec } = require("child_process");
+const { AuthClient, RestliClient } = require("linkedin-api-client");
+
+const { REACT_APP_URL, SERVER_URL, JWT_SECRET, LINKEDIN_APP_ID, LINKEDIN_APP_SECRET } = process.env;
 
 const randomString = (length = 30) => Array.from({ length }, () => Math.random().toString(36)[2]).join("");
 
 const generateAuthToken = (user, expiresIn = 7 * 24 * 60 * 60) => {
   return new Promise((resolve, reject) => {
-    jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn }, (err, token) => (err ? reject(err) : resolve(token)));
+    jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn }, (err, token) => (err ? reject(err) : resolve(token)));
   });
 };
 
@@ -58,11 +62,39 @@ const generateImage = (info) => {
 };
 
 // Get Base Domain URL
-const getBaseDomain = (path = "") => `${process.env.SERVER_URL}/${path}`;
+const getBaseDomain = (path = "") => `${SERVER_URL}/${path}`;
+
+// Redirect to Webapp
+const redirectToWebapp = (req, res) => res.redirect(REACT_APP_URL);
+
+// Get Facebook Auth Client
+const getFacebookAuthClient = () => {
+  return axios.create({
+    baseURL: "https://graph.facebook.com",
+    headers: { "Content-Type": "application/json" },
+  });
+};
+
+// LinkedIn Auth/Rest Clients
+const getLinkedInAuthRestClients = (authType = "connect") => {
+  const authClient = new AuthClient({
+    clientId: LINKEDIN_APP_ID,
+    clientSecret: LINKEDIN_APP_SECRET,
+    redirectUrl: getBaseDomain(`auth/${authType}/linkedin-callback`),
+  });
+
+  const restliClient = new RestliClient();
+  restliClient.setDebugParams({ enabled: true });
+
+  return { authClient, restliClient };
+};
 
 module.exports.randomString = randomString;
 module.exports.getBaseDomain = getBaseDomain;
 module.exports.generateImage = generateImage;
 module.exports.createUsername = createUsername;
 module.exports.getAuthResponse = getAuthResponse;
+module.exports.redirectToWebapp = redirectToWebapp;
 module.exports.generateAuthToken = generateAuthToken;
+module.exports.getFBAuthClient = getFacebookAuthClient;
+module.exports.getLNAuthRestClients = getLinkedInAuthRestClients;

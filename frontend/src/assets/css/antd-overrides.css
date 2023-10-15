@@ -138,3 +138,16 @@ span.ant-tag {
 /* .automation-form .ant-row.ant-form-item-row .ant-form-item-label-left {
   padding-top: 12px;
 } */
+
+.ant-notification
+  .ant-notification-notice
+  .ant-notification-notice-with-icon
+  .ant-notification-notice-description::first-letter {
+  text-transform: uppercase;
+}
+
+.ant-dropdown .ant-dropdown-menu .ant-dropdown-menu-item-group-title,
+.ant-dropdown-menu-submenu .ant-dropdown-menu .ant-dropdown-menu-item-group-title {
+  color: #424242;
+  font-weight: bold;
+}

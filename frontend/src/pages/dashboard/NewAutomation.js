@@ -103,9 +103,6 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
   const isSoloSession = guestTypeValue === SOLO_SESSION;
   const { guest, isLoading } = useSelector((state) => state.guests);
 
-  // Default Socials Items
-  const defaultSocials = getSocialsItems(user?.socialAccounts);
-
   const {
     socials = [],
     guest: guestUser,
@@ -120,7 +117,10 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
     potentialTopics = ['', ''],
     startHostAutomation = false,
   } = guest || {};
-  console.log('guest', guest);
+  // console.log('guest', guest);
+
+  // Default Socials Items
+  const defaultSocials = getSocialsItems(user?.socialAccounts, socials);
 
   useEffect(() => {
     if (!isNew && id) dispatch(fetchGuest(id));

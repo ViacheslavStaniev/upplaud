@@ -1,6 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
+const SocialAccount = require("../models/SocialAccount");
 const { USER_TYPE } = require("../models/User");
 const { ServiceError } = require("./errors");
 const verifyAuth = require("../config/verifyAuth");
@@ -111,24 +112,38 @@ router.post(
   }
 );
 
-// @route   POST api/users/connect/:type/:subType/:selected
+// @route   POST api/users/connect/:type/:subType/:id
 // @desc    Connect user with facebook/linkedin page/group account
 // @access  Public
-router.get("/connect/:type/:subType/:selected", verifyAuth, async (req, res) => {
-  const { type, subType, selected } = req.params;
+router.get("/connect/:type/:subType/:id", verifyAuth, async (req, res) => {
+  const { type, subType, id } = req.params;
 
   try {
-    const user = await User.findById(req.userId).populate("socialAccounts");
-    if (!user) throw new Error("user not found.");
+    const socialAccount = await SocialAccount.findOne({ user: req.userId, type });
+    if (!socialAccount) throw new Error("SocialAccount doesn't exists.");
 
-    // Update social account
-    const socialAccount = user.socialAccounts.find((s) => s.type === type);
-    if (socialAccount) {
-      socialAccount[subType] = { ...socialAccount[subType], socialId: selected, isConnected: true };
-      await socialAccount.save();
-    }
+    await SocialAccount.findByIdAndUpdate(socialAccount._id, {
+      [subType]: { ...socialAccount[subType], socialId: id, askToChoose: false },
+    });
 
-    res.status(200).json({ socialAccount, error: false, msg: "Account connected successfully." });
+    res.status(200).json({ error: false, msg: "Account connected successfully." });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: true, msg: error?.message });
+  }
+});
+
+// @route   POST api/users/disconnect/:type
+// @desc    Disconnect user from facebook/linkedin page/group account
+// @access  Public
+router.get("/disconnect/:type", verifyAuth, async (req, res) => {
+  try {
+    const socialAccount = await SocialAccount.findOne({ user: req.userId, type: req.params.type });
+    if (!socialAccount) throw new Error("SocialAccount doesn't exists.");
+
+    await SocialAccount.findByIdAndUpdate(socialAccount._id, { isConnected: false });
+
+    res.status(200).json({ error: false, msg: "Account disconnected successfully." });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: true, msg: error?.message });

@@ -4,59 +4,60 @@ import { useState, useEffect } from 'react';
 import { APP_BASEURL } from '../../config-global';
 import { useAuthContext } from '../../auth/AuthProvider';
 import { SOCIAL_TYPE, SOCIAL_TITLES } from '../../utils/types';
-import { CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
-import { Radio, Button, Space, Typography, Dropdown, notification, Modal, List, Badge } from 'antd';
+import {
+  CheckCircleFilled,
+  CloseCircleFilled,
+  StopOutlined,
+  SyncOutlined,
+} from '@ant-design/icons';
+import { Button, Space, Typography, Dropdown, notification, Badge } from 'antd';
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Text } = Typography;
 const { FACEBOOK, LINKEDIN } = SOCIAL_TYPE;
 
 export default function SocialMediaConnect({ showTitle = true, className = '' }) {
-  const { user } = useAuthContext();
+  const { user, update } = useAuthContext();
   const socialAccounts = user?.socialAccounts || [];
   const getItem = (type) => socialAccounts.find((item) => item.type === type);
-  const [modalConfig, setModalConfig] = useState({
-    open: false,
-    type: null,
-    subType: null,
-    accounts: [],
-    loading: false,
-    selected: null,
-  });
+
+  const [loading, setLoading] = useState(false);
+  const [openKeys, setOpenKeys] = useState([]);
+  const [openDropdown, setOpenDropdown] = useState(null);
 
   useEffect(() => {
     // Show Page/Group Selection if not selected
-    // const fbItem = getItem(FACEBOOK);
+    const fbItem = getItem(FACEBOOK);
+    if (fbItem && fbItem?.isConnected && (fbItem?.page?.askToChoose || fbItem.group?.askToChoose)) {
+      setOpenDropdown('facebook');
+      setOpenKeys([fbItem?.page?.askToChoose ? 'page' : 'group']);
+    }
 
     // Show Page Selection if not selected
     const lnItem = getItem(LINKEDIN);
     if (lnItem && lnItem?.isConnected && lnItem?.page?.askToChoose) {
-      setModalConfig((c) => ({
-        ...c,
-        open: true,
-        type: LINKEDIN,
-        subType: 'page',
-        accounts: lnItem?.page?.accounts,
-      }));
+      setOpenKeys(['page']);
+      setOpenDropdown('linkedin');
     }
-  }, [socialAccounts]);
+  }, []);
 
   const urlParams = new URLSearchParams(window.location.search);
   const isConnected = urlParams.get('isConnected') || '0';
 
   useEffect(() => {
-    if (isConnected === '1' && modalConfig?.open === false && modalConfig?.type === null) {
+    if (isConnected === '1') {
       notification.success({
         message: 'Success',
         description: 'You have successfully connected your social media account.',
       });
     }
-  }, [isConnected, modalConfig]);
+  }, [isConnected]);
 
   // isSocialConnected
   const isSocialConnected = (type) => getItem(type)?.isConnected || false;
 
   // Get Social Connect Url
-  const getSocialConnectUrl = (type) => `${APP_BASEURL}/auth/connect/${type}`;
+  const getSocialConnectUrl = (type, disconnect = false) =>
+    `${APP_BASEURL}/auth/connect/${type}/${disconnect ? 'disconnect' : ''}`;
 
   const getConnectIcon = (isConnected = false) => {
     return isConnected ? (
@@ -64,6 +65,66 @@ export default function SocialMediaConnect({ showTitle = true, className = '' })
     ) : (
       <CloseCircleFilled className="color-red" />
     );
+  };
+
+  // onPageGroupSelect
+  const onPageGroupSelect = async (type, subType, id, name) => {
+    setLoading(true);
+
+    try {
+      await axios.get(`users/connect/${type}/${subType}/${id}`);
+
+      // Update user
+      const newUser = {
+        ...user,
+        socialAccounts: (user?.socialAccounts || []).map((item) => {
+          if (item.type !== type) return item;
+          return { ...item, [subType]: { ...item[subType], socialId: id, askToChoose: false } };
+        }),
+      };
+
+      update({ user: newUser });
+
+      notification.success({
+        message: 'Success',
+        description: `${subType} "${name}" connected successfully.`,
+      });
+    } catch (error) {
+      console.log(error);
+      notification.error({ message: 'Error', description: error?.msg });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Account Disconnect
+  const onAccountDisconnect = async (type) => {
+    setLoading(true);
+
+    try {
+      await axios.get(`users/disconnect/${type}`);
+
+      // Update user
+      const newUser = {
+        ...user,
+        socialAccounts: (user?.socialAccounts || []).map((item) =>
+          item.type !== type ? item : { ...item, isConnected: false }
+        ),
+      };
+
+      update({ user: newUser });
+
+      notification.success({
+        message: 'Success',
+        description: 'Account disconnected successfully.',
+      });
+    } catch (error) {
+      console.log(error);
+      notification.error({ message: 'Error', description: error?.msg });
+    } finally {
+      setOpenDropdown(null);
+      setLoading(false);
+    }
   };
 
   // getItems
@@ -89,23 +150,47 @@ export default function SocialMediaConnect({ showTitle = true, className = '' })
       );
     };
 
+    const getSubItems = (accounts = [], subType = '', choosenId = null) => {
+      const items = accounts?.map(({ id, name }) => ({
+        key: id,
+        label: name,
+        icon: choosenId === id ? <CheckCircleFilled /> : null,
+        onClick: () => onPageGroupSelect(type, subType, id, name),
+        className: choosenId === id ? 'pointer-none color-white color-0AB6B6 bg-F4F6F8' : '',
+      }));
+      return [
+        { key: 'header', type: 'group', label: `Select ${subType} for automation` },
+        ...items,
+      ];
+    };
+
+    const { accounts: pages = [], socialId: pageId = '' } = page;
+    const { accounts: groups = [], socialId: groupId = '' } = group;
+    const pagesChilds = pages?.length > 1 ? getSubItems(pages, 'page', pageId) : null;
+    const groupChilds = groups?.length > 1 ? getSubItems(groups, 'group', groupId) : null;
+
     const items = [
       {
         key: 'profile',
+        className: 'pointer-none',
         icon: getConnectIcon(isConnected),
         label: <LinkItem subTitle="Profile" />,
       },
       {
         key: 'page',
+        children: pagesChilds,
         disabled: page?.accounts?.length === 0,
-        icon: getConnectIcon(isConnected && page?.socialId),
+        className: pagesChilds ? '' : 'pointer-none',
         label: <LinkItem subTitle="Page" item={page} />,
+        icon: getConnectIcon(isConnected && pageId && page?.askToChoose === false),
       },
       {
         key: 'group',
+        children: groupChilds,
         disabled: group?.accounts?.length === 0,
-        icon: getConnectIcon(isConnected && group?.socialId),
+        className: groupChilds ? '' : 'pointer-none',
         label: <LinkItem subTitle="Group" item={group} />,
+        icon: getConnectIcon(isConnected && groupId && group?.askToChoose === false),
       },
     ];
 
@@ -121,32 +206,19 @@ export default function SocialMediaConnect({ showTitle = true, className = '' })
         type: 'divider',
       },
       {
-        key: 'reconect',
+        key: 'reconect-disconnnect',
         label: (
-          <Button block type={key} href={getSocialConnectUrl(key)} icon={<CustomIcon name={key} />}>
-            Reconnect with {title}
-          </Button>
+          <div className="flex-item">
+            <Button block danger icon={<StopOutlined />} onClick={() => onAccountDisconnect(type)}>
+              Disconnect
+            </Button>
+            <Button block type={key} icon={<SyncOutlined />} href={getSocialConnectUrl(key)}>
+              Reconnect
+            </Button>
+          </div>
         ),
       },
     ];
-  };
-
-  // onPageGroupSelect
-  const onPageGroupSelect = async () => {
-    const { type, subType, selected } = modalConfig;
-
-    setModalConfig((c) => ({ ...c, loading: true }));
-
-    try {
-      const res = await axios.get(`users/connect/${type}/${subType}/${selected}`);
-      console.log(res);
-      notification.success({ message: 'Success', description: res.data?.msg });
-    } catch (error) {
-      console.log(error);
-      notification.error({ message: 'Error', description: error?.msg });
-    } finally {
-      setModalConfig((c) => ({ ...c, open: false, loading: false }));
-    }
   };
 
   // socialsBtns
@@ -173,12 +245,25 @@ export default function SocialMediaConnect({ showTitle = true, className = '' })
 
       <Space size={16}>
         {socialsBtns.map(({ key, title, items, disabled, isConnected }) => (
-          <Dropdown arrow key={key} menu={{ items }} disabled={!isConnected}>
+          <Dropdown
+            arrow
+            key={key}
+            disabled={!isConnected}
+            open={openDropdown === key}
+            menu={{ items, defaultOpenKeys: openKeys }}
+            onOpenChange={(open) => {
+              if (!open && openKeys.length) {
+                setOpenKeys([]);
+                setTimeout(() => setOpenDropdown(open ? key : null), 120);
+              } else setOpenDropdown(open ? key : null);
+            }}
+          >
             <Badge count={getConnectIcon(isConnected)}>
               <Button
                 type={key}
                 size="large"
                 shape="round"
+                loading={loading}
                 disabled={disabled}
                 href={getSocialConnectUrl(key)}
                 icon={<CustomIcon name={key} />}
@@ -194,54 +279,6 @@ export default function SocialMediaConnect({ showTitle = true, className = '' })
           Connect with Instagram
         </Button> */}
       </Space>
-
-      <Modal
-        width={600}
-        closable={false}
-        keyboard={false}
-        okText="Connect"
-        maskClosable={false}
-        open={modalConfig.open}
-        onOk={onPageGroupSelect}
-        cancelButtonProps={{ disabled: modalConfig.loading }}
-        onCancel={() => setModalConfig((c) => ({ ...c, open: false }))}
-        okButtonProps={{ disabled: !modalConfig.selected, loading: modalConfig.loading }}
-      >
-        <Title level={3}>Select {modalConfig.subType}</Title>
-        <Paragraph italic>
-          Please select the {modalConfig.subType} you want to connect for your social media
-          automation.
-        </Paragraph>
-        <List
-          itemLayout="horizontal"
-          dataSource={modalConfig.accounts}
-          header={<Text strong>Your {modalConfig.subType}s</Text>}
-          renderItem={({ id, name, description }) => (
-            <List.Item
-              extra={
-                <Radio
-                  value={id}
-                  checked={modalConfig.selected === id}
-                  onChange={({ target }) =>
-                    setModalConfig((c) => ({ ...c, selected: target.checked ? id : null }))
-                  }
-                >
-                  Select
-                </Radio>
-              }
-            >
-              <List.Item.Meta
-                title={name}
-                description={
-                  <Paragraph ellipsis type="secondary" className="m-0">
-                    {description}
-                  </Paragraph>
-                }
-              />
-            </List.Item>
-          )}
-        />
-      </Modal>
     </div>
   );
 }

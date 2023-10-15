@@ -44,52 +44,37 @@ export const getSocialLabel = (type, subType, subTypeName = '') => {
   return '';
 };
 
-export const getSocialsItems = (socialAccounts = []) => {
-  console.log('socialAccounts', socialAccounts);
+export const getSocialsItems = (socialAccounts = [], socials) => {
+  console.log('getSocialsItems', socialAccounts, socials);
+
   return socialAccounts.reduce((items, item) => {
-    const { type, socialId, page, group, isConnected } = item;
+    if (!item?.isConnected) return items;
 
-    if (!isConnected) return items;
+    const { type, socialId, page, group } = item;
 
-    // Profile
-    items.push({
-      type,
-      frequency: 4,
-      isActive: false,
-      subType: PROFILE,
-      subTypeId: socialId,
-      subTypeName: '',
-      _id: `${type}-profile`,
-    });
-
-    // Page
-    if (page?.socialId) {
-      items.push({
+    const getSocialItem = (subType, subTypeId, subTypeName = '', frequency = 4) => {
+      return {
         type,
-        frequency: 4,
-        subType: PAGE,
+        subType,
+        frequency,
+        subTypeId,
+        subTypeName,
         isActive: false,
-        _id: `${type}-page`,
-        subTypeId: page?.socialId,
-        subTypeName: page?.accounts?.find((item) => Number(item.id) === Number(page?.socialId))
-          ?.name,
-      });
-    }
+        _id: `${type}_${subType}`,
+      };
+    };
 
-    // Group
-    if (type === FACEBOOK && group?.socialId) {
-      items.push({
-        type,
-        frequency: 4,
-        subType: GROUP,
-        isActive: false,
-        _id: `${type}-group`,
-        subTypeId: group?.socialId,
-        subTypeName: group?.accounts?.find((item) => Number(item.id) === Number(group?.socialId))
-          ?.name,
-      });
-    }
+    const getSubTypeName = (item) =>
+      item?.accounts.find(({ id }) => id === item?.socialId)?.name || '';
 
-    return items;
+    const newItems = [
+      ...items,
+      getSocialItem(PROFILE, socialId),
+      getSocialItem(PAGE, page?.socialId, getSubTypeName(page)),
+    ];
+
+    return type === FACEBOOK
+      ? [...newItems, getSocialItem(GROUP, group?.socialId, getSubTypeName(page))]
+      : newItems;
   }, []);
 };

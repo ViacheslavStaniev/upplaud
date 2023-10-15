@@ -31,7 +31,7 @@ app.use(
 );
 
 const corsOptions = {
-  origin: process.env.REACT_APP_URL,
+  origin: [process.env.REACT_APP_URL, process.env.SERVER_URL],
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
 
