@@ -276,14 +276,15 @@ router.get("/init-auto-posting", async (req, res) => {
       if (!socialAccount) continue;
 
       // Check if social account is active
-      const { isConnected, accessToken, refreshToken, page, group } = socialAccount;
+      const { isConnected, accessToken, refreshToken, page } = socialAccount;
       if (!isConnected) continue;
 
       // Post Info
       const postInfo = {
         title: "This is title - " + Date.now(),
         description: "This is description text.",
-        url: getBaseDomain(`poll/${poll._id}`),
+        // url: getBaseDomain(`poll/${poll._id}`),
+        url: "https://www.tcmhack.in/",
       };
 
       // Initiate Posting

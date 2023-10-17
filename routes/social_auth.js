@@ -92,7 +92,7 @@ router.get("/error", responseBackToWebapp);
 // @route   GET auth/login/facebook
 // @desc    Login user via facebook
 // @access  Public
-router.get("/facebook", setFacebookStrategy, passport.authenticate("facebook", { scope: ["email"] }), redirectToWebapp);
+router.get("/facebook", setFacebookStrategy, passport.authenticate("facebook", { scope: ["email", "user_link"] }), redirectToWebapp);
 // router.get(
 //   "/facebook",
 //   (req, res) => {
