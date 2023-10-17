@@ -8,6 +8,8 @@ export default function SidebarNavMenu() {
 
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const pathArr = pathname.split('/');
+  const path = pathArr.length > 2 ? `${pathArr[1]}/new` : pathArr[1];
   const { newAutomation, automations, emailTemplates, guestingAdmin } = PATH_DASHBOARD.dashboard;
 
   const items = [
@@ -55,7 +57,7 @@ export default function SidebarNavMenu() {
       theme="light"
       mode="inline"
       items={items}
-      selectedKeys={[pathname]}
+      selectedKeys={[`/${path}`]}
       defaultOpenKeys={['manage']}
       onClick={({ key }) => navigate(key)}
     />

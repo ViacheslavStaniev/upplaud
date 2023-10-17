@@ -2,24 +2,24 @@ const express = require("express");
 const passport = require("passport");
 const FacebookStrategy = require("passport-facebook").Strategy;
 const LinkedInStrategy = require("passport-linkedin-oauth2").Strategy;
-// const verifyAuth = require("../config/verifyAuth");
 // const { sendEmail } = require("../helpers/email");
 const { createOrUpdateGuestUser, updateUserInfo } = require("./users");
-const { randomString, getAuthResponse, redirectToWebapp } = require("../helpers/utills");
+const { randomString, setUserSession, redirectToWebapp, getFBAuthClient } = require("../helpers/utills");
 
 const router = express.Router();
 
-const { REACT_APP_URL, FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, LINKEDIN_APP_ID, LINKEDIN_APP_SECRET } = process.env;
+const { SERVER_URL, REACT_APP_URL, FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, LINKEDIN_APP_ID, LINKEDIN_APP_SECRET } = process.env;
 const AuthOptions = { failureRedirect: "/auth/login/error", failureFlash: false, session: false, failureMessage: true };
 
-const getAuthCallbackURL = (urlFor) => `auth/login/${urlFor}-callback`;
+const getAuthCallbackURL = (urlFor) => `${SERVER_URL}/auth/login/${urlFor}-callback`;
 
-const responseBackToWebapp = (req, res) => {
-  const { accessToken = null } = req?.user || {};
-  const params = accessToken
-    ? `#auth_token=${accessToken}`
-    : `#error=true&error_description=This social media login might not be working right now. Please use another way to login. 
-  `;
+const responseBackToWebapp = async (req, res) => {
+  let params = "";
+  if (req?.user) await setUserSession(req, req.user);
+  else {
+    params = `#error=true&error_description=This social media login might not be working right now. Please try another way to login.`;
+  }
+
   res.redirect(REACT_APP_URL + params);
 };
 
@@ -30,15 +30,15 @@ const getUser = async (profile) => {
   if (emails && emails[0]?.value) {
     const email = emails[0]?.value;
     const firstName = name?.givenName;
-    const lastName = name?.familyName || "";
     const picture = photos[0]?.value || "";
+    const lastName = name?.familyName || "";
 
     const userObj = await createOrUpdateGuestUser(firstName, lastName, email, randomString(8)); // new user - register first, otherwise fetch user
 
     // update user picture
     await updateUserInfo(userObj._id, { email, lastName, firstName, profile: { ...userObj.profile, picture } });
 
-    return await getAuthResponse(userObj);
+    return await userObj;
   }
 
   return null;
@@ -51,9 +51,8 @@ const setFacebookStrategy = async (req, res, next) => {
       {
         clientID: FACEBOOK_APP_ID,
         clientSecret: FACEBOOK_APP_SECRET,
-        scope: ["email", "public_profile"],
         callbackURL: getAuthCallbackURL("facebook"),
-        profileFields: ["id", "emails", "name", "picture", "gender", "displayName"],
+        profileFields: ["id", "email", "name", "picture", "gender", "displayName"],
       },
       async (accessToken, refreshToken, profile, done) => {
         console.log("profile", profile);
@@ -93,12 +92,46 @@ router.get("/error", responseBackToWebapp);
 // @route   GET auth/login/facebook
 // @desc    Login user via facebook
 // @access  Public
-router.get("/facebook", setFacebookStrategy, passport.authenticate("facebook"), redirectToWebapp);
+router.get("/facebook", setFacebookStrategy, passport.authenticate("facebook", { scope: ["email"] }), redirectToWebapp);
+// router.get(
+//   "/facebook",
+//   (req, res) => {
+//     const loginUrl = `https://www.facebook.com/v12.0/dialog/oauth?client_id=${FACEBOOK_APP_ID}&redirect_uri=${getAuthCallbackURL(
+//       "facebook"
+//     )}&scope=email,public_profile`;
+//     console.log("initiating facebook login", getAuthCallbackURL("facebook"), loginUrl);
+//     res.redirect(loginUrl);
+//   },
+//   redirectToWebapp
+// );
 
 // @route   GET auth/login/facebook-callback
 // @desc    Handle response from facebook
 // @access  Public
 router.get("/facebook-callback", passport.authenticate("facebook", AuthOptions), responseBackToWebapp);
+// router.get(
+//   "/facebook-callback",
+//   async (req, res) => {
+//     const { code } = req.query;
+
+//     if (code) {
+//       const authClient = getFBAuthClient();
+//       try {
+//         const { data } = await authClient.get(
+//           `/oauth/access_token?client_id=${FACEBOOK_APP_ID}&redirect_uri=${getAuthCallbackURL(
+//             "facebook"
+//           )}&client_secret=${FACEBOOK_APP_SECRET}&code=${code}`
+//         );
+//         const { access_token, expires_in } = data;
+//         const { data: userProfile } = await authClient.get(`/me?fields=id,email,name,picture,gender&access_token=${access_token}`);
+//         res.json(userProfile);
+//       } catch (error) {
+//         console.log("error", error);
+//       }
+//     }
+//   },
+//   responseBackToWebapp
+// );
 
 // @route   GET auth/login/linkedin
 // @desc    Login user via linkedin

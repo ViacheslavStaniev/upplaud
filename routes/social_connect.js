@@ -1,12 +1,12 @@
 const express = require("express");
 const passport = require("passport");
+const User = require("../models/User");
+const verifyAuth = require("../config/verifyAuth");
+const SocialAccount = require("./../models/SocialAccount");
 const SocialPosting = require("./../models/SocialPosting");
 const FacebookStrategy = require("passport-facebook").Strategy;
 const LinkedInStrategy = require("passport-linkedin-oauth2").Strategy;
-// const verifyAuth = require("../config/verifyAuth");
 // const { sendEmail } = require("../helpers/email");
-const User = require("../models/User");
-const SocialAccount = require("./../models/SocialAccount");
 const { POLL_STATUS } = require("./../models/Guest");
 const { SOCIAL_TYPE, SOCIAL_SUB_TYPE } = require("./../models/SocialAccount");
 const { getBaseDomain, redirectToWebapp, getFBAuthClient, getLNAuthRestClients } = require("../helpers/utills");
@@ -19,11 +19,11 @@ const { PROFILE, PAGE } = SOCIAL_SUB_TYPE;
 
 // const LINKEDIN_API_URL = "https://api.linkedin.com/rest/";
 const { REACT_APP_URL, FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, LINKEDIN_APP_ID, LINKEDIN_APP_SECRET, LINKEDIN_VERSION } = process.env;
-const AuthOptions = { failureRedirect: "/auth/connect/error", failureFlash: false, session: true, failureMessage: true };
+const AuthOptions = { failureRedirect: "/auth/connect/error", failureFlash: false, session: false, failureMessage: true };
 
 const getAuthCallbackURL = (urlFor) => getBaseDomain(`auth/connect/${urlFor}-callback`);
 
-const responseBackToWebapp = (req, res) => res.redirect(REACT_APP_URL + "?isConnected=1");
+const responseBackToWebapp = async (req, res) => res.redirect(REACT_APP_URL + "?isConnected=1");
 
 const saveUserAccessTokens = async (user, infoObj) => {
   const {
@@ -81,11 +81,8 @@ const setFacebookStrategy = async (req, res, next) => {
         scope: ["email", "public_profile", "publish_to_groups", "pages_manage_posts", "pages_read_engagement"],
       },
       async (accessToken, refreshToken, profile, done) => {
-        // console.log("accessToken", accessToken);
-        // console.log("profile", profile);
-
-        // Temporary Email
-        // profile.emails = [{ value: "tikamchand06@gmail.com" }];
+        // Add Email if not exists
+        if (!profile.emails || profile.emails.length === 0) profile.emails = [{ value: req.userObj.email }];
 
         try {
           const { id, emails, profileUrl } = profile;
@@ -239,7 +236,7 @@ router.get("/error", redirectToWebapp);
 // @route   GET auth/connect/facebook
 // @desc    Connnect user with facebook account
 // @access  Public
-router.get("/facebook", setFacebookStrategy, passport.authenticate("facebook"), redirectToWebapp);
+router.get("/facebook", verifyAuth, setFacebookStrategy, passport.authenticate("facebook"), redirectToWebapp);
 
 // @route   GET auth/connect/facebook-callback
 // @desc    Handle response from facebook
@@ -249,7 +246,7 @@ router.get("/facebook-callback", passport.authenticate("facebook", AuthOptions),
 // @route   GET auth/connect/linkedin
 // @desc    Connect user with linkedin account
 // @access  Public
-router.get("/linkedin", setLinkedinStrategy, passport.authenticate("linkedin"), redirectToWebapp);
+router.get("/linkedin", verifyAuth, setLinkedinStrategy, passport.authenticate("linkedin"), redirectToWebapp);
 
 // @route   GET auth/connect/linkedin-callback
 // @desc    Handle response from linkedin

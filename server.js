@@ -1,14 +1,16 @@
 require("dotenv").config();
+const path = require("path");
 const cors = require("cors");
 const express = require("express");
 const passport = require("passport");
 const connectDB = require("./config/db");
 const bodyParser = require("body-parser");
-const session = require("express-session");
+const session = require("cookie-session");
 const cookieParser = require("cookie-parser");
-const path = require("path");
 
 const app = express();
+
+const { SERVER_URL, REACT_APP_URL, PORT, PASSPORT_SECERT } = process.env;
 
 // Set EJS as the view engine
 app.set("view engine", "ejs");
@@ -31,13 +33,14 @@ app.use(
 );
 
 const corsOptions = {
-  origin: [process.env.REACT_APP_URL, process.env.SERVER_URL],
+  credentials: true,
+  origin: [REACT_APP_URL, SERVER_URL],
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
 
 // Passport Auth
 app.use(cookieParser());
-app.use(session({ secret: process.env.PASSPORT_SECERT, resave: true, saveUninitialized: true, cookie: { secure: true } }));
+app.use(session({ secret: PASSPORT_SECERT, resave: true, saveUninitialized: true, cookie: { secure: true, httpOnly: true } }));
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -61,9 +64,9 @@ app.use("/api/guests", require("./routes/guests"));
 app.use("/auth/login", require("./routes/social_auth"));
 app.use("/auth/connect", require("./routes/social_connect"));
 
-const PORT = process.env.PORT || 5000;
+const LISTEN_PORT = PORT || 5000;
 
 app.enable("trust proxy");
 
-app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+app.listen(LISTEN_PORT, () => console.log(`Server started on port ${LISTEN_PORT}`));
 module.exports = app;

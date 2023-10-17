@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import axios from '../utils/axios';
 import { App } from 'antd';
-import { isValidToken, setSession } from './utils';
 import { useSelector, useDispatch } from 'react-redux';
 import { initialize, saveUser, logoutUser, updateState } from '../reducers/userSlice';
 import { createContext, useEffect, useCallback, useMemo, useContext } from 'react';
@@ -30,17 +29,8 @@ export function AuthProvider({ children }) {
 
   const onInitialize = useCallback(async () => {
     try {
-      const accessToken = localStorage.getItem('accessToken');
-
-      if (accessToken && isValidToken(accessToken)) {
-        setSession(accessToken);
-
-        const { data } = await axios.get('/auth/me');
-
-        dispatch(initialize({ isAuthenticated: true, user: data }));
-      } else {
-        dispatch(initialize({ isAuthenticated: false, user: null }));
-      }
+      const { data } = await axios.get('/auth/me');
+      dispatch(initialize({ isAuthenticated: true, user: data }));
     } catch (error) {
       console.error(error);
       dispatch(initialize({ isAuthenticated: false, user: null }));
@@ -57,13 +47,9 @@ export function AuthProvider({ children }) {
       dispatch(updateState({ isLoading: true }));
 
       try {
-        const response = await axios.post('/auth/login', loginData);
+        const { data } = await axios.post('/auth/login', loginData);
 
-        const { accessToken, user } = response.data;
-
-        setSession(accessToken);
-
-        dispatch(saveUser({ user, isLoading: false }));
+        dispatch(saveUser({ user: data, isLoading: false }));
       } catch (error) {
         dispatch(updateState({ isLoading: false, errors: error?.errors }));
       }
@@ -91,8 +77,9 @@ export function AuthProvider({ children }) {
   );
 
   // LOGOUT
-  const logout = useCallback(() => {
-    setSession(null);
+  const logout = useCallback(async () => {
+    await axios.get('/auth/logout');
+
     dispatch(logoutUser());
   }, [dispatch]);
 
@@ -149,13 +136,7 @@ export function AuthProvider({ children }) {
   );
 
   // Social Login - Login via AuthToken
-  const loginViaToken = useCallback(
-    (accessToken) => {
-      setSession(accessToken);
-      onInitialize();
-    },
-    [onInitialize]
-  );
+  const loginViaToken = useCallback(() => onInitialize(), [onInitialize]);
 
   const memoizedValue = useMemo(
     () => ({

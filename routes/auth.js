@@ -4,10 +4,10 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const verifyAuth = require("../config/verifyAuth");
 const { sendEmail } = require("../helpers/email");
+const { register, getUserInfo } = require("./users");
 const { OAuth2Client } = require("google-auth-library");
 const { check, validationResult } = require("express-validator");
-const { register, getUserInfo } = require("./users");
-const { randomString, getAuthResponse } = require("../helpers/utills");
+const { randomString, getAuthResponse, setUserSession } = require("../helpers/utills");
 
 const router = express.Router();
 
@@ -39,15 +39,15 @@ router.post(
     const { email, password } = req.body;
 
     try {
-      let user = await User.findOne({ email });
+      const user = await User.findOne({ email });
       if (!user) return res.status(400).json({ errors: [{ msg: "Invalid Credentials" }] });
 
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) return res.status(400).json({ errors: [{ msg: "Invalid Credentials" }] });
 
-      const user2 = await getUserInfo(user.id);
+      await setUserSession(req, user);
 
-      res.json(await getAuthResponse(user2));
+      res.json(await getUserInfo(user._id));
     } catch (err) {
       console.error(err.message);
       res.status(500).send("Internal Server Error");
@@ -113,12 +113,14 @@ router.post(
     try {
       const user = await register(firstName, lastName, email, password, timezone);
 
-      res.json(await getAuthResponse(user));
+      // Set User Session
+      await setUserSession(req, user);
+
+      res.json(user);
     } catch (err) {
       console.error(err);
-      if (err.name === "ServiceError") {
-        return res.status(400).json({ errors: [{ msg: err.message }] });
-      }
+      if (err.name === "ServiceError") return res.status(400).json({ errors: [{ msg: err.message }] });
+
       return res.status(500).send("Internal Server Error");
     }
   }
@@ -226,5 +228,18 @@ router.post(
     }
   }
 );
+
+// @route   POST api/auth/logout
+// @desc    Logout user
+// @access  Private
+router.get("/logout", verifyAuth, async (req, res) => {
+  try {
+    req.session = null;
+    res.json({ msg: "Logged out successfully" });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Internal Server Error");
+  }
+});
 
 module.exports = router;

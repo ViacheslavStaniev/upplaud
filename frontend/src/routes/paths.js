@@ -29,7 +29,7 @@ export const PATH_DASHBOARD = {
     automations: path(ROOTS_DASHBOARD, '/automations'),
     accountAdmin: path(ROOTS_DASHBOARD, '/account-admin'),
     guestingAdmin: path(ROOTS_DASHBOARD, '/guesting-admin'),
-    newAutomation: path(ROOTS_DASHBOARD, '/new-automation'),
+    newAutomation: path(ROOTS_DASHBOARD, '/automations/new'),
     emailTemplates: path(ROOTS_DASHBOARD, '/email-templates'),
     postingTemplate: path(ROOTS_DASHBOARD, '/posting-template'),
   },

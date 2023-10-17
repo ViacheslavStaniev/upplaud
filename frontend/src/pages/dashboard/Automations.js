@@ -127,7 +127,7 @@ export default function Automations() {
           <Space>
             <Button icon={<MailOutlined />} />
             <Tooltip title="Edit Automation Details">
-              <Button href={`/new-automation/${id}`} icon={<EditOutlined />} />
+              <Button href={`/automations/${id}`} icon={<EditOutlined />} />
             </Tooltip>
             <Button icon={<CalendarOutlined />} />
             <Button icon={<PauseCircleOutlined />} />

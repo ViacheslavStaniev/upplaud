@@ -1,17 +1,9 @@
-const jwt = require("jsonwebtoken");
-
+// Desc: Middleware to verify user is logged in
 module.exports = function (req, res, next) {
-  const authorization = req.header("authorization");
+  const { user } = req.session;
+  if (!user) return res.status(401).json({ msg: "No user, authorization denied" });
 
-  if (!authorization) return res.status(401).json({ msg: "No token, authorization denied" });
-
-  const token = authorization.split(" ")[1];
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.userId = decoded.userId;
-    next();
-  } catch (err) {
-    res.status(401).json({ msg: "Token is not valid" });
-  }
+  req.userObj = user;
+  req.userId = user.id;
+  next();
 };

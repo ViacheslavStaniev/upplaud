@@ -27,6 +27,19 @@ const createUsername = ({ firstName = "", lastName = "" }) => {
   return `${username}-${randomString(8)}`;
 };
 
+// Set User Session
+const setUserSession = (req, user) => {
+  return new Promise((resolve, reject) => {
+    try {
+      const { _id, type, status, email, show, isAdmin, isPublic, userName, lastName, firstName } = user;
+      req.session.user = { id: _id, type, status, email, show, isAdmin, isPublic, userName, lastName, firstName };
+      resolve();
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 // Function to generate image using FFmpeg
 const generateImage = (info) => {
   const getAssetPath = (file) => path.join(__dirname, "../assets", file);
@@ -93,6 +106,7 @@ module.exports.randomString = randomString;
 module.exports.getBaseDomain = getBaseDomain;
 module.exports.generateImage = generateImage;
 module.exports.createUsername = createUsername;
+module.exports.setUserSession = setUserSession;
 module.exports.getAuthResponse = getAuthResponse;
 module.exports.redirectToWebapp = redirectToWebapp;
 module.exports.generateAuthToken = generateAuthToken;

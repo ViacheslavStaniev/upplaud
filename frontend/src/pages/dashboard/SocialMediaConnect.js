@@ -131,8 +131,8 @@ export default function SocialMediaConnect({ showTitle = true, className = '' })
   const getItems = (type = FACEBOOK) => {
     const item = getItem(type) || {};
     const title = SOCIAL_TITLES[type];
-    const { isConnected, page, group } = item;
     const key = type === FACEBOOK ? 'facebook' : 'linkedin';
+    const { isConnected = false, page = {}, group = {} } = item;
 
     const LinkItem = ({ subTitle, item }) => {
       const { socialId = '', accounts = [], askToChoose = false } = item || {};
