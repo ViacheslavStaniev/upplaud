@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import { Button, notification } from 'antd';
 import { APP_BASEURL } from '../../config-global';
+import { Button, notification, Divider } from 'antd';
 import { useAuthContext } from '../../auth/AuthProvider';
 import CustomIcon from '../../components/CustomIcon';
 
@@ -23,12 +23,14 @@ export default function SocialLogin() {
     <div className="flex-center flex-item">
       <Button
         shape="round"
-        type="facebook"
-        icon={<CustomIcon name="facebook" />}
-        href={`${APP_BASEURL}/auth/login/facebook`}
+        type="google"
+        icon={<CustomIcon name="google" />}
+        href={`${APP_BASEURL}/auth/login/google`}
       >
-        Facebook
+        Google
       </Button>
+
+      <Divider type="vertical" />
 
       <Button
         shape="round"

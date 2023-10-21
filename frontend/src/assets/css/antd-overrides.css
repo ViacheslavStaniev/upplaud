@@ -61,6 +61,15 @@
 .ant-btn.ant-btn-instagram:hover {
   opacity: 0.75;
 }
+.ant-btn.ant-btn-google {
+  color: #3c4043;
+  min-width: 125px;
+  border: 1px solid #dadce0;
+}
+.ant-btn.ant-btn-google:hover {
+  background-color: #f8f9fa;
+  border: 1px solid #d2e3fc;
+}
 
 .form-label,
 .ant-form-item .ant-form-item-label > label {

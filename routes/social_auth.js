@@ -1,14 +1,25 @@
 const express = require("express");
 const passport = require("passport");
 const FacebookStrategy = require("passport-facebook").Strategy;
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const LinkedInStrategy = require("passport-linkedin-oauth2").Strategy;
 // const { sendEmail } = require("../helpers/email");
 const { createOrUpdateGuestUser, updateUserInfo } = require("./users");
-const { randomString, setUserSession, redirectToWebapp, getFBAuthClient } = require("../helpers/utills");
+const { randomString, setUserSession, redirectToWebapp } = require("../helpers/utills");
 
 const router = express.Router();
 
-const { SERVER_URL, REACT_APP_URL, FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, LINKEDIN_APP_ID, LINKEDIN_APP_SECRET } = process.env;
+const {
+  SERVER_URL,
+  REACT_APP_URL,
+  GOOGLE_APP_ID,
+  GOOGLE_APP_SECRET,
+  FACEBOOK_APP_ID,
+  FACEBOOK_APP_SECRET,
+  LINKEDIN_APP_ID,
+  LINKEDIN_APP_SECRET,
+} = process.env;
+
 const AuthOptions = { failureRedirect: "/auth/login/error", failureFlash: false, session: false, failureMessage: true };
 
 const getAuthCallbackURL = (urlFor) => `${SERVER_URL}/auth/login/${urlFor}-callback`;
@@ -84,6 +95,18 @@ const setLinkedinStrategy = async (req, res, next) => {
   next();
 };
 
+// Set Google Strategy
+const setGoogleStrategy = async (req, res, next) => {
+  passport.use(
+    new GoogleStrategy(
+      { clientID: GOOGLE_APP_ID, clientSecret: GOOGLE_APP_SECRET, callbackURL: getAuthCallbackURL("google") },
+      async (accessToken, refreshToken, profile, done) => done(null, await getUser(profile))
+    )
+  );
+
+  next();
+};
+
 // @route   GET auth/login/error
 // @desc    Auth error
 // @access  Public
@@ -93,45 +116,11 @@ router.get("/error", responseBackToWebapp);
 // @desc    Login user via facebook
 // @access  Public
 router.get("/facebook", setFacebookStrategy, passport.authenticate("facebook", { scope: ["email", "user_link"] }), redirectToWebapp);
-// router.get(
-//   "/facebook",
-//   (req, res) => {
-//     const loginUrl = `https://www.facebook.com/v12.0/dialog/oauth?client_id=${FACEBOOK_APP_ID}&redirect_uri=${getAuthCallbackURL(
-//       "facebook"
-//     )}&scope=email,public_profile`;
-//     console.log("initiating facebook login", getAuthCallbackURL("facebook"), loginUrl);
-//     res.redirect(loginUrl);
-//   },
-//   redirectToWebapp
-// );
 
 // @route   GET auth/login/facebook-callback
 // @desc    Handle response from facebook
 // @access  Public
 router.get("/facebook-callback", passport.authenticate("facebook", AuthOptions), responseBackToWebapp);
-// router.get(
-//   "/facebook-callback",
-//   async (req, res) => {
-//     const { code } = req.query;
-
-//     if (code) {
-//       const authClient = getFBAuthClient();
-//       try {
-//         const { data } = await authClient.get(
-//           `/oauth/access_token?client_id=${FACEBOOK_APP_ID}&redirect_uri=${getAuthCallbackURL(
-//             "facebook"
-//           )}&client_secret=${FACEBOOK_APP_SECRET}&code=${code}`
-//         );
-//         const { access_token, expires_in } = data;
-//         const { data: userProfile } = await authClient.get(`/me?fields=id,email,name,picture,gender&access_token=${access_token}`);
-//         res.json(userProfile);
-//       } catch (error) {
-//         console.log("error", error);
-//       }
-//     }
-//   },
-//   responseBackToWebapp
-// );
 
 // @route   GET auth/login/linkedin
 // @desc    Login user via linkedin
@@ -142,5 +131,15 @@ router.get("/linkedin", setLinkedinStrategy, passport.authenticate("linkedin"), 
 // @desc    Handle response from linkedin
 // @access  Public
 router.get("/linkedin-callback", passport.authenticate("linkedin", AuthOptions), responseBackToWebapp);
+
+// @route   GET auth/login/google
+// @desc    Login user via google
+// @access  Public
+router.get("/google", setGoogleStrategy, passport.authenticate("google", { scope: ["profile", "email"] }), redirectToWebapp);
+
+// @route   GET auth/login/google-callback
+// @desc    Handle response from google
+// @access  Public
+router.get("/google-callback", passport.authenticate("google", AuthOptions), responseBackToWebapp);
 
 module.exports = router;
