@@ -44,9 +44,7 @@ export const getSocialLabel = (type, subType, subTypeName = '') => {
   return '';
 };
 
-export const getSocialsItems = (socialAccounts = [], socials) => {
-  console.log('getSocialsItems', socialAccounts, socials);
-
+export const getSocialsItems = (socialAccounts = []) => {
   return socialAccounts.reduce((items, item) => {
     if (!item?.isConnected) return items;
 
@@ -61,6 +59,7 @@ export const getSocialsItems = (socialAccounts = [], socials) => {
         subTypeName,
         isActive: false,
         _id: `${type}_${subType}`,
+        isConnected: (subTypeId || '').toString().length > 0,
       };
     };
 

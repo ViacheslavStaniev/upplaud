@@ -40,7 +40,15 @@ const corsOptions = {
 
 // Passport Auth
 app.use(cookieParser());
-app.use(session({ secret: PASSPORT_SECERT, resave: true, saveUninitialized: true, cookie: { secure: true, httpOnly: true } }));
+app.use(
+  session({
+    resave: true,
+    saveUninitialized: true,
+    secret: PASSPORT_SECERT,
+    maxAge: 24 * 60 * 60 * 1000,
+    cookie: { secure: true, httpOnly: true },
+  })
+);
 app.use(passport.initialize());
 app.use(passport.session());
 

@@ -40,6 +40,10 @@ const SocialPostingSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    isConnected: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true, autoCreate: true }
 );

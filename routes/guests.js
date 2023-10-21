@@ -6,20 +6,102 @@ const verifyAuth = require("../config/verifyAuth");
 const SocialPosting = require("../models/SocialPosting");
 const { USER_TYPE } = require("../models/User");
 const { POLL_STATUS, GUEST_TYPE } = require("../models/Guest");
+const { SOCIAL_TYPE, SOCIAL_SUB_TYPE } = require("../models/SocialAccount");
 const { getS3Path, uploadImage } = require("../helpers/s3Helper");
 const { randomString, generateImage } = require("../helpers/utills");
-const { createOrUpdateGuestUser, getBasicUserInfo, updateUserInfo } = require("./users");
+const { createOrUpdateGuestUser, getUserInfo, getBasicUserInfo, updateUserInfo } = require("./users");
 
 const router = express.Router();
+
+const { FACEBOOK } = SOCIAL_TYPE;
+const { PROFILE, PAGE, GROUP } = SOCIAL_SUB_TYPE;
 
 // @route   GET api/guests/guestId
 // @desc    gets guest details
 // @access  Public
 router.get("/:guestId", verifyAuth, async (req, res) => {
   try {
-    const guest = await getPoll(req.params.guestId);
+    const poll = await getPoll(req.params.guestId);
+    const { socialAccounts } = await getUserInfo(req.userId);
+    // console.log(socialAccounts, poll?.socials);
 
-    res.json(guest);
+    // Get Connected Social
+    const getSocial = (type, subType) => poll?.socials.find((item) => item.type === type && item.subType === subType);
+
+    // Update socials with latest socialAccount data
+    for (let i in socialAccounts) {
+      const { type, socialId, isConnected, page, group } = socialAccounts[i];
+
+      // Create new Social
+      const createNewSocial = async (subType, subTypeId, subTypeName = "") => {
+        const basicObj = { type, isConnected, isActive: false, frequency: 4, poll: poll._id, user: req.userId };
+        const newItem = new SocialPosting({ ...basicObj, subTypeName, subType, subTypeId });
+        return await newItem.save();
+      };
+
+      const profile = getSocial(type, PROFILE);
+      if (profile) {
+        // Check and update Profile if required
+        if (profile.subTypeId !== socialId || profile?.isConnected !== isConnected) {
+          profile.subTypeId = socialId;
+          profile.isConnected = isConnected;
+
+          // Update now
+          await SocialPosting.findByIdAndUpdate(profile._id, { subTypeId: socialId, isConnected });
+        }
+      } else {
+        // Create Profile
+        const profileItem = await createNewSocial(PROFILE, socialId);
+        poll.socials.push(profileItem);
+      }
+
+      // Update Page/Group
+      const updatePageGroup = async (obj, subType) => {
+        const socialItem = getSocial(type, subType);
+        const subTypeName = obj?.accounts.find(({ id }) => id === obj?.socialId)?.name || "";
+
+        if (socialItem) {
+          // check and update page if required
+          if (socialItem.subTypeId !== obj.socialId || socialItem?.isConnected !== isConnected) {
+            socialItem.subTypeId = obj.socialId;
+            socialItem.isConnected = isConnected;
+            socialItem.subTypeName = subTypeName;
+
+            // Update now
+            await SocialPosting.findByIdAndUpdate(obj._id, { subTypeId: socialItem.socialId, isConnected, subTypeName });
+            return { socialItem, isNew: false };
+          }
+
+          return null;
+        } else {
+          // Create new
+          const newItem = await createNewSocial(subType, obj?.socialId, subTypeName);
+          return { socialItem: newItem, isNew: true };
+        }
+      };
+
+      // Upddate Page
+      const pageItem = await updatePageGroup(page, PAGE);
+      if (pageItem) {
+        if (pageItem?.isNew) poll.socials.push(pageItem.socialItem);
+        else poll.socials.map((item) => (item._id === pageItem.socialItem._id ? pageItem.socialItem : item));
+      }
+
+      // Update Group
+      if (type === FACEBOOK) {
+        const groupItem = await updatePageGroup(group, GROUP);
+        if (groupItem) {
+          if (groupItem?.isNew) poll.socials.push(groupItem.socialItem);
+          else poll.socials.map((item) => (item._id === groupItem.socialItem._id ? groupItem.socialItem : item));
+        }
+      }
+    }
+
+    // Update Polls
+    const newSocialIds = poll?.socials.map((item) => item._id);
+    await Guest.findByIdAndUpdate(poll._id, { socials: newSocialIds });
+
+    res.json(poll);
   } catch (err) {
     // throw err;
     console.error({ msg: err.message });
@@ -111,9 +193,11 @@ router.post("/", verifyAuth, async (req, res) => {
 
     // Save Social Accounts
     if (socials.length) {
-      const socialAccounts = socials.map(({ type, subType, subTypeName, subTypeId, frequency, isActive = false }) => {
-        return { poll: poll._id, user: req.userId, type, subType, subTypeId, subTypeName, frequency, isActive };
-      });
+      const socialAccounts = socials.map(
+        ({ type, subType, subTypeName, subTypeId, frequency, isActive = false, isConnected = false }) => {
+          return { poll: poll._id, user: req.userId, type, subType, subTypeId, subTypeName, frequency, isActive, isConnected };
+        }
+      );
 
       const socialsIems = await SocialPosting.insertMany(socialAccounts, options);
       poll.socials = socialsIems.map((item) => item._id);
@@ -217,25 +301,28 @@ router.put("/:pollId", verifyAuth, async (req, res) => {
 
     // Save Social Accounts
     if (socials.length) {
-      const socialsIds = socials.map(async ({ type, subType, subTypeName, subTypeId, frequency, isActive = false }) => {
-        let socialAccount = await SocialPosting.findOne({ poll: pollId, type, subType });
-        if (socialAccount) await SocialPosting.findByIdAndUpdate(socialAccount._id, { subTypeId, subTypeName, frequency, isActive });
-        else {
-          socialAccount = new SocialPosting({
-            poll: pollId,
-            user: req.userId,
-            type,
-            subType,
-            subTypeId,
-            subTypeName,
-            frequency,
-            isActive,
-          });
-          await socialAccount.save();
-        }
+      const socialsIds = socials.map(
+        async ({ type, subType, subTypeName, subTypeId, frequency, isActive = false, isConnected = false }) => {
+          let socialAccount = await SocialPosting.findOne({ poll: pollId, type, subType });
+          if (socialAccount) await SocialPosting.findByIdAndUpdate(socialAccount._id, { subTypeId, subTypeName, frequency, isActive });
+          else {
+            socialAccount = new SocialPosting({
+              poll: pollId,
+              user: req.userId,
+              type,
+              subType,
+              subTypeId,
+              subTypeName,
+              frequency,
+              isActive,
+              isConnected,
+            });
+            await socialAccount.save();
+          }
 
-        return socialAccount._id;
-      });
+          return socialAccount._id;
+        }
+      );
 
       pollInfo.socials = await Promise.all(socialsIds);
     }

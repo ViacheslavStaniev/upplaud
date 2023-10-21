@@ -120,7 +120,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
   // console.log('guest', guest);
 
   // Default Socials Items
-  const defaultSocials = getSocialsItems(user?.socialAccounts, socials);
+  const defaultSocials = getSocialsItems(user?.socialAccounts || []);
 
   useEffect(() => {
     if (!isNew && id) dispatch(fetchGuest(id));
