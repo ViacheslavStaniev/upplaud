@@ -1,11 +1,12 @@
 const fs = require("fs");
 const path = require("path");
+const https = require("https");
 const axios = require("axios");
 const jwt = require("jsonwebtoken");
 const { exec } = require("child_process");
 const { AuthClient, RestliClient } = require("linkedin-api-client");
 
-const { REACT_APP_URL, SERVER_URL, JWT_SECRET, LINKEDIN_APP_ID, LINKEDIN_APP_SECRET } = process.env;
+const { REACT_APP_URL, SERVER_URL, JWT_SECRET, LINKEDIN_APP_ID, LINKEDIN_APP_SECRET, LINKEDIN_VERSION } = process.env;
 
 const randomString = (length = 30) => Array.from({ length }, () => Math.random().toString(36)[2]).join("");
 
@@ -40,10 +41,11 @@ const setUserSession = (req, user) => {
   });
 };
 
+// Get Asset Path
+const getAssetPath = (pathStr = "") => path.join(__dirname, "../assets", pathStr);
+
 // Function to generate image using FFmpeg
 const generateImage = (info) => {
-  const getAssetPath = (file) => path.join(__dirname, "../assets", file);
-
   const arialFont = getAssetPath("arial.ttf");
   const baseImage = getAssetPath("base_image.png");
   const breeFont = getAssetPath("BreeSerif-Regular.ttf");
@@ -74,6 +76,25 @@ const generateImage = (info) => {
   });
 };
 
+// Function to Live Stream a video
+const liveStreamTheVideo = (info) => {
+  const { video_url, stream_url } = info;
+  const ffmpegPath = getAssetPath("ffmpeg-build/ffmpeg");
+
+  return new Promise((resolve, reject) => {
+    // FFmpeg command
+    const command = `'${ffmpegPath}' -re -i '${video_url}' -c:a copy -ac 1 -ar 44100 -b:a 96k -vcodec libx264 -pix_fmt yuv420p -vf scale=1080:-1 -r 30 -g 60 -tune zerolatency -f flv -maxrate 2000k -preset veryfast '${stream_url}'`;
+
+    // Execute FFmpeg command
+    exec(command, (error, stdout, stderr) => {
+      if (error) return reject({ error: true, message: error.message });
+      // if (stderr) console.log(`FFmpeg Error: ${stderr}`);
+
+      resolve({ error: false, message: "Video streamed successfully" });
+    });
+  });
+};
+
 // Get Base Domain URL
 const getBaseDomain = (path = "") => `${SERVER_URL}/${path}`;
 
@@ -99,9 +120,61 @@ const getLinkedInAuthRestClients = (authType = "connect") => {
   const restliClient = new RestliClient();
   restliClient.setDebugParams({ enabled: true });
 
-  return { authClient, restliClient };
+  // Axios Rest Client
+  const axiosRestClient = axios.create({
+    baseURL: "https://api.linkedin.com/rest",
+    headers: { "Content-Type": "application/json", "X-Restli-Protocol-Version": "2.0.0", "LinkedIn-Version": LINKEDIN_VERSION },
+  });
+
+  return { authClient, restliClient, axiosRestClient };
 };
 
+// Function to download the file from the URL
+const downloadFile = async (url, fileName = "") => {
+  const destination = getAssetPath(`temp/${fileName}`);
+
+  const writer = fs.createWriteStream(destination);
+
+  return axios({
+    url: url,
+    method: "get",
+    responseType: "stream",
+    httpsAgent: new https.Agent({ rejectUnauthorized: false }), // In case of self-signed certificates
+  }).then((response) => {
+    response.data.pipe(writer);
+    console.log(`Downloading file from ${url} to ${destination}`, response.status, response.statusText);
+
+    return new Promise((resolve, reject) => {
+      writer.on("finish", () => resolve(destination));
+      writer.on("error", reject);
+    });
+  });
+};
+
+// Function to remove the file from the path
+const removeFile = (filePath) => {
+  return new Promise((resolve, reject) => {
+    fs.unlink(filePath, (err) => (err ? reject(err) : resolve()));
+  });
+};
+
+// Upload the file to the URL
+const uploadFile = async (videoUrl, uploadUrl) => {
+  const uploadCommand = `curl -v -H 'Content-Type: application/octet-stream' --upload-file ${videoUrl} '${uploadUrl}'`;
+
+  // Function to execute cURL commands
+  return new Promise((resolve, reject) => {
+    exec(uploadCommand, (error, stdout, stderr) => {
+      if (error) reject(error);
+      else resolve(stdout);
+    });
+  });
+};
+
+module.exports.uploadFile = uploadFile;
+module.exports.removeFile = removeFile;
+module.exports.downloadFile = downloadFile;
+module.exports.getAssetPath = getAssetPath;
 module.exports.randomString = randomString;
 module.exports.getBaseDomain = getBaseDomain;
 module.exports.generateImage = generateImage;
@@ -111,4 +184,5 @@ module.exports.getAuthResponse = getAuthResponse;
 module.exports.redirectToWebapp = redirectToWebapp;
 module.exports.generateAuthToken = generateAuthToken;
 module.exports.getFBAuthClient = getFacebookAuthClient;
+module.exports.liveStreamTheVideo = liveStreamTheVideo;
 module.exports.getLNAuthRestClients = getLinkedInAuthRestClients;

@@ -1,16 +1,21 @@
-import Logo from "../components/Logo";
-import { Link, Outlet } from "react-router-dom";
+import Logo from '../components/Logo';
+import { Layout } from 'antd';
+import { Link, Outlet } from 'react-router-dom';
+
+const { Header, Content } = Layout;
 
 export default function CompactLayout() {
   return (
-    <div style={{ padding: 20 }}>
-      <Link to='/'>
-        <Logo />
-      </Link>
+    <Layout>
+      <Header className="sticky-header">
+        <Link to="/">
+          <Logo />
+        </Link>
+      </Header>
 
-      <div className='mail'>
+      <Content className="h-100 bg-white">
         <Outlet />
-      </div>
-    </div>
+      </Content>
+    </Layout>
   );
 }

@@ -1,16 +1,17 @@
 import dayjs from 'dayjs';
 import { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { getFiles } from '../../reducers/fileSlice';
 import { useSelector, useDispatch } from 'react-redux';
 import { useAuthContext } from '../../auth/AuthProvider';
+import { useParams, useNavigate } from 'react-router-dom';
 import { GUEST_TYPE, POLL_STATUS } from '../../utils/types';
 import { pollTypeOptions, getPollType, getSocialsItems } from '../../utils/common';
 import { addGuest, fetchGuest, updateGuest, updateState } from '../../reducers/guestsSlice';
 import { Form, Space, Input, Button, DatePicker, Typography, Radio, Switch } from 'antd';
 import AppTitle from '../../components/AppTitle';
-import PollSharingImage from './PollSharingImage';
-import SocialPostingItem from './SocialPostingItem';
 import HeadshotImage from '../layouts/HeadshotImage';
+import PollSharingImage from './layouts/PollSharingImage';
+import SocialPostingItem from './layouts/SocialPostingItem';
 
 const { Text, Title } = Typography;
 const { HOST_GUEST, SOLO_SESSION } = GUEST_TYPE;
@@ -95,15 +96,17 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
   const { id } = useParams();
   const [form] = Form.useForm();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { user } = useAuthContext();
 
   const isNew = id === undefined; // new automation
   const guestTypeValue = Form.useWatch('guestType', form);
 
   const isSoloSession = guestTypeValue === SOLO_SESSION;
-  const { guest, isLoading } = useSelector((state) => state.guests);
+  const { guest, error, isLoading } = useSelector((state) => state.guests);
 
   const {
+    audio = null,
     socials = [],
     guest: guestUser,
     pollImageSrc = '',
@@ -117,12 +120,15 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
     potentialTopics = ['', ''],
     startHostAutomation = false,
   } = guest || {};
-  // console.log('guest', guest);
+  console.log('guest', guest);
 
   // Default Socials Items
   const defaultSocials = getSocialsItems(user?.socialAccounts || []);
 
   useEffect(() => {
+    // Get files
+    dispatch(getFiles());
+
     if (!isNew && id) dispatch(fetchGuest(id));
 
     return () => dispatch(updateState({ guest: null }));
@@ -142,7 +148,15 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
     form.setFieldsValue({ guest: { email, phone, about, picture, fullName } });
   }, [user, guestUser, form, isSoloSession]);
 
+  // Handle Error
+  useEffect(() => {
+    if (error && error.status === 403) navigate('/403');
+
+    return () => dispatch(updateState({ error: null }));
+  }, [error, navigate, dispatch]);
+
   const initialValues = {
+    audio,
     guestType,
     pollImageSrc,
     hostOfferUrl,

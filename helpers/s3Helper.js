@@ -79,7 +79,33 @@ const copyImage = async (oldfile, newfile, inputfolder, targetfolder) => {
   }
 };
 
+// Upload Audio
+const uploadAudio = async (buffer, filePath = "", name = "hello.webm") => {
+  const key = `${filePath}/${name}`;
+
+  const params = {
+    Key: key,
+    Body: buffer,
+    Bucket: S3_BUCKET,
+    // ACL: "public-read",
+    ContentType: `audio/webm`, // required. Notice the back ticks
+  };
+
+  // The upload() is used instead of putObject() as we'd need the location url and assign that to our user profile/database
+  // see: http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#upload-property
+
+  return new Promise(async (resolve, reject) => {
+    try {
+      await client.send(new PutObjectCommand(params));
+      resolve(key);
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 module.exports.getS3Path = getS3Path;
 module.exports.copyImage = copyImage;
 module.exports.uploadImage = uploadImage;
 module.exports.deleteImage = deleteImage;
+module.exports.uploadAudio = uploadAudio;

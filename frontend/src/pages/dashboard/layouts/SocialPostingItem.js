@@ -1,5 +1,5 @@
-import Accordian from '../../components/Accordian';
-import { getSocialLabel } from '../../utils/common';
+import Accordian from '../../../components/Accordian';
+import { getSocialLabel } from '../../../utils/common';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Button, Checkbox, Select, Form, Alert, Tooltip } from 'antd';
 

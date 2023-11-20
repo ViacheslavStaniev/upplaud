@@ -9,15 +9,23 @@ const LinkedInStrategy = require("passport-linkedin-oauth2").Strategy;
 // const { sendEmail } = require("../helpers/email");
 const { POLL_STATUS } = require("./../models/Guest");
 const { SOCIAL_TYPE, SOCIAL_SUB_TYPE } = require("./../models/SocialAccount");
-const { getBaseDomain, redirectToWebapp, getFBAuthClient, getLNAuthRestClients } = require("../helpers/utills");
+const {
+  removeFile,
+  uploadFile,
+  downloadFile,
+  getBaseDomain,
+  getFBAuthClient,
+  redirectToWebapp,
+  liveStreamTheVideo,
+  getLNAuthRestClients,
+} = require("../helpers/utills");
 
 // const { updateUserInfo } = require("./users");
 
 const router = express.Router();
-const { LINKEDIN, FACEBOOK } = SOCIAL_TYPE;
 const { PROFILE, PAGE } = SOCIAL_SUB_TYPE;
+const { LINKEDIN, FACEBOOK } = SOCIAL_TYPE;
 
-// const LINKEDIN_API_URL = "https://api.linkedin.com/rest/";
 const { REACT_APP_URL, FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, LINKEDIN_APP_ID, LINKEDIN_APP_SECRET, LINKEDIN_VERSION } = process.env;
 const AuthOptions = { failureRedirect: "/auth/connect/error", failureFlash: false, session: false, failureMessage: true };
 
@@ -78,7 +86,7 @@ const setFacebookStrategy = async (req, res, next) => {
         clientSecret: FACEBOOK_APP_SECRET,
         callbackURL: getAuthCallbackURL("facebook"),
         profileFields: ["id", "emails", "gender", "name", "displayName", "profileUrl"],
-        scope: ["email", "public_profile", "publish_to_groups", "pages_manage_posts", "pages_read_engagement"],
+        scope: ["email", "public_profile", "publish_to_groups", "pages_manage_posts", "pages_read_engagement", "publish_video"],
       },
       async (accessToken, refreshToken, profile, done) => {
         // Add Email if not exists
@@ -269,7 +277,7 @@ router.get("/init-auto-posting", async (req, res) => {
       const { poll, user, type, subType, subTypeId, frequency, frequencyPosted } = posting;
 
       // Check is poll is published
-      if (!poll || poll.status === POLL_STATUS.DRAFT) continue;
+      if (!poll || poll.status === POLL_STATUS.DRAFT || !subTypeId) continue;
 
       // Check if social account is connected
       const socialAccount = user.socialAccounts.find((s) => s.type === type);
@@ -284,8 +292,11 @@ router.get("/init-auto-posting", async (req, res) => {
         title: "This is title - " + Date.now(),
         description: "This is description text.",
         // url: getBaseDomain(`poll/${poll._id}`),
-        url: "https://www.tcmhack.in/",
+        url: "https://video-socials.s3.us-east-2.amazonaws.com/7/videos/uploads/video_1681880073_video_1676706027_tcmdemo25_1605085991.mp4",
       };
+
+      // Download Video
+      postInfo.videoUrl = await downloadFile(postInfo.url, `${Date.now()}.mp4`);
 
       // Initiate Posting
       if (type === SOCIAL_TYPE.FACEBOOK) {
@@ -309,9 +320,8 @@ router.get("/init-auto-posting", async (req, res) => {
             expiresInSeconds: tokenObj.refresh_token_expires_in,
           });
         } catch (error) {
-          const urs = await saveUserAccessTokens(user, { type, subType, isConnected: false, expiresInSeconds: 0 });
-
-          console.log(error, urs);
+          // await saveUserAccessTokens(user, { type, subType, isConnected: false, expiresInSeconds: 0 });
+          console.log(error);
         }
       }
     }
@@ -325,57 +335,75 @@ router.get("/init-auto-posting", async (req, res) => {
 
 // Initiate LinkedIn Posting
 async function initLinkedInPosting(id, postInfo, refreshToken, subType = PROFILE) {
+  console.log("Posting on LinkedIn", subType, id);
   return new Promise(async (resolve, reject) => {
-    // Author
-    const author = subType === PROFILE ? `urn:li:person:${id}` : `urn:li:organization:${id}`;
-
-    const { authClient, restliClient } = getLNAuthRestClients();
-
-    // Post Content
-    const { title, description, url } = postInfo;
-    const post = {
-      author,
-      lifecycleState: "PUBLISHED",
-      specificContent: {
-        "com.linkedin.ugc.ShareContent": {
-          shareMediaCategory: "ARTICLE",
-          shareCommentary: { text: title },
-          media: [
-            {
-              status: "READY",
-              originalUrl: url,
-              title: { text: title },
-              description: { text: description },
-            },
-          ],
-        },
-      },
-      visibility: { "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC" },
-    };
+    const { title, description, videoUrl } = postInfo; // Post Content
+    const { authClient, restliClient, axiosRestClient } = getLNAuthRestClients();
+    const author = subType === PROFILE ? `urn:li:person:${id}` : `urn:li:organization:${id}`; // Author
 
     try {
-      // fetch new access token
+      // Fetch new access token
       const tokenObj = await authClient.exchangeRefreshTokenForAccessToken(refreshToken);
       const accessToken = tokenObj?.access_token;
 
-      await restliClient.create({ resourcePath: "/ugcPosts", entity: post, accessToken });
-      // console.log(res, res?.createdEntityId);
+      // Add access token to axios rest client
+      axiosRestClient.defaults.headers["Authorization"] = `Bearer ${accessToken}`;
+
+      // 1. Register Upload
+      const uploadData = {
+        registerUploadRequest: {
+          owner: author,
+          recipes: ["urn:li:digitalmediaRecipe:feedshare-video"],
+          serviceRelationships: [{ identifier: "urn:li:userGeneratedContent", relationshipType: "OWNER" }],
+        },
+      };
+      const { data } = await axiosRestClient.post("/assets?action=registerUpload", uploadData);
+      const asset = data.value.asset;
+      const assetId = asset.split("urn:li:digitalmediaAsset:")[1];
+      const uploadUrl = data.value.uploadMechanism["com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest"].uploadUrl;
+      console.log("Step 1: Register Upload Complete");
+
+      // 2. Upload Video
+      await uploadFile(videoUrl, uploadUrl);
+      console.log("Step 2: Video Upload Complete");
+
+      // 3. Checck if video is ready
+      let isReady = false;
+      while (!isReady) {
+        const { data } = await restliClient.get({ resourcePath: `/assets/${assetId}`, accessToken });
+        isReady = data.recipes[0]?.status === "AVAILABLE";
+        console.log("isReady =>", assetId, isReady);
+        if (!isReady) await new Promise((resolve) => setTimeout(resolve, 2500)); // Retry checking after 2.5 seconds
+      }
+      console.log("Step 3: Is asset available? ", isReady);
+
+      // 4. Create Post
+      const post = {
+        author,
+        visibility: "PUBLIC",
+        commentary: description,
+        lifecycleState: "PUBLISHED",
+        isReshareDisabledByAuthor: false,
+        content: { media: { title, id: `urn:li:video:${assetId}` } },
+        distribution: { targetEntities: [], feedDistribution: "MAIN_FEED", thirdPartyDistributionChannels: [] },
+      };
+      const res2 = await axiosRestClient.post("/posts", post);
+      console.log("Step 4: Post Creation completed ", res2.data, res2.status, res2.statusText);
+
       resolve(tokenObj);
     } catch (error) {
+      console.log(error);
       reject({ error: true, msg: error?.response?.data?.error_description || error?.message });
+    } finally {
+      await removeFile(videoUrl); // Remove Video File from local
     }
   });
 }
 
 // Initiate Facebook Posting
 async function initFacebookPosting(id, postInfo, access_token, subType = PROFILE) {
-  console.log("Posting on ", subType, id);
+  console.log("Posting on Facebook", subType, id);
   return new Promise(async (resolve, reject) => {
-    // Post Content
-    const { title, description, url } = postInfo;
-
-    const authClient = getFBAuthClient();
-
     // Get refresh token
     // const res = await authClient.get(
     //   `/oauth/access_token?grant_type=fb_exchange_token&client_id=${FACEBOOK_APP_ID}&client_secret=${FACEBOOK_APP_SECRET}&fb_exchange_token=${accessToken}`
@@ -383,14 +411,30 @@ async function initFacebookPosting(id, postInfo, access_token, subType = PROFILE
     // const { access_token } = res.data;
     // console.log("access_token", access_token);
 
-    // Post
-    const post = { access_token, message: title, link: url, caption: description };
-
     try {
-      // Post on Facebook
-      const response = await authClient.post(`/${subType === PROFILE ? "me" : id}/feed`, post);
-      resolve(response.data);
+      const authClient = getFBAuthClient();
+
+      // Post Content
+      const { title, description, url } = postInfo;
+
+      // Live Stream on Facebook
+      const { data } = await authClient.post(`/${id}/live_videos`, {
+        title,
+        description,
+        access_token,
+        status: "LIVE_NOW",
+        privacy: { value: "EVERYONE" },
+      });
+
+      // Live Stream the Video
+      const result = await liveStreamTheVideo({ video_url: url, stream_url: data.stream_url });
+
+      // End the Live Stream
+      await authClient.post(`/${data.id}`, { end_live_video: true, access_token });
+
+      resolve(result);
     } catch (error) {
+      console.log(error);
       reject({ error: true, msg: error?.response?.data?.error?.message || error?.message });
     }
   });

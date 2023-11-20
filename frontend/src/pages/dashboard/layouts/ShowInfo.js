@@ -1,5 +1,5 @@
-import { getFullS3Url } from '../../config-global';
-import { useAuthContext } from '../../auth/AuthProvider';
+import { getFullS3Url } from '../../../config-global';
+import { useAuthContext } from '../../../auth/AuthProvider';
 import { Form, Image, Input, Upload, Button, Typography } from 'antd';
 
 const { Dragger } = Upload;

@@ -20,8 +20,8 @@ import {
   LoginPage,
   RegisterPage,
   VerifyCodePage,
-  NewPasswordPage,
   ResetPasswordPage,
+  ForgotPasswordPage,
   // Dashboard
   NewAutomation,
   Automations,
@@ -53,14 +53,9 @@ export default function Router() {
             </GuestGuard>
           ),
         },
-        {
-          element: <CompactLayout />,
-          children: [
-            { path: 'verify', element: <VerifyCodePage /> },
-            { path: 'new-password', element: <NewPasswordPage /> },
-            { path: 'reset-password', element: <ResetPasswordPage /> },
-          ],
-        },
+        { path: 'verify', element: <VerifyCodePage /> },
+        { path: 'forgot-password', element: <ForgotPasswordPage /> },
+        { path: 'reset-password/:token', element: <ResetPasswordPage /> },
       ],
     },
     {

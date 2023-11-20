@@ -1,7 +1,7 @@
 import ImgCrop from 'antd-img-crop';
 import { useState } from 'react';
 import { Spin, Upload, message } from 'antd';
-import { uploadAndGetS3Path } from '../../reducers/imageSlice';
+import { uploadAndGetS3Path } from '../../reducers/fileSlice';
 
 export default function CustomUpload({ onComplete, children, cropShape = 'round', aspect = 1 }) {
   const [isUploading, setIsUploading] = useState(false);

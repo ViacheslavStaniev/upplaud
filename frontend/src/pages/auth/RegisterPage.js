@@ -1,9 +1,11 @@
 import SocialLogin from './SocialLogin';
 import LoginLayout from '../../layouts/LoginLayout';
+import { Link } from 'react-router-dom';
+import { PATH_AUTH, PATH_PAGE } from '../../routes/paths';
 import { useAuthContext } from '../../auth/AuthProvider';
 import { Form, Typography, Button, Input, Divider, Alert, Space } from 'antd';
 
-const { Title, Paragraph, Link } = Typography;
+const { Title, Paragraph } = Typography;
 
 export default function RegisterPage() {
   const [form] = Form.useForm();
@@ -13,7 +15,7 @@ export default function RegisterPage() {
     <LoginLayout title="Register">
       <Title level={3}>Get started absolutely free.</Title>
       <Paragraph>
-        Already have an account? <Link href="/auth/login">Sign In</Link>
+        Already have an account? <Link to={PATH_AUTH.login}>Sign In</Link>
       </Paragraph>
 
       {errors &&
@@ -74,8 +76,8 @@ export default function RegisterPage() {
       </Form>
 
       <Paragraph>
-        By signing up, I agree to <Link href="/tos">Terms of Service</Link> and{' '}
-        <Link href="/privacy">Privacy Policy</Link>.
+        By signing up, I agree to <Link to={PATH_PAGE.tos}>Terms of Service</Link> and{' '}
+        <Link to={PATH_PAGE.privacy}>Privacy Policy</Link>.
       </Paragraph>
 
       <Divider plain>OR</Divider>

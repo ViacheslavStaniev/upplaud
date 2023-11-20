@@ -20,6 +20,7 @@ const GuestSchema = new Schema(
     startHostAutomation: { type: Boolean, default: false },
     show: { ref: "Show", type: Schema.Types.ObjectId },
     guest: { ref: "User", type: Schema.Types.ObjectId },
+    audio: { ref: "UserFile", type: Schema.Types.ObjectId },
     pollImageSrc: { type: String, default: "" },
     pollImageInfo: { ref: "PollImage", type: Schema.Types.ObjectId },
     status: { type: String, enum: Object.values(POLL_STATUS), default: POLL_STATUS.DRAFT },

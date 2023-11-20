@@ -142,19 +142,19 @@ router.post("/resetPassword", [check("email", "Please enter a valid email addres
       user.resetToken = resetToken;
       await user.save();
 
-      const link = `${process.env.REACT_APP_URL}/reset-password/${resetToken}`;
+      const link = `${process.env.REACT_APP_URL}/auth/reset-password/${resetToken}`;
 
       const subject = "Password reset link";
-      const body = `Hi ${user.name.first}<br/><br/>
+      const body = `Hi ${user?.firstName} ${user?.lastName}<br/><br/>
 
         We received a request to reset your password.<br/>
         Please click open this link in your browser window and set your new password.<br/>
         <a href="${link}">${link}</a><br/><br/>
 
-        If you did not make this change, please disregard this email and contact UXArmy helpdesk at <a href="mailto:hi@uxarmy.com">hi@uxarmy.com</a>.<br/>
+        If you did not make this change, please disregard this email and contact Upplaud helpdesk at <a href="mailto:hi@upplaud.com">hi@Upplaud.com</a>.<br/>
         Do not reply to this automated email.<br/><br/>
         
-        Regards, Team UXArmy`;
+        Regards, Team Upplaud`;
 
       sendEmail({ subject, body, to: user.email }); // Send Email
 

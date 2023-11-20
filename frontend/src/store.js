@@ -1,12 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit';
+import fileSlice from './reducers/fileSlice';
 import userSlice from './reducers/userSlice';
 import guestsSlice from './reducers/guestsSlice';
-import imageSlice from './reducers/imageSlice';
 
 export default configureStore({
   reducer: {
     user: userSlice,
+    files: fileSlice,
     guests: guestsSlice,
-    images: imageSlice,
   },
 });

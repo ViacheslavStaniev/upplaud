@@ -1,6 +1,7 @@
 import SocialLogin from './SocialLogin';
 import LoginLayout from '../../layouts/LoginLayout';
 import { Link } from 'react-router-dom';
+import { PATH_AUTH } from '../../routes/paths';
 import { useAuthContext } from '../../auth/AuthProvider';
 import { Form, Typography, Button, Input, Divider, Alert } from 'antd';
 
@@ -14,7 +15,7 @@ export default function LoginPage() {
     <LoginLayout title="Login">
       <Title level={3}>Sign in to mic.vote</Title>
       <Paragraph>
-        New User? <Link to="/auth/register">Create an account</Link>
+        New User? <Link to={PATH_AUTH.register}>Create an account</Link>
       </Paragraph>
 
       {errors &&
@@ -57,7 +58,7 @@ export default function LoginPage() {
         </Form.Item>
 
         <Paragraph className="text-right">
-          <Link to="/auth/forgot-password">Forgot Password?</Link>
+          <Link to={PATH_AUTH.forgotPassword}>Forgot Password?</Link>
         </Paragraph>
 
         <Button block type="primary" htmlType="submit" loading={isLoading}>

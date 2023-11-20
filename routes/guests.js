@@ -1,10 +1,11 @@
 const express = require("express");
 const Guest = require("../models/Guest");
-const Image = require("../models/Image");
+const UserFile = require("../models/UserFile");
 const PollImage = require("../models/PollImage");
 const verifyAuth = require("../config/verifyAuth");
 const SocialPosting = require("../models/SocialPosting");
 const { USER_TYPE } = require("../models/User");
+const { FILE_TYPE } = require("../models/UserFile");
 const { POLL_STATUS, GUEST_TYPE } = require("../models/Guest");
 const { SOCIAL_TYPE, SOCIAL_SUB_TYPE } = require("../models/SocialAccount");
 const { getS3Path, uploadImage } = require("../helpers/s3Helper");
@@ -16,14 +17,20 @@ const router = express.Router();
 const { FACEBOOK } = SOCIAL_TYPE;
 const { PROFILE, PAGE, GROUP } = SOCIAL_SUB_TYPE;
 
-// @route   GET api/guests/guestId
+// @route   GET api/guests/pollId
 // @desc    gets guest details
 // @access  Public
-router.get("/:guestId", verifyAuth, async (req, res) => {
+router.get("/:pollId", verifyAuth, async (req, res) => {
   try {
-    const poll = await getPoll(req.params.guestId);
-    const { socialAccounts } = await getUserInfo(req.userId);
-    // console.log(socialAccounts, poll?.socials);
+    const user = await getUserInfo(req.userId);
+    const poll = await getPoll(req.params.pollId);
+
+    // Check if user authorized to access this poll
+    if (!poll?.show || !user?.show || poll?.show?._id.toString() !== user?.show?._id.toString()) {
+      return res.status(403).send("You are not authorized to access this poll.");
+    }
+
+    const { socialAccounts } = user;
 
     // Get Connected Social
     const getSocial = (type, subType) => poll?.socials.find((item) => item.type === type && item.subType === subType);
@@ -114,6 +121,7 @@ router.get("/:guestId", verifyAuth, async (req, res) => {
 // @access  Public
 router.post("/", verifyAuth, async (req, res) => {
   const {
+    audio = null,
     socials = [],
     guest = null,
     pollImageSrc = "",
@@ -143,6 +151,7 @@ router.post("/", verifyAuth, async (req, res) => {
 
     // Poll info
     const pollInfo = {
+      audio,
       status,
       guestType,
       pollImageSrc,
@@ -181,7 +190,7 @@ router.post("/", verifyAuth, async (req, res) => {
     const poll = new Guest(pollInfo);
     await poll.save(options);
 
-    // Save Poll Sharing Image Info
+    // Save Poll Sharing ImageFile Info
     if (pollSharingImage) {
       const pollId = poll._id;
       const pollImageInfo = await createPollSharingImage(pollId, pollSharingImage);
@@ -222,6 +231,7 @@ router.post("/", verifyAuth, async (req, res) => {
 // @access  Public
 router.put("/:pollId", verifyAuth, async (req, res) => {
   const {
+    audio = null,
     socials = [],
     guest = null,
     pollImageSrc = "",
@@ -253,6 +263,7 @@ router.put("/:pollId", verifyAuth, async (req, res) => {
 
     // Poll info
     const pollInfo = {
+      audio,
       status,
       guestType,
       pollImageSrc,
@@ -289,7 +300,7 @@ router.put("/:pollId", verifyAuth, async (req, res) => {
       // if (isGuestSpeaker) pollInfo.show = null;
     } else pollInfo.guest = hostUser._id; // if guestType is SOLO_SESSION, then guest will be HostUser
 
-    // Save Poll Sharing Image Info
+    // Save Poll Sharing ImageFile Info
     if (pollSharingImage) {
       let pollImageInfo = await PollImage.findOne({ poll: pollId });
       if (pollImageInfo) await PollImage.findByIdAndUpdate(pollImageInfo._id, getPollSharingInfoObj(pollSharingImage));
@@ -396,7 +407,7 @@ router.post("/batch-delete", verifyAuth, async (req, res) => {
 // @access  Public
 router.get("/list/:showId", verifyAuth, async (req, res) => {
   try {
-    const guestList = await Guest.find({ show: req.params.showId }).populate("guest show pollImageInfo");
+    const guestList = await Guest.find({ show: req.params.showId }).populate("guest show pollImageInfo socials");
 
     res.json(guestList);
   } catch (err) {
@@ -426,7 +437,7 @@ router.get("/list/:userId", verifyAuth, async (req, res) => {
 // @access  Public
 router.get("/images/:guestId", verifyAuth, async (req, res) => {
   try {
-    const images = await Image.find({ guest: req.params.guestId });
+    const images = await UserFile.find({ guest: req.params.guestId, type: FILE_TYPE.IMAGE });
     res.json(images);
   } catch (err) {
     // throw err;
@@ -442,7 +453,7 @@ router.post("/images/:guestId", verifyAuth, async (req, res) => {
   const { name, imageData } = req.body;
 
   try {
-    const image = new Image({ name, guest: req.params.guestId });
+    const image = new UserFile({ name, guest: req.params.guestId, type: FILE_TYPE.IMAGE });
 
     if (imageData) image.s3Path = await uploadImage(imageData, `${req.params.guestId}/images`);
 
@@ -457,7 +468,7 @@ router.post("/images/:guestId", verifyAuth, async (req, res) => {
 });
 
 // @route   POST api/guests/poll-image-info/:pollId
-// @desc    Save Poll Image Info
+// @desc    Save Poll ImageFile Info
 // @access  Public
 router.post("/poll-image-info/:pollId", verifyAuth, async (req, res) => {
   const { logo = "", footer = {}, header = {} } = req.body;
@@ -479,7 +490,7 @@ router.post("/poll-image-info/:pollId", verifyAuth, async (req, res) => {
 });
 
 // @route   PUT api/guests/poll-image-info/:pollImageId
-// @desc    Update Poll Image Info
+// @desc    Update Poll ImageFile Info
 // @access  Public
 router.put("/poll-image-info/:pollImageId", verifyAuth, async (req, res) => {
   const { logo = "", footer = {}, header = {} } = req.body;
@@ -496,7 +507,7 @@ router.put("/poll-image-info/:pollImageId", verifyAuth, async (req, res) => {
 });
 
 // @route   POST api/guests/generate-poll-image
-// @desc    Generate Poll Image
+// @desc    Generate Poll ImageFile
 // @access  Public
 router.post("/generate-poll-image", verifyAuth, async (req, res) => {
   try {
@@ -520,10 +531,10 @@ router.post("/generate-poll-image", verifyAuth, async (req, res) => {
       },
     };
 
-    // Generate Image
+    // Generate ImageFile
     const { imageBase64 } = await generateImage(info);
 
-    // Upload Image to S3
+    // Upload ImageFile to S3
     const s3Path = await uploadImage(imageBase64, `${req.userId}/images`, true);
 
     res.json({ s3Path });

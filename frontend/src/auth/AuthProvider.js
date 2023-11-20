@@ -32,7 +32,6 @@ export function AuthProvider({ children }) {
       const { data } = await axios.get('/auth/me');
       dispatch(initialize({ isAuthenticated: true, user: data }));
     } catch (error) {
-      console.error(error);
       dispatch(initialize({ isAuthenticated: false, user: null }));
     }
   }, [dispatch]);
@@ -135,6 +134,81 @@ export function AuthProvider({ children }) {
     [dispatch, update, user, notification]
   );
 
+  // Forgot Password
+  const forgotPassword = useCallback(
+    async (data) => {
+      try {
+        update({ isLoading: true });
+
+        await axios.post('auth/resetPassword', data);
+
+        notification.success({
+          message: 'Success',
+          description: 'Password reset link sent to your email.',
+        });
+        update({ isLoading: false });
+      } catch (error) {
+        console.log(error);
+        update({ isLoading: false });
+        notification.error({
+          message: 'Error',
+          description: 'An error occurred. Please try again.',
+        });
+      }
+    },
+    [update, notification]
+  );
+
+  //  Vefiry Token
+  const verifyToken = useCallback(
+    async (token) => {
+      try {
+        update({ isLoading: true });
+
+        await axios.get(`auth/verify/${token}`);
+
+        notification.success({
+          message: 'Success',
+          description: 'Email verified successfully.',
+        });
+        update({ isLoading: false });
+      } catch (error) {
+        console.log(error);
+        update({ isLoading: false });
+        notification.error({
+          message: 'Error',
+          description: 'An error occurred. Please try again.',
+        });
+      }
+    },
+    [update, notification]
+  );
+
+  // Reset Password
+  const changePassword = useCallback(
+    async (data) => {
+      try {
+        update({ isLoading: true });
+
+        await axios.post('auth/changePassword', data);
+
+        notification.success({
+          message: 'Success',
+          description: 'Password reset link sent to your email.',
+        });
+        update({ isLoading: false });
+      } catch (error) {
+        console.log(error);
+        update({ isLoading: false });
+        notification.error({
+          message: 'Error',
+          description: 'An error occurred. Please try again.',
+        });
+      }
+    },
+    [update, notification]
+  );
+
   // Social Login - Login via AuthToken
   const loginViaToken = useCallback(() => onInitialize(), [onInitialize]);
 
@@ -148,9 +222,12 @@ export function AuthProvider({ children }) {
       register,
       isLoading,
       updateUser,
+      verifyToken,
+      changePassword,
       loginViaToken,
       addUpdateShow,
       isInitialized,
+      forgotPassword,
       isAuthenticated,
     }),
     [
@@ -162,9 +239,12 @@ export function AuthProvider({ children }) {
       register,
       isLoading,
       updateUser,
+      verifyToken,
+      changePassword,
       loginViaToken,
       addUpdateShow,
       isInitialized,
+      forgotPassword,
       isAuthenticated,
     ]
   );

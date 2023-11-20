@@ -106,6 +106,7 @@ export const fetchGuest = (guestId) => async (dispatch) => {
     const { data } = await axios.get(`guests/${guestId}`);
     dispatch(onFetchGuest(data));
   } catch (error) {
+    console.log(error);
     dispatch(hasError(error));
   }
 };

@@ -1,10 +1,15 @@
+const multer = require("multer");
 const express = require("express");
-const Image = require("../models/Image");
+const UserFile = require("../models/UserFile");
 const PollImage = require("../models/PollImage");
 const verifyAuth = require("../config/verifyAuth");
-const { uploadImage } = require("../helpers/s3Helper");
+const { FILE_TYPE } = require("../models/UserFile");
+const { uploadImage, uploadAudio } = require("../helpers/s3Helper");
 
 const router = express.Router();
+
+// Multer middleware for handling file uploads
+const upload = multer({ storage: multer.memoryStorage() });
 
 // @route   GET api/poll-images/:pollId
 // @desc    gets guest poll images
@@ -20,13 +25,13 @@ router.get("/poll-images/:pollId", verifyAuth, async (req, res) => {
   }
 });
 
-// @route   GET api/images
-// @desc    gets users images
+// @route   GET api/files
+// @desc    gets users files
 // @access  Public
 router.get("/", verifyAuth, async (req, res) => {
   try {
-    const images = await Image.find({ user: req.userId });
-    res.json(images);
+    const files = await UserFile.find({ user: req.userId });
+    res.json(files);
   } catch (err) {
     // throw err;
     console.error({ msg: err.message });
@@ -34,10 +39,10 @@ router.get("/", verifyAuth, async (req, res) => {
   }
 });
 
-// @route   POST api/images
-// @desc    creates guest images
+// @route   POST api/files/image
+// @desc    creates guest image
 // @access  Public
-router.post("/", verifyAuth, async (req, res) => {
+router.post("/image", verifyAuth, async (req, res) => {
   try {
     const { name, imageData } = req.body;
     const result = await createUserImage(name, imageData, req.userId);
@@ -49,10 +54,30 @@ router.post("/", verifyAuth, async (req, res) => {
   }
 });
 
-// @route   POST api/images/bulk
+// @route POST api/files/audio
+// @desc  creates guest audio
+// @access Public
+router.post("/audio", verifyAuth, upload.single("audio"), async (req, res) => {
+  try {
+    const userId = req.userId;
+    const name = `Recording_${Date.now()}.webm`;
+    const s3Path = await uploadAudio(req.file.buffer, `${userId}/audios`, name);
+
+    // Save User File
+    const file = new UserFile({ name, user: userId, type: FILE_TYPE.AUDIO, s3Path });
+    await file.save();
+
+    res.json(file);
+  } catch (error) {
+    console.error({ msg: error.message });
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// @route   POST api/files/bulk
 // @desc    creates bulk user images
 // @access  Public
-router.post("/bulk", verifyAuth, async (req, res) => {
+router.post("/image/bulk", verifyAuth, async (req, res) => {
   try {
     const { images } = req.body;
     const result = await Promise.all(images.map(async ({ name, imageData }) => await createUserImage(name, imageData, req.userId)));
@@ -64,16 +89,16 @@ router.post("/bulk", verifyAuth, async (req, res) => {
   }
 });
 
-// @route   DELETE api/images/:imageId
+// @route   DELETE api/files/:fileId
 // @desc    deletes users images
 // @access  Public
-router.delete("/:imageId", verifyAuth, async (req, res) => {
+router.delete("/:fileId", verifyAuth, async (req, res) => {
   try {
-    const image = await Image.findById(req.params.imageId);
-    if (!image) return res.status(404).json({ msg: "Image not found" });
-    if (image.user.toString() !== req.userId) return res.status(401).json({ msg: "Unauthorized" });
-    await image.remove();
-    res.json({ msg: "Image deleted" });
+    const file = await UserFile.findById(req.params.fileId);
+    if (!file) return res.status(404).json({ msg: "File not found" });
+    if (file.user.toString() !== req.userId) return res.status(401).json({ msg: "Unauthorized" });
+    await file.remove();
+    res.json({ msg: "File deleted" });
   } catch (err) {
     // throw err;
     console.error({ msg: err.message });
@@ -97,12 +122,12 @@ router.post("/upload2s3", verifyAuth, async (req, res) => {
   }
 });
 
-// Create User Image Helper
+// Create UserImage Helper
 async function createUserImage(name, imageData, userId) {
-  const image = new Image({ name, user: userId });
-  if (imageData) image.s3Path = await uploadImage(imageData, `${userId}/images`);
-  await image.save();
-  return image;
+  const file = new UserFile({ name, user: userId, type: FILE_TYPE.IMAGE });
+  if (imageData) file.s3Path = await uploadImage(imageData, `${userId}/images`);
+  await file.save();
+  return file;
 }
 
 module.exports = router;

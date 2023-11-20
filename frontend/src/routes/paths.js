@@ -9,7 +9,7 @@ export const PATH_AUTH = {
   verify: path(ROOTS_AUTH, '/verify'),
   register: path(ROOTS_AUTH, '/register'),
   newPassword: path(ROOTS_AUTH, '/new-password'),
-  resetPassword: path(ROOTS_AUTH, '/reset-password'),
+  forgotPassword: path(ROOTS_AUTH, '/forgot-password'),
 };
 
 export const PATH_PAGE = {
@@ -19,6 +19,8 @@ export const PATH_PAGE = {
   page500: '/500',
   about: '/about-us',
   contact: '/contact-us',
+  tos: '/terms-of-service',
+  privacy: '/privacy-policy',
   dashboard: ROOTS_DASHBOARD,
 };
 
@@ -38,8 +40,9 @@ export const PATH_DASHBOARD = {
     new: path(ROOTS_DASHBOARD, '/user/new'),
     list: path(ROOTS_DASHBOARD, '/user/list'),
     cards: path(ROOTS_DASHBOARD, '/user/cards'),
-    profile: path(ROOTS_DASHBOARD, '/user/profile'),
     account: path(ROOTS_DASHBOARD, '/user/account'),
-    edit: (name) => path(ROOTS_DASHBOARD, `/user/${name}/edit`),
+    profile: path(ROOTS_DASHBOARD, '/user/profile'),
+    settings: path(ROOTS_DASHBOARD, '/user/settings'),
+    edit: (id) => path(ROOTS_DASHBOARD, `/user/${id}/edit`),
   },
 };

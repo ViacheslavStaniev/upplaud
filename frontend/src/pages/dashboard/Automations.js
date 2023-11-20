@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
+import { POLL_STATUS } from '../../utils/types';
 import { useSelector, useDispatch } from 'react-redux';
 import { useAuthContext } from '../../auth/AuthProvider';
 import { getRandomColor, getDateString, pollTypeOptions } from '../../utils/common';
 import { getGuestsList, deleteGuest, deleteManyGuests } from '../../reducers/guestsSlice';
-import { Avatar, Button, Typography, Space, Table, Tag, Popconfirm, Tooltip, Tabs } from 'antd';
+import { Tag, Tabs, Space, Table, Badge, Button, Tooltip, Typography, Popconfirm } from 'antd';
 import {
   EditOutlined,
   MailOutlined,
@@ -16,6 +17,7 @@ import {
 } from '@ant-design/icons';
 import AppTitle from '../../components/AppTitle';
 
+const { PUBLISHED } = POLL_STATUS;
 const { Text, Title } = Typography;
 
 export default function Automations() {
@@ -38,9 +40,8 @@ export default function Automations() {
       dataIndex: 'name',
       render: (name, record) => (
         <Space className={!record.guest ? 'disabled' : ''}>
-          <Avatar size="small" style={{ backgroundColor: getRandomColor() }}>
-            {name.charAt()}
-          </Avatar>
+          <Badge color={getRandomColor()} count={name.charAt()} />
+
           <Text strong>{name}</Text>
         </Space>
       ),
@@ -55,9 +56,9 @@ export default function Automations() {
     },
     {
       title: 'STATUS',
-      key: 'status',
+      key: 'statusObj',
       // align: 'center',
-      dataIndex: 'status',
+      dataIndex: 'statusObj',
       render: ({ guest, host }) => (
         <div className="flex-item gap-1">
           <Tag
@@ -122,7 +123,7 @@ export default function Automations() {
     {
       key: 'action',
       title: 'Action',
-      render: ({ id }) => (
+      render: ({ id, isAutomationActive }) => (
         <Space direction="vertical">
           <Space>
             <Button icon={<MailOutlined />} />
@@ -130,8 +131,12 @@ export default function Automations() {
               <Button href={`/automations/${id}`} icon={<EditOutlined />} />
             </Tooltip>
             <Button icon={<CalendarOutlined />} />
-            <Button icon={<PauseCircleOutlined />} />
+
+            <Tooltip title={`${isAutomationActive ? 'Pause' : 'Active'} Automation`}>
+              <Button danger={isAutomationActive} icon={<PauseCircleOutlined />} />
+            </Tooltip>
           </Space>
+
           <Space>
             <Button icon={<CloudDownloadOutlined />} />
             <Button icon={<SettingOutlined />} />
@@ -155,15 +160,18 @@ export default function Automations() {
   const getDataSource = (key) => {
     return guests
       .filter(({ guestType }) => guestType === key)
-      .map(({ _id, guest, recordingDate }) => ({
+      .map(({ _id, guest, status, socials, recordingDate }) => ({
         guest,
+        status,
         id: _id,
         key: _id,
-        status: { guest: null, host: null },
+        statusObj: { guest: null, host: null },
         recordingDate: new Date(recordingDate).getTime(),
         name: guest ? `${guest.firstName} ${guest.lastName}` : '--',
         asqs: { g: 0, h: 0, n: 0 },
         todo: '',
+        isAutomationActive:
+          status === PUBLISHED && socials.reduce((y, { isActive }) => (y ? y : isActive), false),
       }));
   };
 

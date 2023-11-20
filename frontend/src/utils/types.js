@@ -15,3 +15,5 @@ export const SOCIAL_TITLES = {
   [SOCIAL_TYPE.LINKEDIN]: 'LinkedIn',
   [SOCIAL_TYPE.INSTAGRAM]: 'Instagram',
 };
+
+export const FILE_TYPE = { IMAGE: 'IMAGE', VIDEO: 'VIDEO', AUDIO: 'AUDIO' };

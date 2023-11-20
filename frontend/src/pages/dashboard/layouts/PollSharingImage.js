@@ -1,9 +1,10 @@
 import Simplebar from 'simplebar-react';
-import { useEffect, useState } from 'react';
-import { getFullS3Url } from '../../config-global';
+import { useState } from 'react';
+import { FILE_TYPE } from '../../../utils/types';
+import { getFullS3Url } from '../../../config-global';
 import { useDispatch, useSelector } from 'react-redux';
-import { useAuthContext } from '../../auth/AuthProvider';
-import { getImages, uploadImage, deleteImage, generatePollImage } from '../../reducers/imageSlice';
+import { useAuthContext } from '../../../auth/AuthProvider';
+import { deleteFile, uploadImages, generatePollImage } from '../../../reducers/fileSlice';
 import {
   List,
   Form,
@@ -22,9 +23,10 @@ import {
   notification,
 } from 'antd';
 import { PlusOutlined, InboxOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import Accordian from '../../components/Accordian';
-import CustomUpload from '../layouts/CustomUpload';
-import SuggestionModal from '../layouts/SuggestionModal';
+import PollAudioRecord from './PollAudioRecord';
+import Accordian from '../../../components/Accordian';
+import CustomUpload from '../../layouts/CustomUpload';
+import SuggestionModal from '../../layouts/SuggestionModal';
 
 const { Option } = Select;
 const { Dragger } = Upload;
@@ -44,12 +46,8 @@ export default function PollSharingImage() {
 
   // Redux States
   const dispatch = useDispatch();
-  const { images, isLoading, isUploading } = useSelector((state) => state.images);
-
-  // Get Images
-  useEffect(() => {
-    dispatch(getImages());
-  }, [dispatch]);
+  const { files, isLoading, isUploading } = useSelector((state) => state.files);
+  const images = files.filter(({ type }) => type === FILE_TYPE.IMAGE);
 
   const getFormName = (name) => ['pollSharingImage', name];
 
@@ -165,6 +163,8 @@ export default function PollSharingImage() {
       label: 'Customize Poll Sharing Image',
       children: (
         <>
+          <PollAudioRecord />
+
           <div className="flex-item gap-2 mb-2">
             <Form.Item label="LOGO IMAGE FROM" name={getFormName('logo')} className="w-40 m-0">
               <Select
@@ -246,7 +246,7 @@ export default function PollSharingImage() {
             },
           ],
         };
-        dispatch(uploadImage(requestBody));
+        dispatch(uploadImages(requestBody));
       };
     },
     onDrop(e) {
@@ -293,7 +293,7 @@ export default function PollSharingImage() {
                     okText="Yes"
                     cancelText="No"
                     title="Delete Image"
-                    onConfirm={() => dispatch(deleteImage(_id))}
+                    onConfirm={() => dispatch(deleteFile(_id))}
                     description="Are you sure to delete this image?"
                   >
                     <Button danger size="small">
