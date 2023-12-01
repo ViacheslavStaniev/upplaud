@@ -105,7 +105,7 @@ const generateVideo = (imgS3Path = "", audioS3Path = "") => {
         // if (stderr) console.log(`FFmpeg Error: ${stderr}`);
 
         // Reject if output file not generated
-        if (!fs.existsSync(output)) return reject({ error: true, message: "Unable to generate video" });
+        if (!fs.existsSync(outputMp4)) return reject({ error: true, message: "Unable to generate video" });
 
         // Delete file after reading
         fs.unlinkSync(outputMp3);
