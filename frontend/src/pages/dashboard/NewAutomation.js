@@ -165,7 +165,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
     potentialTopics,
     hostSpeakerLabel,
     guestSpeakerLabel,
-    socialShareFileSrc,
+    socialShareFileSrc: '64ffe6a8f2e75529c85200bd/videos/Video_1701451254106.mp4',
     startHostAutomation,
     guest: getGuesUsertObj(guestUser),
     socials: socials.length > 0 ? socials : defaultSocials,

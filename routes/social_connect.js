@@ -19,6 +19,7 @@ const {
   liveStreamTheVideo,
   getLNAuthRestClients,
 } = require("../helpers/utills");
+const { getS3Path } = require("../helpers/s3Helper");
 
 // const { updateUserInfo } = require("./users");
 
@@ -277,7 +278,7 @@ router.get("/init-auto-posting", async (req, res) => {
       const { poll, user, type, subType, subTypeId, frequency, frequencyPosted } = posting;
 
       // Check is poll is published
-      if (!poll || poll.status === POLL_STATUS.DRAFT || !subTypeId) continue;
+      if (!poll || poll.status === POLL_STATUS.DRAFT || !subTypeId || !poll?.socialShareFileSrc) continue;
 
       // Check if social account is connected
       const socialAccount = user.socialAccounts.find((s) => s.type === type);
@@ -292,7 +293,7 @@ router.get("/init-auto-posting", async (req, res) => {
         title: "This is title - " + Date.now(),
         description: "This is description text.",
         // url: getBaseDomain(`poll/${poll._id}`),
-        url: "https://video-socials.s3.us-east-2.amazonaws.com/7/videos/uploads/video_1681880073_video_1676706027_tcmdemo25_1605085991.mp4",
+        url: getS3Path(poll.socialShareFileSrc),
       };
 
       // Download Video

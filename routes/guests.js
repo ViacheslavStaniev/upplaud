@@ -130,6 +130,7 @@ router.post("/", verifyAuth, async (req, res) => {
     potentialTopics = [],
     hostSpeakerLabel = "",
     guestSpeakerLabel = "",
+    socialShareFileSrc = "",
     pollSharingImage = null,
     status = POLL_STATUS.DRAFT,
     recordingDate = new Date(),
@@ -161,6 +162,7 @@ router.post("/", verifyAuth, async (req, res) => {
       potentialTopics,
       hostSpeakerLabel,
       guestSpeakerLabel,
+      socialShareFileSrc,
       startHostAutomation,
       show: hostUser.show,
       pollImageInfo: null,
@@ -240,6 +242,7 @@ router.put("/:pollId", verifyAuth, async (req, res) => {
     potentialTopics = [],
     hostSpeakerLabel = "",
     guestSpeakerLabel = "",
+    socialShareFileSrc = "",
     pollSharingImage = null,
     status = POLL_STATUS.DRAFT,
     recordingDate = new Date(),
@@ -273,6 +276,7 @@ router.put("/:pollId", verifyAuth, async (req, res) => {
       potentialTopics,
       hostSpeakerLabel,
       guestSpeakerLabel,
+      socialShareFileSrc,
       startHostAutomation,
       show: hostUser.show,
       pollImageInfo: null,
@@ -554,7 +558,6 @@ router.post("/generate-poll-image", verifyAuth, async (req, res) => {
       const audioS3Path = getS3Path(audioObj?.s3Path);
       const { videoFileBuffer } = await generateVideo(getS3Path(imageS3Path), audioS3Path);
       const videoS3Path = await uploadFile(videoFileBuffer, `${req.userId}/videos`, `Video_${Date.now()}.mp4`, "video/mp4");
-      console.log(videoFileBuffer, s3Path);
       console.log("Video Generated", { imageS3Path, videoS3Path });
       res.json({ imageS3Path, videoS3Path });
     } else res.json({ imageS3Path, videoS3Path: "" });

@@ -119,11 +119,12 @@ const generateVideo = (imgS3Path = "", audioS3Path = "") => {
 // Function to Live Stream a video
 const liveStreamTheVideo = (info) => {
   const { video_url, stream_url } = info;
-  const ffmpegPath = getAssetPath("ffmpeg-build/ffmpeg");
+  // const ffmpegPath = getAssetPath("ffmpeg-build/ffmpeg");
 
   return new Promise((resolve, reject) => {
     // FFmpeg command
-    const command = `'${ffmpegPath}' -re -i '${video_url}' -c:a copy -ac 1 -ar 44100 -b:a 96k -vcodec libx264 -pix_fmt yuv420p -vf scale=1080:-1 -r 30 -g 60 -tune zerolatency -f flv -maxrate 2000k -preset veryfast '${stream_url}'`;
+    // const command = `ffmpeg -re -i '${video_url}' -c:a copy -ac 1 -ar 44100 -b:a 96k -vcodec libx264 -pix_fmt yuv420p -vf scale=1080:-1 -r 30 -g 60 -tune zerolatency -f flv -maxrate 2000k -preset veryfast '${stream_url}'`;
+    const command = `ffmpeg -re -i '${video_url}' -c:v libx264 -c:a aac -f flv -maxrate 2000k -preset veryfast '${stream_url}'`;
 
     // Execute FFmpeg command
     exec(command, (error, stdout, stderr) => {

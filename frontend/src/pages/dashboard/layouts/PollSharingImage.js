@@ -10,7 +10,6 @@ import {
   Form,
   Spin,
   Modal,
-  Image,
   Select,
   Button,
   Input,
@@ -36,7 +35,6 @@ export default function PollSharingImage() {
   const { user } = useAuthContext();
 
   const form = Form.useFormInstance();
-  const pollImageSrc = Form.useWatch('pollImageSrc', form);
   const socialShareFileSrc = Form.useWatch('socialShareFileSrc', form);
 
   // Local States
@@ -216,14 +214,28 @@ export default function PollSharingImage() {
               Preview Video
             </Button>
 
-            <Image
+            {/* <Image
               style={{ display: 'none' }}
               src={getFullS3Url(pollImageSrc)}
               preview={{
                 visible: showPollImagePreview,
                 onVisibleChange: (value) => setShowPollImagePreview(value),
               }}
-            />
+            /> */}
+            <Modal
+              centered
+              width={'50%'}
+              footer={false}
+              open={showPollImagePreview}
+              title="Poll Sharing Video Preview"
+              onCancel={() => setShowPollImagePreview(false)}
+            >
+              <video
+                src={getFullS3Url(socialShareFileSrc)}
+                controls
+                style={{ width: '100%', height: 'auto' }}
+              />
+            </Modal>
           </div>
         </>
       ),
