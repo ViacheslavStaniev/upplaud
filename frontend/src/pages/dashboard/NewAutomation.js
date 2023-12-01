@@ -117,6 +117,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
     guestType = HOST_GUEST,
     hostSpeakerLabel = '',
     guestSpeakerLabel = '',
+    socialShareFileSrc = '',
     potentialTopics = ['', ''],
     startHostAutomation = false,
   } = guest || {};
@@ -164,6 +165,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
     potentialTopics,
     hostSpeakerLabel,
     guestSpeakerLabel,
+    socialShareFileSrc,
     startHostAutomation,
     guest: getGuesUsertObj(guestUser),
     socials: socials.length > 0 ? socials : defaultSocials,
@@ -212,6 +214,10 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
       >
         <Form.Item hidden name="pollImageSrc" label="Poll Image">
           <Input placeholder="Poll Image" />
+        </Form.Item>
+
+        <Form.Item hidden name="socialShareFileSrc" label="Social Share File">
+          <Input placeholder="Social Share File" />
         </Form.Item>
 
         <Form.Item name="guestType">

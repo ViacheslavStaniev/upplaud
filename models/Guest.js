@@ -16,6 +16,7 @@ const GuestSchema = new Schema(
     guestOfferUrl: { type: String, default: "" },
     hostSpeakerLabel: { type: String, default: "" },
     guestSpeakerLabel: { type: String, default: "" },
+    socialShareFileSrc: { type: String, default: "" },
     recordingDate: { type: Date, default: new Date() },
     startHostAutomation: { type: Boolean, default: false },
     show: { ref: "Show", type: Schema.Types.ObjectId },

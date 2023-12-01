@@ -79,16 +79,16 @@ const copyImage = async (oldfile, newfile, inputfolder, targetfolder) => {
   }
 };
 
-// Upload Audio
-const uploadAudio = async (buffer, filePath = "", name = "hello.webm") => {
+// Upload File
+const uploadFile = async (buffer, filePath = "", name = "hello.webm", ContentType = "audio/webm") => {
   const key = `${filePath}/${name}`;
 
   const params = {
     Key: key,
+    ContentType, // required. Notice the back ticks
     Body: buffer,
     Bucket: S3_BUCKET,
     // ACL: "public-read",
-    ContentType: `audio/webm`, // required. Notice the back ticks
   };
 
   // The upload() is used instead of putObject() as we'd need the location url and assign that to our user profile/database
@@ -106,6 +106,6 @@ const uploadAudio = async (buffer, filePath = "", name = "hello.webm") => {
 
 module.exports.getS3Path = getS3Path;
 module.exports.copyImage = copyImage;
+module.exports.uploadFile = uploadFile;
 module.exports.uploadImage = uploadImage;
 module.exports.deleteImage = deleteImage;
-module.exports.uploadAudio = uploadAudio;

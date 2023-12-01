@@ -25,7 +25,7 @@ import {
 import { PlusOutlined, InboxOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import PollAudioRecord from './PollAudioRecord';
 import Accordian from '../../../components/Accordian';
-import CustomUpload from '../../layouts/CustomUpload';
+// import CustomUpload from '../../layouts/CustomUpload';
 import SuggestionModal from '../../layouts/SuggestionModal';
 
 const { Option } = Select;
@@ -37,6 +37,7 @@ export default function PollSharingImage() {
 
   const form = Form.useFormInstance();
   const pollImageSrc = Form.useWatch('pollImageSrc', form);
+  const socialShareFileSrc = Form.useWatch('socialShareFileSrc', form);
 
   // Local States
   const [isGenerating, setIsGenerating] = useState(false);
@@ -102,11 +103,12 @@ export default function PollSharingImage() {
   const onPollImageGenerateClick = async () => {
     const formValues = form.getFieldsValue();
 
-    const { guest, pollSharingImage, hostSpeakerLabel, guestSpeakerLabel } = formValues;
+    const { audio, guest, pollSharingImage, hostSpeakerLabel, guestSpeakerLabel } = formValues;
 
     // user logo
     const pollSharingImageInfo = {
       ...pollSharingImage,
+      audio,
       showLogo: user?.show?.logo,
       userLogo: images.find(({ _id }) => _id === pollSharingImage.logo)?.s3Path,
       host: {
@@ -138,9 +140,10 @@ export default function PollSharingImage() {
     setIsGenerating(true);
 
     try {
-      const res = await generatePollImage(pollSharingImageInfo);
+      const { imageS3Path, videoS3Path } = await generatePollImage(pollSharingImageInfo);
 
-      form.setFieldValue('pollImageSrc', res.s3Path);
+      form.setFieldValue('pollImageSrc', imageS3Path);
+      if (videoS3Path) form.setFieldValue('socialShareFileSrc', videoS3Path);
 
       notification.success({
         message: 'Success',
@@ -163,7 +166,7 @@ export default function PollSharingImage() {
       label: 'Customize Poll Sharing Image',
       children: (
         <>
-          <PollAudioRecord />
+          <PollAudioRecord name={getFormName('audio')} />
 
           <div className="flex-item gap-2 mb-2">
             <Form.Item label="LOGO IMAGE FROM" name={getFormName('logo')} className="w-40 m-0">
@@ -195,22 +198,22 @@ export default function PollSharingImage() {
 
           <div className="flex-item gap-2 mt-4">
             <Button danger type="primary" loading={isGenerating} onClick={onPollImageGenerateClick}>
-              GENERATE POLL SHARING IMAGE
+              GENERATE POLL SHARING VIDEO
             </Button>
-            <CustomUpload
+            {/* <CustomUpload
               cropShape="rect"
               aspect={1.91 / 1}
               onComplete={(value) => form.setFieldValue('pollImageSrc', value)}
             >
               <Button type="primary">UPLOAD YOUR OWN</Button>
-            </CustomUpload>
+            </CustomUpload> */}
 
             <Button
               type="default"
-              disabled={!pollImageSrc}
+              disabled={!socialShareFileSrc}
               onClick={() => setShowPollImagePreview(true)}
             >
-              Preview Image
+              Preview Video
             </Button>
 
             <Image

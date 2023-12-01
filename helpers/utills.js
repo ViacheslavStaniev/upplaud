@@ -49,14 +49,14 @@ const generateImage = (info) => {
   const arialFont = getAssetPath("arial.ttf");
   const baseImage = getAssetPath("base_image.png");
   const breeFont = getAssetPath("BreeSerif-Regular.ttf");
-  const ffmpegPath = getAssetPath("ffmpeg-build/ffmpeg");
+  // const ffmpegPath = getAssetPath("ffmpeg-build/ffmpeg");
   const output = getAssetPath(`temp/temp_${Date.now()}.png`);
 
   const { showLogo, userLogo, header, footer, host, guest } = info;
 
   return new Promise((resolve, reject) => {
     // FFmpeg command
-    const command = `'${ffmpegPath}' -i '${baseImage}' -i '${showLogo}' -i '${userLogo}' -filter_complex "[1:v]scale=400:400[top_left_scaled]; [2:v]scale=330:330[center_scaled]; [0:v][top_left_scaled]overlay=35:(h-h/2)-168/2[tmp_overlay]; [tmp_overlay][center_scaled]overlay=660:210, drawbox=x=0:y=0:w=iw:h=85:t=fill:color=${header.bgColor}@1[bg]; [bg]drawtext=text='${header.text}':x=30:y=15:fontsize=58:fontcolor=${header.fontColor}:fontfile='${breeFont}', drawbox=x=0:y=ih-85:w=iw:h=85:t=fill:color=${footer.bgColor}@1[bg_bottom]; [bg_bottom]drawtext=text='${footer.text}':x=30:y=h-th-15:fontsize=58:fontcolor=${footer.fontColor}:fontfile='${breeFont}', drawtext=text='${host.label} - ${host.text}':x=450:y=120:fontsize=24:fontcolor=${host.fontColor}:fontfile='${arialFont}', drawtext=text='${guest.label} - ${guest.text}':x=450:y=160:fontsize=24:fontcolor=${guest.fontColor}:fontfile='${arialFont}'" -vframes 1 '${output}'`;
+    const command = `ffmpeg -i '${baseImage}' -i '${showLogo}' -i '${userLogo}' -filter_complex "[1:v]scale=400:400[top_left_scaled]; [2:v]scale=330:330[center_scaled]; [0:v][top_left_scaled]overlay=35:(h-h/2)-168/2[tmp_overlay]; [tmp_overlay][center_scaled]overlay=660:210, drawbox=x=0:y=0:w=iw:h=85:t=fill:color=${header.bgColor}@1[bg]; [bg]drawtext=text='${header.text}':x=30:y=15:fontsize=58:fontcolor=${header.fontColor}:fontfile='${breeFont}', drawbox=x=0:y=ih-85:w=iw:h=85:t=fill:color=${footer.bgColor}@1[bg_bottom]; [bg_bottom]drawtext=text='${footer.text}':x=30:y=h-th-15:fontsize=58:fontcolor=${footer.fontColor}:fontfile='${breeFont}', drawtext=text='${host.label} - ${host.text}':x=450:y=120:fontsize=24:fontcolor=${host.fontColor}:fontfile='${arialFont}', drawtext=text='${guest.label} - ${guest.text}':x=450:y=160:fontsize=24:fontcolor=${guest.fontColor}:fontfile='${arialFont}'" -vframes 1 '${output}'`;
 
     // Execute FFmpeg command
     exec(command, (error, stdout, stderr) => {
@@ -72,6 +72,46 @@ const generateImage = (info) => {
       fs.unlinkSync(output);
 
       resolve({ error: false, message: "Image generated successfully", imageBase64 });
+    });
+  });
+};
+
+// Function to generate video using FFmpeg
+const generateVideo = (imgS3Path = "", audioS3Path = "") => {
+  // const ffmpegPath = getAssetPath("ffmpeg-build/ffmpeg");
+  // const ffprobePath = getAssetPath("ffmpeg-build/ffprobe");
+  const outputMp3 = getAssetPath(`temp/temp_${Date.now()}.mp3`);
+  const outputMp4 = getAssetPath(`temp/temp_${Date.now()}.mp4`);
+
+  return new Promise((resolve, reject) => {
+    // convert webm to mp3
+    const command1 = `ffmpeg -i '${audioS3Path}' -y '${outputMp3}'`;
+
+    // Execute FFmpeg command
+    exec(command1, (error, stdout, stderr) => {
+      if (error) return reject({ error: true, message: error.message });
+      // if (stderr) console.log(`FFmpeg Error: ${stderr}`);
+
+      // Reject if output file not generated
+      if (!fs.existsSync(outputMp3)) return reject({ error: true, message: "Unable to convert audio" });
+
+      // generate video command
+      const command = `ffmpeg -loop 1 -i '${imgS3Path}' -i '${outputMp3}' -c:v libx264 -t $(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 '${outputMp3}') -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -c:a aac -strict experimental -b:a 192k -shortest '${outputMp4}'`;
+      console.log(command);
+
+      // Execute FFmpeg command
+      exec(command, (error, stdout, stderr) => {
+        if (error) return reject({ error: true, message: error.message });
+        // if (stderr) console.log(`FFmpeg Error: ${stderr}`);
+
+        // Reject if output file not generated
+        if (!fs.existsSync(output)) return reject({ error: true, message: "Unable to generate video" });
+
+        // Delete file after reading
+        fs.unlinkSync(outputMp3);
+
+        resolve({ error: false, message: "Video generated successfully", videoFileBuffer: fs.readFileSync(outputMp4) });
+      });
     });
   });
 };
@@ -178,6 +218,7 @@ module.exports.getAssetPath = getAssetPath;
 module.exports.randomString = randomString;
 module.exports.getBaseDomain = getBaseDomain;
 module.exports.generateImage = generateImage;
+module.exports.generateVideo = generateVideo;
 module.exports.createUsername = createUsername;
 module.exports.setUserSession = setUserSession;
 module.exports.getAuthResponse = getAuthResponse;

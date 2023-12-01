@@ -70,7 +70,7 @@ export default function PollAudioRecord() {
         else updateState({ timeLeft });
       }, 1000);
     }
-  }, [recordingStartedAt, stopRecording]);
+  }, [recordingStartedAt]);
 
   // Seconds to mm:ss
   const secondsToMinutes = (seconds) => {

@@ -8,8 +8,8 @@ const { USER_TYPE } = require("../models/User");
 const { FILE_TYPE } = require("../models/UserFile");
 const { POLL_STATUS, GUEST_TYPE } = require("../models/Guest");
 const { SOCIAL_TYPE, SOCIAL_SUB_TYPE } = require("../models/SocialAccount");
-const { getS3Path, uploadImage } = require("../helpers/s3Helper");
-const { randomString, generateImage } = require("../helpers/utills");
+const { getS3Path, uploadImage, uploadFile } = require("../helpers/s3Helper");
+const { randomString, generateImage, generateVideo } = require("../helpers/utills");
 const { createOrUpdateGuestUser, getUserInfo, getBasicUserInfo, updateUserInfo } = require("./users");
 
 const router = express.Router();
@@ -511,8 +511,19 @@ router.put("/poll-image-info/:pollImageId", verifyAuth, async (req, res) => {
 // @access  Public
 router.post("/generate-poll-image", verifyAuth, async (req, res) => {
   try {
-    const { footerBgColor, footerText, footerTextColor, headerBgColor, headerText, headerTextColor, userLogo, showLogo, host, guest } =
-      req.body;
+    const {
+      host,
+      guest,
+      audio,
+      userLogo,
+      showLogo,
+      headerText,
+      headerBgColor,
+      headerTextColor,
+      footerText,
+      footerBgColor,
+      footerTextColor,
+    } = req.body;
 
     const info = {
       host,
@@ -535,9 +546,17 @@ router.post("/generate-poll-image", verifyAuth, async (req, res) => {
     const { imageBase64 } = await generateImage(info);
 
     // Upload ImageFile to S3
-    const s3Path = await uploadImage(imageBase64, `${req.userId}/images`, true);
+    const imageS3Path = await uploadImage(imageBase64, `${req.userId}/images`, true);
 
-    res.json({ s3Path });
+    // Generate Video if audio is present
+    if (audio) {
+      const audioObj = await UserFile.findById(audio);
+      const audioS3Path = getS3Path(audioObj?.s3Path);
+      const { videoFileBuffer } = await generateVideo(getS3Path(imageS3Path), audioS3Path);
+      const { s3Path } = await uploadFile(videoFileBuffer, `${req.userId}/videos`, `Video_${Date.now()}.mp4`, "video/mp4");
+      console.log(videoFileBuffer);
+      res.json({ imageS3Path, videoS3Path: s3Path });
+    } else res.json({ imageS3Path, videoS3Path: "" });
   } catch (err) {
     // throw err;
     console.error({ msg: err.message });

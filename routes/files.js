@@ -4,7 +4,7 @@ const UserFile = require("../models/UserFile");
 const PollImage = require("../models/PollImage");
 const verifyAuth = require("../config/verifyAuth");
 const { FILE_TYPE } = require("../models/UserFile");
-const { uploadImage, uploadAudio } = require("../helpers/s3Helper");
+const { uploadImage, uploadFile } = require("../helpers/s3Helper");
 
 const router = express.Router();
 
@@ -61,7 +61,7 @@ router.post("/audio", verifyAuth, upload.single("audio"), async (req, res) => {
   try {
     const userId = req.userId;
     const name = `Recording_${Date.now()}.webm`;
-    const s3Path = await uploadAudio(req.file.buffer, `${userId}/audios`, name);
+    const s3Path = await uploadFile(req.file.buffer, `${userId}/audios`, name);
 
     // Save User File
     const file = new UserFile({ name, user: userId, type: FILE_TYPE.AUDIO, s3Path });
