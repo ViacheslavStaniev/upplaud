@@ -553,10 +553,10 @@ router.post("/generate-poll-image", verifyAuth, async (req, res) => {
       const audioObj = await UserFile.findById(audio);
       const audioS3Path = getS3Path(audioObj?.s3Path);
       const { videoFileBuffer } = await generateVideo(getS3Path(imageS3Path), audioS3Path);
-      const { s3Path } = await uploadFile(videoFileBuffer, `${req.userId}/videos`, `Video_${Date.now()}.mp4`, "video/mp4");
+      const videoS3Path = await uploadFile(videoFileBuffer, `${req.userId}/videos`, `Video_${Date.now()}.mp4`, "video/mp4");
       console.log(videoFileBuffer, s3Path);
-      console.log("Video Generated", { imageS3Path, videoS3Path: s3Path });
-      res.json({ imageS3Path, videoS3Path: s3Path });
+      console.log("Video Generated", { imageS3Path, videoS3Path });
+      res.json({ imageS3Path, videoS3Path });
     } else res.json({ imageS3Path, videoS3Path: "" });
   } catch (err) {
     // throw err;
