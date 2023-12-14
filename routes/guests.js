@@ -10,12 +10,26 @@ const { POLL_STATUS, GUEST_TYPE } = require("../models/Guest");
 const { SOCIAL_TYPE, SOCIAL_SUB_TYPE } = require("../models/SocialAccount");
 const { getS3Path, uploadImage, uploadFile } = require("../helpers/s3Helper");
 const { randomString, generateImage, generateVideo } = require("../helpers/utills");
-const { createOrUpdateGuestUser, getUserInfo, getBasicUserInfo, updateUserInfo } = require("./users");
+const { createOrUpdateGuestUser, getUserInfo, updateUserInfo } = require("./users");
 
 const router = express.Router();
 
 const { FACEBOOK } = SOCIAL_TYPE;
 const { PROFILE, PAGE, GROUP } = SOCIAL_SUB_TYPE;
+
+// @route   GET api/guests
+// @desc    Fetchs the list of guests for the current logged-in user.
+// @access  Public
+router.get("/", verifyAuth, async (req, res) => {
+  try {
+    const guestList = await Guest.find({ user: req.userId }).populate("guest");
+    res.json(guestList);
+  } catch (err) {
+    // throw err;
+    console.error({ msg: err.message });
+    res.status(500).send("Internal Server Error");
+  }
+});
 
 // @route   GET api/guests/pollId
 // @desc    gets guest details
@@ -26,7 +40,7 @@ router.get("/:pollId", verifyAuth, async (req, res) => {
     const poll = await getPoll(req.params.pollId);
 
     // Check if user authorized to access this poll
-    if (!poll?.show || !user?.show || poll?.show?._id.toString() !== user?.show?._id.toString()) {
+    if (!poll || poll?.user?._id.toString() !== user?._id.toString()) {
       return res.status(403).send("You are not authorized to access this poll.");
     }
 
@@ -143,18 +157,14 @@ router.post("/", verifyAuth, async (req, res) => {
   session.startTransaction();
 
   try {
-    const hostUser = await getBasicUserInfo(req.userId);
-
-    if (!hostUser) return res.status(400).send({ errors: ["Unauthorised"] });
-    else if (!hostUser?.show) {
-      return res.status(400).send({ errors: ["You haven't added your show info. Please add your show info first."] });
-    }
+    const userId = req.userId;
 
     // Poll info
     const pollInfo = {
       audio,
       status,
       guestType,
+      user: userId,
       pollImageSrc,
       hostOfferUrl,
       guestOfferUrl,
@@ -164,7 +174,6 @@ router.post("/", verifyAuth, async (req, res) => {
       guestSpeakerLabel,
       socialShareFileSrc,
       startHostAutomation,
-      show: hostUser.show,
       pollImageInfo: null,
     };
 
@@ -176,17 +185,12 @@ router.post("/", verifyAuth, async (req, res) => {
       const lastName = nameArr.join(" ");
 
       const newUser = await createOrUpdateGuestUser(firstName, lastName, email, randomString(8), USER_TYPE.GUEST);
-      if (newUser)
+      if (newUser) {
         await updateUserInfo(newUser._id, { profile: { ...newUser.profile, phone, about, picture, jobTitle, organization } });
+      }
 
-      // Current Host is a Guest for another show
-      const isGuestSpeaker = guestType === GUEST_TYPE.GUEST_SPEAKER;
-
-      pollInfo.guest = isGuestSpeaker ? hostUser._id : newUser?._id;
-
-      // there are no details for show
-      // if (isGuestSpeaker) pollInfo.show = null;
-    } else pollInfo.guest = hostUser._id; // if guestType is SOLO_SESSION, then guest will be HostUser
+      pollInfo.guest = guestType === GUEST_TYPE.GUEST_SPEAKER ? userId : newUser?._id;
+    } else pollInfo.guest = userId; // if guestType is SOLO_SESSION, then guest will be himself/herself
 
     // Create new Poll
     const poll = new Guest(pollInfo);
@@ -250,6 +254,7 @@ router.put("/:pollId", verifyAuth, async (req, res) => {
     guestType = GUEST_TYPE.HOST_GUEST,
   } = req.body;
 
+  const userId = req.userId;
   const pollId = req.params.pollId;
 
   const session = await Guest.startSession();
@@ -258,11 +263,8 @@ router.put("/:pollId", verifyAuth, async (req, res) => {
   try {
     const poll = await getPoll(pollId);
     if (!poll) {
-      return res.status(400).send({ errors: ["Invalid automations details. Please make sure you're updating the right automation."] });
+      return res.status(400).send({ errors: ["Invalid automation. Please make sure you're updating the right automation."] });
     }
-
-    // Host User
-    const hostUser = await getBasicUserInfo(req.userId);
 
     // Poll info
     const pollInfo = {
@@ -278,7 +280,6 @@ router.put("/:pollId", verifyAuth, async (req, res) => {
       guestSpeakerLabel,
       socialShareFileSrc,
       startHostAutomation,
-      show: hostUser.show,
       pollImageInfo: null,
     };
 
@@ -290,19 +291,16 @@ router.put("/:pollId", verifyAuth, async (req, res) => {
       const lastName = nameArr.join(" ");
 
       const userObj = poll.guest;
-      if (userObj)
+      if (userObj) {
         await updateUserInfo(userObj._id, {
           firstName,
           lastName,
           profile: { ...userObj.profile, phone, about, picture, jobTitle, organization },
         });
+      }
 
-      const isGuestSpeaker = guestType === GUEST_TYPE.GUEST_SPEAKER;
-      pollInfo.guest = isGuestSpeaker ? hostUser._id : userObj?._id;
-
-      // there are no details for show
-      // if (isGuestSpeaker) pollInfo.show = null;
-    } else pollInfo.guest = hostUser._id; // if guestType is SOLO_SESSION, then guest will be HostUser
+      pollInfo.guest = guestType === GUEST_TYPE.GUEST_SPEAKER ? userId : userObj?._id;
+    } else pollInfo.guest = userId; // if guestType is SOLO_SESSION, then guest will be himself/herself
 
     // Save Poll Sharing ImageFile Info
     if (pollSharingImage) {
@@ -406,42 +404,12 @@ router.post("/batch-delete", verifyAuth, async (req, res) => {
   }
 });
 
-// @route   GET api/guests/list/showId
-// @desc    gets list of all guests for a show
-// @access  Public
-router.get("/list/:showId", verifyAuth, async (req, res) => {
-  try {
-    const guestList = await Guest.find({ show: req.params.showId }).populate("guest show pollImageInfo socials");
-
-    res.json(guestList);
-  } catch (err) {
-    // throw err;
-    console.error({ msg: err.message });
-    res.status(500).send("Internal Server Error");
-  }
-});
-
-// @route   GET api/guests/list/userId
-// @desc    Fetchs the list of shows for which the current users is the guest.
-// @access  Public
-router.get("/list/:userId", verifyAuth, async (req, res) => {
-  try {
-    const guestList = await Guest.find({ guest: req.params.showId }).populate("guest").populate("show");
-
-    res.json(guestList);
-  } catch (err) {
-    // throw err;
-    console.error({ msg: err.message });
-    res.status(500).send("Internal Server Error");
-  }
-});
-
-// @route   GET api/guests/images/:guestId
+// @route   GET api/guests/images/:userId
 // @desc    gets guest images
 // @access  Public
-router.get("/images/:guestId", verifyAuth, async (req, res) => {
+router.get("/images/:userId", verifyAuth, async (req, res) => {
   try {
-    const images = await UserFile.find({ guest: req.params.guestId, type: FILE_TYPE.IMAGE });
+    const images = await UserFile.find({ user: req.params.userId, type: FILE_TYPE.IMAGE });
     res.json(images);
   } catch (err) {
     // throw err;
@@ -450,16 +418,16 @@ router.get("/images/:guestId", verifyAuth, async (req, res) => {
   }
 });
 
-// @route   POST api/guests/images/:guestId
+// @route   POST api/guests/images/:userId
 // @desc    creates guest images
 // @access  Public
-router.post("/images/:guestId", verifyAuth, async (req, res) => {
+router.post("/images/:userId", verifyAuth, async (req, res) => {
   const { name, imageData } = req.body;
 
   try {
-    const image = new UserFile({ name, guest: req.params.guestId, type: FILE_TYPE.IMAGE });
+    const image = new UserFile({ name, user: req.params.userId, type: FILE_TYPE.IMAGE });
 
-    if (imageData) image.s3Path = await uploadImage(imageData, `${req.params.guestId}/images`);
+    if (imageData) image.s3Path = await uploadImage(imageData, `${req.params.userId}/images`);
 
     await image.save();
 
@@ -569,7 +537,7 @@ router.post("/generate-poll-image", verifyAuth, async (req, res) => {
 });
 
 async function getPoll(pollId) {
-  return await Guest.findById(pollId).populate("guest show pollImageInfo socials");
+  return await Guest.findById(pollId).populate("guest audio pollImageInfo socials");
 }
 
 function getPollSharingInfoObj(obj) {

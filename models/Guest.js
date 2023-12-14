@@ -19,7 +19,7 @@ const GuestSchema = new Schema(
     socialShareFileSrc: { type: String, default: "" },
     recordingDate: { type: Date, default: new Date() },
     startHostAutomation: { type: Boolean, default: false },
-    show: { ref: "Show", type: Schema.Types.ObjectId },
+    user: { ref: "User", type: Schema.Types.ObjectId },
     guest: { ref: "User", type: Schema.Types.ObjectId },
     audio: { ref: "UserFile", type: Schema.Types.ObjectId },
     pollImageSrc: { type: String, default: "" },

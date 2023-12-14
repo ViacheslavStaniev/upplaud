@@ -81,10 +81,10 @@ const UserSchema = new Schema(
       default: true,
     },
     socialAccounts: [{ ref: "SocialAccount", type: Schema.Types.ObjectId }],
-    show: {
-      ref: "Show",
-      type: Schema.Types.ObjectId,
-    },
+    // show: {
+    //   ref: "Show",
+    //   type: Schema.Types.ObjectId,
+    // },
   },
   { timestamps: true, autoCreate: true }
 );

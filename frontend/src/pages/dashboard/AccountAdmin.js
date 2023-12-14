@@ -1,4 +1,3 @@
-import ShowInfo from './layouts/ShowInfo';
 import AppTitle from '../../components/AppTitle';
 import HeadshotImage from '../layouts/HeadshotImage';
 import SocialMediaConnect from './SocialMediaConnect';
@@ -94,10 +93,6 @@ export default function AccountAdmin() {
             )}
           </Space>
         </Form>
-
-        <Divider />
-
-        <ShowInfo />
 
         <Divider />
 

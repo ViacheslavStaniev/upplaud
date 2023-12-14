@@ -60,11 +60,12 @@ router.post("/image", verifyAuth, async (req, res) => {
 router.post("/audio", verifyAuth, upload.single("audio"), async (req, res) => {
   try {
     const userId = req.userId;
-    const name = `Recording_${Date.now()}.webm`;
+    const duration = req.body?.duration || 0;
+    const name = req.file.originalname || `Recording_${Date.now()}.webm`;
     const s3Path = await uploadFile(req.file.buffer, `${userId}/audios`, name);
 
     // Save User File
-    const file = new UserFile({ name, user: userId, type: FILE_TYPE.AUDIO, s3Path });
+    const file = new UserFile({ name, duration, user: userId, type: FILE_TYPE.AUDIO, s3Path });
     await file.save();
 
     res.json(file);

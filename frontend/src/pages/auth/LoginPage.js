@@ -1,9 +1,9 @@
-import SocialLogin from './SocialLogin';
+// import SocialLogin from './SocialLogin';
 import LoginLayout from '../../layouts/LoginLayout';
 import { Link } from 'react-router-dom';
 import { PATH_AUTH } from '../../routes/paths';
 import { useAuthContext } from '../../auth/AuthProvider';
-import { Form, Typography, Button, Input, Divider, Alert } from 'antd';
+import { Form, Typography, Button, Input, Alert } from 'antd';
 
 const { Title, Paragraph } = Typography;
 
@@ -13,7 +13,7 @@ export default function LoginPage() {
 
   return (
     <LoginLayout title="Login">
-      <Title level={3}>Sign in to mic.vote</Title>
+      <Title level={3}>Sign in to Upplaud</Title>
       <Paragraph>
         New User? <Link to={PATH_AUTH.register}>Create an account</Link>
       </Paragraph>
@@ -66,9 +66,9 @@ export default function LoginPage() {
         </Button>
       </Form>
 
-      <Divider plain>OR</Divider>
+      {/* <Divider plain>OR</Divider> */}
 
-      <SocialLogin />
+      {/* <SocialLogin /> */}
     </LoginLayout>
   );
 }

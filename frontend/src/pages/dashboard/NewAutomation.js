@@ -157,7 +157,6 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
   }, [error, navigate, dispatch]);
 
   const initialValues = {
-    audio,
     guestType,
     pollImageSrc,
     hostOfferUrl,
@@ -165,8 +164,10 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
     potentialTopics,
     hostSpeakerLabel,
     guestSpeakerLabel,
-    socialShareFileSrc: '64ffe6a8f2e75529c85200bd/videos/Video_1701451254106.mp4',
+    socialShareFileSrc,
     startHostAutomation,
+    audio: audio?._id || null,
+    audioDuration: audio?.duration || 0,
     guest: getGuesUsertObj(guestUser),
     socials: socials.length > 0 ? socials : defaultSocials,
     pollSharingImage: getPostSharingImageInfo(pollImageInfo),
@@ -197,7 +198,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
       <div className="add-guest">
         <Title className="m-0">AUTOMATE POLL SHARING</Title>
         <Title level={5} className="fw-400" type="secondary">
-          Pull in more interest when your upplaud poll is posted automatically.
+          Pull in more interest when your upplaud automation is posted automatically.
         </Title>
       </div>
 
@@ -224,20 +225,6 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
           <Radio.Group options={pollTypeOptions} />
         </Form.Item>
 
-        <Form.Item
-          className="w-50"
-          name="recordingDate"
-          label="Poll End Date"
-          rules={[{ required: true }]}
-        >
-          <DatePicker
-            className="w-75 ml-0"
-            disabledDate={(d) =>
-              d && (d < dayjs().subtract(1, 'day') || d > dayjs().add(1, 'years'))
-            }
-          />
-        </Form.Item>
-
         <div className="d-flex gap-2">
           <div className="flex-1">
             <Title level={5}>{getPollType(guestTypeValue)?.text}</Title>
@@ -257,7 +244,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
           </div>
 
           <div className="flex-1">
-            <Title level={5}>Poll Info</Title>
+            <Title level={5}>Automation Info</Title>
 
             {topicLabels.map((label, index) => (
               <Form.Item
@@ -284,12 +271,33 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
 
         <SocialPostingItem />
 
-        <div className="flex-item mt-4">
-          <Text strong>POSTING STARTS NOW</Text>
-          <Form.Item name="startHostAutomation" valuePropName="checked" className="m-0">
+        <Form.Item
+          className="w-50 mt-4"
+          name="recordingDate"
+          label="Automation End Date"
+          rules={[{ required: true }]}
+        >
+          <DatePicker
+            className="w-75 ml-0"
+            disabledDate={(d) =>
+              d && (d < dayjs().subtract(1, 'day') || d > dayjs().add(1, 'years'))
+            }
+          />
+        </Form.Item>
+
+        <div className="flex-item">
+          <Form.Item
+            className="m-0"
+            valuePropName="checked"
+            label="POSTING STARTS NOW"
+            name="startHostAutomation"
+            labelCol={{ span: 20 }}
+          >
             <Switch disabled={isSoloSession} />
           </Form.Item>
-          <Text type="secondary">Start when they starts</Text>
+          <Text type="secondary" className="ml-1">
+            Start when they starts
+          </Text>
         </div>
 
         <Space size={30} className="mt-4">
@@ -301,7 +309,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
             loading={isLoading}
             onClick={() => onFormSubmit(POLL_STATUS.PUBLISHED)}
           >
-            LAUNCH POLL AUTOMATION
+            LAUNCH AUTOMATION
           </Button>
         </Space>
       </Form>

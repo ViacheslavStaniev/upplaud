@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { POLL_STATUS } from '../../utils/types';
 import { useSelector, useDispatch } from 'react-redux';
-import { useAuthContext } from '../../auth/AuthProvider';
 import { getRandomColor, getDateString, pollTypeOptions } from '../../utils/common';
 import { getGuestsList, deleteGuest, deleteManyGuests } from '../../reducers/guestsSlice';
 import { Tag, Tabs, Space, Table, Badge, Button, Tooltip, Typography, Popconfirm } from 'antd';
@@ -26,12 +25,11 @@ export default function Automations() {
   const [selectedRows, setSelectedRows] = useState([]);
   const totalSelected = selectedRows.length;
 
-  const { user } = useAuthContext();
   const { guests = [], isLoading = false } = useSelector((state) => state.guests);
 
   useEffect(() => {
-    dispatch(getGuestsList(user.show?._id));
-  }, [user.show?._id, dispatch]);
+    dispatch(getGuestsList());
+  }, [dispatch]);
 
   const columns = [
     {

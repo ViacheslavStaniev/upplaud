@@ -14,6 +14,7 @@ const {
   uploadFile,
   downloadFile,
   getBaseDomain,
+  getFrontendUrl,
   getFBAuthClient,
   redirectToWebapp,
   liveStreamTheVideo,
@@ -268,7 +269,7 @@ router.get("/linkedin-callback", passport.authenticate("linkedin", AuthOptions),
 router.get("/init-auto-posting", async (req, res) => {
   try {
     const activePostings = await SocialPosting.find({ isActive: true })
-      .populate("poll")
+      .populate({ path: "poll", populate: { path: "pollImageInfo" } })
       .populate({ path: "user", populate: { path: "socialAccounts" } });
     if (activePostings.length === 0) return res.status(200).json({ error: false, msg: "No active posting found." });
 
@@ -278,7 +279,7 @@ router.get("/init-auto-posting", async (req, res) => {
       const { poll, user, type, subType, subTypeId, frequency, frequencyPosted } = posting;
 
       // Check is poll is published
-      if (!poll || poll.status === POLL_STATUS.DRAFT || !subTypeId || !poll?.socialShareFileSrc) continue;
+      if (!poll || poll.status === POLL_STATUS.DRAFT || !subTypeId) continue;
 
       // Check if social account is connected
       const socialAccount = user.socialAccounts.find((s) => s.type === type);
@@ -290,14 +291,13 @@ router.get("/init-auto-posting", async (req, res) => {
 
       // Post Info
       const postInfo = {
-        title: "This is title - " + Date.now(),
-        description: "This is description text.",
-        // url: getBaseDomain(`poll/${poll._id}`),
-        url: getS3Path(poll.socialShareFileSrc),
+        title: "Click the link in the text to vote",
+        description: getSocialShareText(poll, user),
+        // url: getS3Path(poll.socialShareFileSrc),
+        url: "https://video-socials.s3.us-east-2.amazonaws.com/7/videos/uploads/video_1681880073_video_1676706027_tcmdemo25_1605085991.mp4",
       };
 
-      // Download Video
-      postInfo.videoUrl = await downloadFile(postInfo.url, `${Date.now()}.mp4`);
+      console.log("Posting Info", postInfo);
 
       // Initiate Posting
       if (type === SOCIAL_TYPE.FACEBOOK) {
@@ -310,6 +310,9 @@ router.get("/init-auto-posting", async (req, res) => {
         }
       } else if (type === SOCIAL_TYPE.LINKEDIN) {
         try {
+          // Download Video
+          postInfo.videoUrl = await downloadFile(postInfo.url, `${Date.now()}.mp4`);
+
           const tokenObj = await initLinkedInPosting(subTypeId, postInfo, refreshToken, subType);
 
           // SAVE ACCESS_TOKEN
@@ -439,6 +442,14 @@ async function initFacebookPosting(id, postInfo, access_token, subType = PROFILE
       reject({ error: true, msg: error?.response?.data?.error?.message || error?.message });
     }
   });
+}
+
+// Get Social Share Text
+function getSocialShareText(poll, user) {
+  const { footer, header } = poll?.pollImageInfo || {};
+  const voteLink = getFrontendUrl(`poll/${poll?._id}`);
+
+  return `VOTE NOW: ${voteLink} \n\n${footer?.text || ""} \n${header?.text || ""}`;
 }
 
 module.exports = router;

@@ -1,4 +1,3 @@
-import Simplebar from 'simplebar-react';
 import { useState } from 'react';
 import { FILE_TYPE } from '../../../utils/types';
 import { getFullS3Url } from '../../../config-global';
@@ -16,12 +15,14 @@ import {
   Avatar,
   Upload,
   Tooltip,
+  Statistic,
   Typography,
   Popconfirm,
   ColorPicker,
   notification,
 } from 'antd';
 import { PlusOutlined, InboxOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import Simplebar from 'simplebar-react';
 import PollAudioRecord from './PollAudioRecord';
 import Accordian from '../../../components/Accordian';
 // import CustomUpload from '../../layouts/CustomUpload';
@@ -35,7 +36,10 @@ export default function PollSharingImage() {
   const { user } = useAuthContext();
 
   const form = Form.useFormInstance();
+  const audioDuration = Form.useWatch('audioDuration', form);
   const socialShareFileSrc = Form.useWatch('socialShareFileSrc', form);
+
+  console.log('audioDuration', audioDuration);
 
   // Local States
   const [isGenerating, setIsGenerating] = useState(false);
@@ -53,8 +57,14 @@ export default function PollSharingImage() {
   const TextColorFormItem = ({ label, title, formType }) => {
     return (
       <div className="flex-item gap-2 mb-2">
-        <Form.Item label={label} name={getFormName(`${formType}Text`)} className="w-40 m-0">
+        <Form.Item
+          label={label}
+          className="w-40 m-0"
+          name={getFormName(`${formType}Text`)}
+          rules={[{ max: 45, message: 'Maximum 45 character are allowed.' }]}
+        >
           <Input
+            maxLength={45}
             placeholder="Enter the text here"
             suffix={
               <Tooltip title="Show Suggestions">
@@ -107,7 +117,7 @@ export default function PollSharingImage() {
     const pollSharingImageInfo = {
       ...pollSharingImage,
       audio,
-      showLogo: user?.show?.logo,
+      showLogo: guest?.picture || '',
       userLogo: images.find(({ _id }) => _id === pollSharingImage.logo)?.s3Path,
       host: {
         fontColor: '#000000',
@@ -131,7 +141,7 @@ export default function PollSharingImage() {
     } else if (!pollSharingImageInfo.showLogo) {
       return notification.error({
         message: 'Error',
-        description: 'Please upload logo for your show first',
+        description: 'Please upload your logo first.',
       });
     }
 
@@ -145,7 +155,7 @@ export default function PollSharingImage() {
 
       notification.success({
         message: 'Success',
-        description: 'Poll sharing image generated successfully',
+        description: 'Automation sharing image generated successfully',
       });
     } catch (error) {
       console.error(error);
@@ -161,11 +171,9 @@ export default function PollSharingImage() {
   const items = [
     {
       key: 'pollSharingImage',
-      label: 'Customize Poll Sharing Image',
+      label: 'Customize Automation Sharing Image',
       children: (
         <>
-          <PollAudioRecord name={getFormName('audio')} />
-
           <div className="flex-item gap-2 mb-2">
             <Form.Item label="LOGO IMAGE FROM" name={getFormName('logo')} className="w-40 m-0">
               <Select
@@ -194,9 +202,11 @@ export default function PollSharingImage() {
           <TextColorFormItem label="HEADLINE HOOK" title="HEADLINE" formType="header" />
           <TextColorFormItem label="FOOTER BENEFIT" title="FOOTER" formType="footer" />
 
+          <PollAudioRecord name={getFormName('audio')} />
+
           <div className="flex-item gap-2 mt-4">
             <Button danger type="primary" loading={isGenerating} onClick={onPollImageGenerateClick}>
-              GENERATE POLL SHARING VIDEO
+              Generate Video Invitation Post
             </Button>
             {/* <CustomUpload
               cropShape="rect"
@@ -211,7 +221,7 @@ export default function PollSharingImage() {
               disabled={!socialShareFileSrc}
               onClick={() => setShowPollImagePreview(true)}
             >
-              Preview Video
+              Preview Video Invitation Post
             </Button>
 
             {/* <Image
@@ -227,7 +237,7 @@ export default function PollSharingImage() {
               width={'50%'}
               footer={false}
               open={showPollImagePreview}
-              title="Poll Sharing Video Preview"
+              title="Preview Video Invitation Post"
               onCancel={() => setShowPollImagePreview(false)}
             >
               <video
@@ -326,6 +336,28 @@ export default function PollSharingImage() {
             )}
           />
         </Simplebar>
+      </Modal>
+
+      <Modal
+        centered
+        footer={false}
+        destroyOnClose
+        closable={false}
+        keyboard={false}
+        open={isGenerating}
+        maskClosable={false}
+        title="Video is getting Generated..."
+      >
+        <Paragraph className="mt-2">
+          Please wait while we generate your video. This may take a few minutes.
+        </Paragraph>
+
+        <Statistic.Countdown
+          format="mm:ss"
+          title="Estimated Time:"
+          className="text-center wait-countdown"
+          value={Date.now() + (audioDuration || 0) * 2.5 * 1000}
+        />
       </Modal>
     </>
   );

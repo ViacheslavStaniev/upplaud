@@ -5,29 +5,50 @@ import { FILE_TYPE } from '../../../utils/types';
 import { useDispatch, useSelector } from 'react-redux';
 import { useCallback, useEffect, useState } from 'react';
 import { uploadAudio, deleteFile } from '../../../reducers/fileSlice';
-import { Spin, List, Form, Button, Typography, Modal, Select, Popconfirm } from 'antd';
+import { Spin, List, Form, Input, Button, Typography, Modal, Select, Popconfirm } from 'antd';
 
 const { Paragraph } = Typography;
 
 export default function PollAudioRecord() {
+  const form = Form.useFormInstance();
   const [state, setState] = useState({
     blob: null,
     open: false,
+    audioName: '',
     timeLeft: 120,
     recorder: null,
+    audioDuration: 0,
     isRecording: false,
     recordingStartedAt: null,
   });
 
   const updateState = (newState) => setState((prevState) => ({ ...prevState, ...newState }));
 
-  const { blob, open, timeLeft, recorder, isRecording, recordingStartedAt } = state;
+  const {
+    blob,
+    open,
+    audioName,
+    timeLeft,
+    audioDuration,
+    recorder,
+    isRecording,
+    recordingStartedAt,
+  } = state;
 
   // Redux States
   const dispatch = useDispatch();
   const { files, isLoading, isUploading } = useSelector(({ files }) => files);
-  console.log('files', files);
   const audios = files.filter(({ type }) => type === FILE_TYPE.AUDIO);
+
+  const getAudioFileName = () => {
+    const localeTimeStr = new Date()
+      .toLocaleString()
+      .replaceAll(',', '')
+      .replaceAll(':', '')
+      .replaceAll('/', '')
+      .replaceAll(' ', '_');
+    return `Recording_${localeTimeStr}.webm`;
+  };
 
   // Start Recording
   const startRecording = () => {
@@ -51,15 +72,27 @@ export default function PollAudioRecord() {
     recorder.stopRecording(() => {
       const audioBlob = new Blob([recorder.getBlob()], { type: 'audio/webm' });
       recorder.stream.stop();
-      updateState({ blob: audioBlob, isRecording: false, recorder: null });
+
+      const audioDuration = Math.floor((Date.now() - recordingStartedAt) / 1000);
+
+      updateState({
+        audioDuration,
+        recorder: null,
+        blob: audioBlob,
+        isRecording: false,
+        audioName: getAudioFileName(),
+      });
     });
-  }, [recorder]);
+  }, [recorder, recordingStartedAt]);
 
   // Save Recording
   const onSaveRecording = async () => {
     const formData = new FormData();
-    formData.append('audio', blob, 'audio.webm');
+    formData.append('duration', audioDuration);
+    formData.append('audio', blob, audioName || getAudioFileName());
+
     dispatch(uploadAudio(formData));
+    updateState({ blob: null, audioName: '' });
   };
 
   useEffect(() => {
@@ -70,7 +103,7 @@ export default function PollAudioRecord() {
         else updateState({ timeLeft });
       }, 1000);
     }
-  }, [recordingStartedAt]);
+  }, [recordingStartedAt, stopRecording]);
 
   // Seconds to mm:ss
   const secondsToMinutes = (seconds) => {
@@ -83,6 +116,8 @@ export default function PollAudioRecord() {
 
   return (
     <>
+      <Form.Item name="audioDuration" hidden />
+
       <div className="flex-item gap-2 mb-2">
         <Form.Item name="audio" label="Audio" className="w-40 m-0">
           <Select
@@ -90,7 +125,12 @@ export default function PollAudioRecord() {
             disabled={isLoading}
             className="minw-200px"
             placeholder="Select an Audio"
-            options={audios.map(({ _id, name }) => ({ label: name, value: _id }))}
+            options={audios.map(({ _id, name, duration = 0 }) => ({
+              label: name,
+              value: _id,
+              duration,
+            }))}
+            onChange={(value, { duration }) => form.setFieldValue('audioDuration', duration)}
           />
         </Form.Item>
 
@@ -116,6 +156,17 @@ export default function PollAudioRecord() {
         </Paragraph>
         <Spin spinning={isLoading} tip="Uploading...">
           <audio src={blob ? URL.createObjectURL(blob) : ''} controls className="w-100 mb-1" />
+
+          {blob && (
+            <Form.Item label="File Name (Optional)">
+              <Input
+                value={audioName}
+                disabled={isRecording}
+                placeholder="Enter file name"
+                onChange={(e) => updateState({ audioName: e.target.value })}
+              />
+            </Form.Item>
+          )}
 
           <div className="flex-item gap-1 mb-1">
             <Button htmlType="button" onClick={startRecording} loading={isRecording}>

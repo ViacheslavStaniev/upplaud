@@ -1,9 +1,9 @@
-import SocialLogin from './SocialLogin';
+// import SocialLogin from './SocialLogin';
 import LoginLayout from '../../layouts/LoginLayout';
 import { Link } from 'react-router-dom';
 import { PATH_AUTH, PATH_PAGE } from '../../routes/paths';
 import { useAuthContext } from '../../auth/AuthProvider';
-import { Form, Typography, Button, Input, Divider, Alert, Space } from 'antd';
+import { Form, Typography, Button, Input, Alert, Space } from 'antd';
 
 const { Title, Paragraph } = Typography;
 
@@ -80,9 +80,9 @@ export default function RegisterPage() {
         <Link to={PATH_PAGE.privacy}>Privacy Policy</Link>.
       </Paragraph>
 
-      <Divider plain>OR</Divider>
+      {/* <Divider plain>OR</Divider> */}
 
-      <SocialLogin />
+      {/* <SocialLogin /> */}
     </LoginLayout>
   );
 }

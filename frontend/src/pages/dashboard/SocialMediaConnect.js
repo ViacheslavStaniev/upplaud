@@ -248,6 +248,7 @@ export default function SocialMediaConnect({ showTitle = true, className = '' })
           <Dropdown
             arrow
             key={key}
+            placement="top"
             disabled={!isConnected}
             open={openDropdown === key}
             menu={{ items, defaultOpenKeys: openKeys }}

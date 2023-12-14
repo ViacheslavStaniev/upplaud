@@ -160,3 +160,13 @@ span.ant-tag {
   color: #424242;
   font-weight: bold;
 }
+
+/* Countdown */
+.ant-statistic.wait-countdown .ant-statistic-title {
+  font-size: 24px;
+  font-weight: 600;
+}
+.ant-statistic.wait-countdown .ant-statistic-content-value {
+  font-size: 36px;
+  font-weight: 600;
+}

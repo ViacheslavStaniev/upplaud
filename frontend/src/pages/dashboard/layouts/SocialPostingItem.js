@@ -57,8 +57,8 @@ export default function SocialPostingItem() {
 
                   {!isConnected && (
                     <Tooltip
-                      defaultOpen
                       color="red"
+                      arrow={false}
                       title="Please connect your social account to enable this automation."
                     >
                       <Button

@@ -156,7 +156,7 @@ async function isUserNameTaken(userId, userName) {
 }
 
 async function getUserInfo(userId) {
-  return await User.findById(userId).select("-password -resetToken").populate("show").populate("socialAccounts");
+  return await User.findById(userId).select("-password -resetToken").populate("socialAccounts");
 }
 
 async function getBasicUserInfo(userId) {

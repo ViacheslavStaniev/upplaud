@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useAuthContext } from '../../auth/AuthProvider';
 import { getShowsList } from '../../reducers/guestsSlice';
 import { Button, Typography, Space, Table, Tag, Popconfirm } from 'antd';
 import { EditOutlined, LinkOutlined, DeleteOutlined, PauseCircleOutlined } from '@ant-design/icons';
@@ -14,13 +13,12 @@ export default function GuestingAdmin() {
   const [selectedRows, setSelectedRows] = useState([]);
   const totalSelected = selectedRows.length;
 
-  const { user } = useAuthContext();
   const { shows = [] } = useSelector((state) => state.guests);
   console.log(shows);
 
   useEffect(() => {
-    dispatch(getShowsList(user?._id));
-  }, [user?._id, dispatch]);
+    dispatch(getShowsList());
+  }, [dispatch]);
 
   const columns = [
     {

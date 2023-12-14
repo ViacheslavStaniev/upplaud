@@ -75,11 +75,11 @@ const {
 export const updateState = (data) => async (dispatch) => dispatch(onUpdateState(data));
 
 // Get Guests list of a Show
-export const getGuestsList = (showId) => async (dispatch) => {
+export const getGuestsList = () => async (dispatch) => {
   dispatch(startLoading());
 
   try {
-    const { data } = await axios.get(`guests/list/${showId}`);
+    const { data } = await axios.get(`guests`);
     dispatch(onFetchGuests(data));
   } catch (error) {
     dispatch(hasError(error));

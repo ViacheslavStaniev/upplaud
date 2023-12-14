@@ -123,8 +123,10 @@ const liveStreamTheVideo = (info) => {
 
   return new Promise((resolve, reject) => {
     // FFmpeg command
-    // const command = `ffmpeg -re -i '${video_url}' -c:a copy -ac 1 -ar 44100 -b:a 96k -vcodec libx264 -pix_fmt yuv420p -vf scale=1080:-1 -r 30 -g 60 -tune zerolatency -f flv -maxrate 2000k -preset veryfast '${stream_url}'`;
-    const command = `ffmpeg -re -i '${video_url}' -c:v libx264 -c:a aac -f flv -maxrate 2000k -preset veryfast '${stream_url}'`;
+    const command = `ffmpeg -re -i '${video_url}' -c:a copy -ac 1 -ar 44100 -b:a 96k -vcodec libx264 -pix_fmt yuv420p -vf scale=1080:-1 -r 30 -g 60 -tune zerolatency -f flv -maxrate 2000k -preset veryfast '${stream_url}'`;
+    // const command2 = `ffmpeg -re -i '${video_url}' -c:v libx264 -preset veryfast -tune zerolatency -vf "scale=1280:720" -b:v 2500k -c:a aac -b:a 128k -ar 44100 -f flv '${stream_url}'`;
+    // const command = `ffmpeg -re -i '${video_url}' -c:v libx264 -c:a aac -f flv -maxrate 2000k -preset veryfast '${stream_url}'`;
+    // const command = `ffmpeg -re -i '${video_url}' -c:v libx264 -preset veryfast -tune zerolatency -c:a aac -b:a 128k -ar 44100 -f flv '${stream_url}'`;
 
     // Execute FFmpeg command
     exec(command, (error, stdout, stderr) => {
@@ -138,6 +140,9 @@ const liveStreamTheVideo = (info) => {
 
 // Get Base Domain URL
 const getBaseDomain = (path = "") => `${SERVER_URL}/${path}`;
+
+// Get Frontend URL
+const getFrontendUrl = (path = "") => `${REACT_APP_URL}/${path}`;
 
 // Redirect to Webapp
 const redirectToWebapp = (req, res) => res.redirect(REACT_APP_URL);
@@ -218,6 +223,7 @@ module.exports.downloadFile = downloadFile;
 module.exports.getAssetPath = getAssetPath;
 module.exports.randomString = randomString;
 module.exports.getBaseDomain = getBaseDomain;
+module.exports.getFrontendUrl = getFrontendUrl;
 module.exports.generateImage = generateImage;
 module.exports.generateVideo = generateVideo;
 module.exports.createUsername = createUsername;
