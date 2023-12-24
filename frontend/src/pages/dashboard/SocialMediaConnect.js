@@ -38,6 +38,7 @@ export default function SocialMediaConnect({ showTitle = true, className = '' })
       setOpenKeys(['page']);
       setOpenDropdown('linkedin');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -59,11 +60,11 @@ export default function SocialMediaConnect({ showTitle = true, className = '' })
   const getSocialConnectUrl = (type, disconnect = false) =>
     `${APP_BASEURL}/auth/connect/${type}/${disconnect ? 'disconnect' : ''}`;
 
-  const getConnectIcon = (isConnected = false) => {
+  const getConnectIcon = (isConnected = false, size = 14) => {
     return isConnected ? (
-      <CheckCircleFilled className="color-0AB6B6" />
+      <CheckCircleFilled className="color-0AB6B6" style={{ fontSize: size || 14 }} />
     ) : (
-      <CloseCircleFilled className="color-red" />
+      <CloseCircleFilled className="color-red" style={{ fontSize: size || 14 }} />
     );
   };
 
@@ -259,7 +260,7 @@ export default function SocialMediaConnect({ showTitle = true, className = '' })
               } else setOpenDropdown(open ? key : null);
             }}
           >
-            <Badge count={getConnectIcon(isConnected)}>
+            <Badge count={getConnectIcon(isConnected, 32)}>
               <Button
                 type={key}
                 size="large"

@@ -117,8 +117,8 @@ export default function PollSharingImage() {
     const pollSharingImageInfo = {
       ...pollSharingImage,
       audio,
-      showLogo: guest?.picture || '',
-      userLogo: images.find(({ _id }) => _id === pollSharingImage.logo)?.s3Path,
+      userLogo: guest?.picture || '',
+      showLogo: images.find(({ _id }) => _id === pollSharingImage.logo)?.s3Path,
       host: {
         fontColor: '#000000',
         label: hostSpeakerLabel,

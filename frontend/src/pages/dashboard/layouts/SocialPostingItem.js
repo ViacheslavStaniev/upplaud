@@ -88,5 +88,5 @@ export default function SocialPostingItem() {
     },
   ];
 
-  return <Accordian items={items} defaultActive="social" />;
+  return <Accordian items={items} defaultActive="social" marginBottom={false} />;
 }

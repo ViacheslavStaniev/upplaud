@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { getFiles } from '../../reducers/fileSlice';
 import { useSelector, useDispatch } from 'react-redux';
 import { useAuthContext } from '../../auth/AuthProvider';
@@ -7,13 +7,27 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { GUEST_TYPE, POLL_STATUS } from '../../utils/types';
 import { pollTypeOptions, getPollType, getSocialsItems } from '../../utils/common';
 import { addGuest, fetchGuest, updateGuest, updateState } from '../../reducers/guestsSlice';
-import { Form, Space, Input, Button, DatePicker, Typography, Radio, Switch } from 'antd';
+import {
+  List,
+  Form,
+  Space,
+  Input,
+  Button,
+  DatePicker,
+  Typography,
+  Radio,
+  Switch,
+  Steps,
+  Row,
+  Col,
+} from 'antd';
 import AppTitle from '../../components/AppTitle';
+import TextEditor from '../../components/TextEditor';
 import HeadshotImage from '../layouts/HeadshotImage';
 import PollSharingImage from './layouts/PollSharingImage';
 import SocialPostingItem from './layouts/SocialPostingItem';
 
-const { Text, Title } = Typography;
+const { Text, Title, Paragraph } = Typography;
 const { HOST_GUEST, SOLO_SESSION } = GUEST_TYPE;
 
 const hostInfoFields = [
@@ -99,6 +113,8 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
   const navigate = useNavigate();
   const { user } = useAuthContext();
 
+  const [currentStep, setCurrentStep] = useState(1);
+
   const isNew = id === undefined; // new automation
   const guestTypeValue = Form.useWatch('guestType', form);
 
@@ -172,6 +188,22 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
     socials: socials.length > 0 ? socials : defaultSocials,
     pollSharingImage: getPostSharingImageInfo(pollImageInfo),
     recordingDate: recordingDate ? dayjs(recordingDate, 'YYYY/MM/DD') : null,
+    invite: {
+      email: {
+        subject: '',
+        body: `Hi [GUEST_FIRSTNAME], it's [USER_FULLNAME]. [CUSTOMIZE THE FOLLOWING PHRASING & REMOVE THIS RED TEXT: I'm looking forward to featuring you on my podcast, "Branded Expert." Let's grow the audience even before we record. Here's how we'll increase your reach:
+        We should start building interest in what we'll talk about now itself. We don't have to finalize our talking points yet: Instead of guessing what others want to know from us... Let's ask them (using social media & email).
+        I chose 2 possible topics for our connections to vote on. They can even privately suggest their own topics for us.
+        I've already setup everything through a website called Upplaud. It'll post on our Facebook and LinkedIn, inviting our connections to vote. 
+        It doesn't matter how active you are on social media: People on Facebook & LinkedIn love participating like this (and will even share you with others). We can even share our Upplaud through email, etc. 
+        All you need to do is click the button below. Upplaud will post on our social media, inviting our connections to vote on the topics. (I've already connected my Facebook & LinkedIn.)
+        It only takes a few seconds to do. Thanks for doing it now: Every day counts to grow our audience interest. More time for more votes, more shares & more results.
+        The button to click is right below my name (be sure to save the Private Invite Password, since only you can connect & toggle your social media). I'm happy we're growing this together!
+        Thanks, see you soon.
+        - [USER_FIRSTNAME]
+        `,
+      },
+    },
   };
 
   const onFormSubmit = (status) => {
@@ -191,12 +223,180 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
       .catch(console.log);
   };
 
+  const stepItems = [
+    {
+      title: 'Got your info',
+      className: 'pointer-none',
+      content: <span>current-user-details</span>,
+    },
+    {
+      title: 'Guest info',
+      content: (
+        <>
+          <Title level={5}>{getPollType(guestTypeValue)?.text}</Title>
+
+          {hostInfoFields.map(({ label, name, rules = null }) => (
+            <Form.Item key={label} name={name} label={label} rules={isSoloSession ? null : rules}>
+              <Input placeholder={label} disabled={isSoloSession} />
+            </Form.Item>
+          ))}
+
+          <Form.Item name={['guest', 'picture']} label="HEADSHOT IMAGE" className="m-0">
+            <HeadshotImage
+              picture={Form.useWatch(['guest', 'picture'], form)}
+              onChange={(picture) => form.setFieldValue(['guest', 'picture'], picture)}
+            />
+          </Form.Item>
+        </>
+      ),
+    },
+    {
+      title: 'Topics info',
+      content: (
+        <>
+          <Title level={5}>Automation Info</Title>
+
+          {topicLabels.map((label, index) => (
+            <Form.Item
+              key={index}
+              label={label}
+              rules={[{ required: true }]}
+              name={['potentialTopics', index]}
+            >
+              <Input placeholder={label} />
+            </Form.Item>
+          ))}
+
+          {pollInfoFields.map(({ name, label }, i) => {
+            return (
+              <Form.Item
+                key={label}
+                name={name}
+                label={label}
+                className={pollInfoFields.length - 1 === i ? 'm-0' : ''}
+              >
+                <Input placeholder={label} />
+              </Form.Item>
+            );
+          })}
+        </>
+      ),
+    },
+    {
+      title: 'Voter invites',
+      content: (
+        <>
+          <PollSharingImage />
+          <SocialPostingItem />
+        </>
+      ),
+    },
+    {
+      title: 'Guest invites',
+      content: (
+        <Row gutter={[24]}>
+          <Col span={18}>
+            <Title level={4} className="mt-0">
+              Invite Email
+            </Title>
+
+            <Paragraph strong className="mb-1">
+              Subject
+            </Paragraph>
+            <Form.Item name={['invite', 'email', 'subject']} wrapperCol={24}>
+              <Input placeholder="Subject" />
+            </Form.Item>
+
+            <Paragraph strong className="mb-1">
+              Body
+            </Paragraph>
+            <TextEditor
+              name={['invite', 'email', 'body']}
+              placeholder="Enter your text here..."
+              formItemParams={{ className: 'm-0', wrapperCol: 24 }}
+            />
+          </Col>
+          <Col span={6}>
+            <Title level={5} className="mt-0">
+              Short Codes
+            </Title>
+
+            <List
+              bordered
+              size="small"
+              itemLayout="horizontal"
+              renderItem={(item) => <List.Item>{item}</List.Item>}
+              dataSource={[
+                '[USER_FIRSTNAME]',
+                '[USER_LASTNAME]',
+                '[USER_FULLNAME]',
+                '[GUEST_FIRSTNAME]',
+                '[GUEST_LASTNAME]',
+                '[GUEST_FULLNAME]',
+              ]}
+            />
+          </Col>
+        </Row>
+      ),
+    },
+    {
+      title: 'UPPLAUD LAUNCH',
+      content: (
+        <>
+          <Form.Item
+            className="w-50 mt-4"
+            name="recordingDate"
+            label="Automation End Date"
+            rules={[{ required: true }]}
+          >
+            <DatePicker
+              className="w-75 ml-0"
+              disabledDate={(d) =>
+                d && (d < dayjs().subtract(1, 'day') || d > dayjs().add(1, 'years'))
+              }
+            />
+          </Form.Item>
+
+          <div className="flex-item">
+            <Form.Item
+              className="m-0"
+              valuePropName="checked"
+              label="POSTING STARTS NOW"
+              name="startHostAutomation"
+              labelCol={{ span: 20 }}
+            >
+              <Switch disabled={isSoloSession} />
+            </Form.Item>
+            <Text type="secondary" className="ml-1">
+              Start when they starts
+            </Text>
+          </div>
+
+          <Space size={20} className="mt-4">
+            <Button onClick={() => setCurrentStep((c) => c - 1)}>Previous Step</Button>
+
+            <Button loading={isLoading} onClick={() => onFormSubmit(POLL_STATUS.DRAFT)}>
+              SAVE DRAFT
+            </Button>
+            <Button
+              type="primary"
+              loading={isLoading}
+              onClick={() => onFormSubmit(POLL_STATUS.PUBLISHED)}
+            >
+              LAUNCH AUTOMATION
+            </Button>
+          </Space>
+        </>
+      ),
+    },
+  ];
+
   return (
     <div className="automation-form">
       {!isGuestAcceptance && <AppTitle title={`${isNew ? 'New' : 'Update'} Automation`} />}
 
       <div className="add-guest">
-        <Title className="m-0">AUTOMATE POLL SHARING</Title>
+        <Title className="m-0">NEW UPPLAUD AUTOMATION</Title>
         <Title level={5} className="fw-400" type="secondary">
           Pull in more interest when your upplaud automation is posted automatically.
         </Title>
@@ -208,9 +408,9 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
         labelWrap={true}
         labelAlign="left"
         layout="horizontal"
-        requiredMark={false}
-        labelCol={{ span: 8 }}
-        wrapperCol={{ span: 15 }}
+        // requiredMark={false}
+        labelCol={{ span: 7 }}
+        wrapperCol={{ span: 17 }}
         initialValues={initialValues}
       >
         <Form.Item hidden name="pollImageSrc" label="Poll Image">
@@ -221,97 +421,49 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
           <Input placeholder="Social Share File" />
         </Form.Item>
 
-        <Form.Item name="guestType">
+        <Form.Item name="guestType" className="mb-1">
           <Radio.Group options={pollTypeOptions} />
         </Form.Item>
 
-        <div className="d-flex gap-2">
-          <div className="flex-1">
-            <Title level={5}>{getPollType(guestTypeValue)?.text}</Title>
+        <Title level={4} className="mt-0">
+          Quick Steps:
+        </Title>
+        <Steps current={currentStep} items={stepItems} onChange={setCurrentStep} />
 
-            {hostInfoFields.map(({ label, name, rules = null }) => (
-              <Form.Item key={label} name={name} label={label} rules={isSoloSession ? null : rules}>
-                <Input placeholder={label} disabled={isSoloSession} />
-              </Form.Item>
-            ))}
-
-            <Form.Item name={['guest', 'picture']} label="HEADSHOT IMAGE">
-              <HeadshotImage
-                picture={Form.useWatch(['guest', 'picture'], form)}
-                onChange={(picture) => form.setFieldValue(['guest', 'picture'], picture)}
-              />
-            </Form.Item>
+        {stepItems.map((item, index) => (
+          <div
+            key={index}
+            className="mt-2 mb-2"
+            style={{ display: currentStep === index ? 'block' : 'none' }}
+          >
+            {item?.content}
           </div>
+        ))}
 
-          <div className="flex-1">
-            <Title level={5}>Automation Info</Title>
+        {/* <div className="mt-2 mb-2">{stepItems[currentStep]?.content}</div> */}
 
-            {topicLabels.map((label, index) => (
-              <Form.Item
-                key={index}
-                label={label}
-                rules={[{ required: true }]}
-                name={['potentialTopics', index]}
+        {currentStep !== stepItems.length - 1 && (
+          <div className="flex-item gap-1 flex-center">
+            {currentStep < stepItems.length - 1 && (
+              <Button
+                type="primary"
+                onClick={() => {
+                  // form
+                  //   .validateFields()
+                  //   .then(() => setCurrentStep((c) => c + 1))
+                  //   .catch(console.log);
+                  setCurrentStep((c) => c + 1);
+                }}
               >
-                <Input placeholder={label} />
-              </Form.Item>
-            ))}
+                Next Step
+              </Button>
+            )}
 
-            {pollInfoFields.map(({ name, label }) => {
-              return (
-                <Form.Item key={label} name={name} label={label}>
-                  <Input placeholder={label} />
-                </Form.Item>
-              );
-            })}
+            {currentStep > 1 && (
+              <Button onClick={() => setCurrentStep((c) => c - 1)}>Previous Step</Button>
+            )}
           </div>
-        </div>
-
-        <PollSharingImage />
-
-        <SocialPostingItem />
-
-        <Form.Item
-          className="w-50 mt-4"
-          name="recordingDate"
-          label="Automation End Date"
-          rules={[{ required: true }]}
-        >
-          <DatePicker
-            className="w-75 ml-0"
-            disabledDate={(d) =>
-              d && (d < dayjs().subtract(1, 'day') || d > dayjs().add(1, 'years'))
-            }
-          />
-        </Form.Item>
-
-        <div className="flex-item">
-          <Form.Item
-            className="m-0"
-            valuePropName="checked"
-            label="POSTING STARTS NOW"
-            name="startHostAutomation"
-            labelCol={{ span: 20 }}
-          >
-            <Switch disabled={isSoloSession} />
-          </Form.Item>
-          <Text type="secondary" className="ml-1">
-            Start when they starts
-          </Text>
-        </div>
-
-        <Space size={30} className="mt-4">
-          <Button loading={isLoading} onClick={() => onFormSubmit(POLL_STATUS.DRAFT)}>
-            SAVE DRAFT
-          </Button>
-          <Button
-            type="primary"
-            loading={isLoading}
-            onClick={() => onFormSubmit(POLL_STATUS.PUBLISHED)}
-          >
-            LAUNCH AUTOMATION
-          </Button>
-        </Space>
+        )}
       </Form>
     </div>
   );
