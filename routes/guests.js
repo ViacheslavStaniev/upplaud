@@ -1,16 +1,18 @@
 const express = require("express");
+const Vote = require("../models/Vote");
 const Guest = require("../models/Guest");
 const UserFile = require("../models/UserFile");
 const PollImage = require("../models/PollImage");
 const verifyAuth = require("../config/verifyAuth");
 const SocialPosting = require("../models/SocialPosting");
 const { USER_TYPE } = require("../models/User");
+const { sendEmail } = require("../helpers/email");
 const { FILE_TYPE } = require("../models/UserFile");
 const { POLL_STATUS, GUEST_TYPE } = require("../models/Guest");
 const { SOCIAL_TYPE, SOCIAL_SUB_TYPE } = require("../models/SocialAccount");
 const { getS3Path, uploadImage, uploadFile } = require("../helpers/s3Helper");
-const { randomString, generateImage, generateVideo } = require("../helpers/utills");
 const { createOrUpdateGuestUser, getUserInfo, updateUserInfo } = require("./users");
+const { randomString, generateImage, generateVideo, replaceConstants } = require("../helpers/utills");
 
 const router = express.Router();
 
@@ -141,6 +143,7 @@ router.post("/", verifyAuth, async (req, res) => {
     pollImageSrc = "",
     hostOfferUrl = "",
     guestOfferUrl = "",
+    emailTemplate = null,
     potentialTopics = [],
     hostSpeakerLabel = "",
     guestSpeakerLabel = "",
@@ -176,6 +179,9 @@ router.post("/", verifyAuth, async (req, res) => {
       startHostAutomation,
       pollImageInfo: null,
     };
+
+    // Save Email Template
+    if (emailTemplate) pollInfo.emailTemplate = emailTemplate;
 
     // Create Guest User && update it if guestType is not SOLO_SESSION
     if (guestType !== GUEST_TYPE.SOLO_SESSION) {
@@ -243,6 +249,7 @@ router.put("/:pollId", verifyAuth, async (req, res) => {
     pollImageSrc = "",
     hostOfferUrl = "",
     guestOfferUrl = "",
+    emailTemplate = null,
     potentialTopics = [],
     hostSpeakerLabel = "",
     guestSpeakerLabel = "",
@@ -282,6 +289,9 @@ router.put("/:pollId", verifyAuth, async (req, res) => {
       startHostAutomation,
       pollImageInfo: null,
     };
+
+    // Save Email Template
+    if (emailTemplate) pollInfo.emailTemplate = emailTemplate;
 
     // Create Guest User && update it if guestType is not SOLO_SESSION
     if (guestType !== GUEST_TYPE.SOLO_SESSION) {
@@ -342,6 +352,30 @@ router.put("/:pollId", verifyAuth, async (req, res) => {
 
     // Update PollINfo
     await Guest.findByIdAndUpdate(pollId, pollInfo);
+
+    // Send Email in case of Publish
+    if (status === POLL_STATUS.PUBLISHED && pollInfo?.emailTemplate && guestType !== GUEST_TYPE.SOLO_SESSION) {
+      const { guest, emailTemplate } = pollInfo;
+      const guestInfo = await getUserInfo(guest);
+      const userInfo = await getUserInfo(userId);
+
+      const paramsToReplace = {
+        "[GUEST_FIRSTNAME]": guestInfo?.firstName,
+        "[GUEST_LASTNAME]": guestInfo?.lastName,
+        "[GUEST_FULLNAME]": `${guestInfo?.firstName} ${guestInfo?.lastName}`,
+        "[USER_FIRSTNAME]": userInfo?.firstName,
+        "[USER_LASTNAME]": userInfo?.lastName,
+        "[USER_FULLNAME]": `${userInfo?.firstName} ${userInfo?.lastName}`,
+      };
+
+      if (emailTemplate) {
+        const { subject, body } = emailTemplate;
+        const emailBody = replaceConstants(body, paramsToReplace);
+        const emailSubject = replaceConstants(subject, paramsToReplace);
+        await sendEmail({ to: guestInfo.email, subject: emailSubject, body: emailBody });
+        console.log("Email Sent!");
+      }
+    }
 
     await session.commitTransaction();
     session.endSession();
@@ -529,6 +563,45 @@ router.post("/generate-poll-image", verifyAuth, async (req, res) => {
       console.log("Video Generated", { imageS3Path, videoS3Path });
       res.json({ imageS3Path, videoS3Path });
     } else res.json({ imageS3Path, videoS3Path: "" });
+  } catch (err) {
+    // throw err;
+    console.error({ msg: err.message });
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// @route   GET api/guests/vote/pollId
+// @desc    gets guest details
+// @access  Public
+router.get("/vote/:pollId", async (req, res) => {
+  try {
+    const poll = await Guest.findById(req.params.pollId)
+      .populate("guest pollImageInfo")
+      .populate({ path: "user", select: "firstName lastName" });
+    res.json(poll);
+  } catch (err) {
+    // throw err;
+    console.error({ msg: err.message });
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// @route   POST api/guests/vote/pollId
+// @desc    save vote details
+// @access  Public
+router.post("/vote/:pollId", async (req, res) => {
+  try {
+    const pollInfo = req.body;
+
+    // Create New if not exists
+    if (!pollInfo._id) {
+      const vote = new Vote(pollInfo);
+      await vote.save();
+      res.json(vote);
+    } else {
+      await Vote.findByIdAndUpdate(pollInfo._id, pollInfo);
+      res.json({ msg: "Vote updated successfully." });
+    }
   } catch (err) {
     // throw err;
     console.error({ msg: err.message });

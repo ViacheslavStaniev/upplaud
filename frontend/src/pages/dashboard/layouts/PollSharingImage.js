@@ -42,6 +42,7 @@ export default function PollSharingImage() {
   console.log('audioDuration', audioDuration);
 
   // Local States
+  const [countdownTime, setCountdownTime] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showAddManageImages, setShowAddManageImages] = useState(false);
@@ -136,16 +137,17 @@ export default function PollSharingImage() {
     if (!pollSharingImageInfo.userLogo) {
       return notification.error({
         message: 'Error',
-        description: 'Please select a logo image',
+        description: 'Please upload your headshot image first.',
       });
     } else if (!pollSharingImageInfo.showLogo) {
       return notification.error({
         message: 'Error',
-        description: 'Please upload your logo first.',
+        description: 'Please select a logo image',
       });
     }
 
     setIsGenerating(true);
+    setCountdownTime(audioDuration || 60);
 
     try {
       const { imageS3Path, videoS3Path } = await generatePollImage(pollSharingImageInfo);
@@ -356,7 +358,8 @@ export default function PollSharingImage() {
           format="mm:ss"
           title="Estimated Time:"
           className="text-center wait-countdown"
-          value={Date.now() + (audioDuration || 0) * 2.5 * 1000}
+          value={Date.now() + countdownTime * 3 * 1000}
+          onFinish={() => setCountdownTime(audioDuration || 60)}
         />
       </Modal>
     </>

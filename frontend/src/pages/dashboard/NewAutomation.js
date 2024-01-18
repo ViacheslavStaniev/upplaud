@@ -136,6 +136,21 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
     socialShareFileSrc = '',
     potentialTopics = ['', ''],
     startHostAutomation = false,
+    emailTemplate = {
+      subject: '',
+      body: `Hi [GUEST_FIRSTNAME], it's [USER_FULLNAME]. [CUSTOMIZE THE FOLLOWING PHRASING & REMOVE THIS RED TEXT: I'm looking forward to featuring you on my podcast, "Branded Expert." Let's grow the audience even before we record. Here's how we'll increase your reach:
+      We should start building interest in what we'll talk about now itself. We don't have to finalize our talking points yet: Instead of guessing what others want to know from us... Let's ask them (using social media & email).
+      I chose 2 possible topics for our connections to vote on. They can even privately suggest their own topics for us.
+      I've already setup everything through a website called Upplaud. It'll post on our Facebook and LinkedIn, inviting our connections to vote. 
+      It doesn't matter how active you are on social media: People on Facebook & LinkedIn love participating like this (and will even share you with others). We can even share our Upplaud through email, etc. 
+      All you need to do is click the button below. Upplaud will post on our social media, inviting our connections to vote on the topics. (I've already connected my Facebook & LinkedIn.)
+      It only takes a few seconds to do. Thanks for doing it now: Every day counts to grow our audience interest. More time for more votes, more shares & more results.
+      The button to click is right below my name (be sure to save the Private Invite Password, since only you can connect & toggle your social media). I'm happy we're growing this together!
+      
+      Thanks, see you soon.
+      - [USER_FIRSTNAME]
+    `,
+    },
   } = guest || {};
   console.log('guest', guest);
 
@@ -176,6 +191,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
     guestType,
     pollImageSrc,
     hostOfferUrl,
+    emailTemplate,
     guestOfferUrl,
     potentialTopics,
     hostSpeakerLabel,
@@ -188,22 +204,6 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
     socials: socials.length > 0 ? socials : defaultSocials,
     pollSharingImage: getPostSharingImageInfo(pollImageInfo),
     recordingDate: recordingDate ? dayjs(recordingDate, 'YYYY/MM/DD') : null,
-    invite: {
-      email: {
-        subject: '',
-        body: `Hi [GUEST_FIRSTNAME], it's [USER_FULLNAME]. [CUSTOMIZE THE FOLLOWING PHRASING & REMOVE THIS RED TEXT: I'm looking forward to featuring you on my podcast, "Branded Expert." Let's grow the audience even before we record. Here's how we'll increase your reach:
-        We should start building interest in what we'll talk about now itself. We don't have to finalize our talking points yet: Instead of guessing what others want to know from us... Let's ask them (using social media & email).
-        I chose 2 possible topics for our connections to vote on. They can even privately suggest their own topics for us.
-        I've already setup everything through a website called Upplaud. It'll post on our Facebook and LinkedIn, inviting our connections to vote. 
-        It doesn't matter how active you are on social media: People on Facebook & LinkedIn love participating like this (and will even share you with others). We can even share our Upplaud through email, etc. 
-        All you need to do is click the button below. Upplaud will post on our social media, inviting our connections to vote on the topics. (I've already connected my Facebook & LinkedIn.)
-        It only takes a few seconds to do. Thanks for doing it now: Every day counts to grow our audience interest. More time for more votes, more shares & more results.
-        The button to click is right below my name (be sure to save the Private Invite Password, since only you can connect & toggle your social media). I'm happy we're growing this together!
-        Thanks, see you soon.
-        - [USER_FIRSTNAME]
-        `,
-      },
-    },
   };
 
   const onFormSubmit = (status) => {
@@ -303,7 +303,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
             <Paragraph strong className="mb-1">
               Subject
             </Paragraph>
-            <Form.Item name={['invite', 'email', 'subject']} wrapperCol={24}>
+            <Form.Item name={['emailTemplate', 'subject']} wrapperCol={24}>
               <Input placeholder="Subject" />
             </Form.Item>
 
@@ -311,7 +311,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
               Body
             </Paragraph>
             <TextEditor
-              name={['invite', 'email', 'body']}
+              name={['emailTemplate', 'body']}
               placeholder="Enter your text here..."
               formItemParams={{ className: 'm-0', wrapperCol: 24 }}
             />

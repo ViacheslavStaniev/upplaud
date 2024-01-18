@@ -170,3 +170,16 @@ span.ant-tag {
   font-size: 36px;
   font-weight: 600;
 }
+
+.ant-typography.ant-typography-info {
+  color: #893da0;
+}
+
+.ant-progress.step-margin .ant-progress-steps-outer {
+  gap: 16px;
+  justify-content: space-between;
+}
+.ant-progress.step-margin .ant-progress-steps-item {
+  flex: 1;
+  margin-inline-end: 0;
+}

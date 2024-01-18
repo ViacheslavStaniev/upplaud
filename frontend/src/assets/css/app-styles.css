@@ -256,6 +256,18 @@
 .bg-8F24B2-10 {
   background-color: rgb(143 36 178 / 10%);
 }
+.bg-E6F5FB {
+  background-color: #e6f5fb !important;
+}
+.bg-F3EAF9 {
+  background-color: #f3eaf9 !important;
+}
+.bg-EBF9E6 {
+  background-color: #ebf9e6 !important;
+}
+.bg-EEF4FB {
+  background-color: #eef4fb !important;
+}
 .color-facebook {
   color: #1877f2;
 }
@@ -286,11 +298,17 @@
 .border-000000 {
   border: 1px solid #000000;
 }
+.border-black-1 {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
 .font-inherit {
   font-size: inherit !important;
 }
 .font-16px {
   font-size: 16px !important;
+}
+.font-18px {
+  font-size: 18px !important;
 }
 .font-20px {
   font-size: 20px !important;
@@ -461,3 +479,7 @@
   height: 100px !important;
   top: 2px !important;
 } */
+
+.filter-shadow-1 {
+  filter: drop-shadow(0px 14px 20px rgba(0, 0, 0, 0.05));
+}

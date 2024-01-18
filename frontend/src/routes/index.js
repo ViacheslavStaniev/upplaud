@@ -23,6 +23,7 @@ import {
   ResetPasswordPage,
   ForgotPasswordPage,
   // Dashboard
+  VotingPage,
   NewAutomation,
   Automations,
   AccountAdmin,
@@ -102,6 +103,7 @@ export default function Router() {
         { path: '500', element: <Page500 /> },
         { path: '404', element: <Page404 /> },
         { path: '403', element: <Page403 /> },
+        { path: 'vote/:guestId', element: <VotingPage /> },
       ],
     },
     { path: 'guest-acceptance/:guestId', element: <GuestAcceptance /> },

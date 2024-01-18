@@ -27,6 +27,7 @@ const GuestSchema = new Schema(
     status: { type: String, enum: Object.values(POLL_STATUS), default: POLL_STATUS.DRAFT },
     guestType: { type: String, enum: Object.values(GUEST_TYPE), default: GUEST_TYPE.HOST_GUEST },
     socials: [{ ref: "SocialPosting", type: Schema.Types.ObjectId }],
+    emailTemplate: { type: Object, default: { subject: "", body: "" } },
   },
   { timestamps: true, autoCreate: true }
 );

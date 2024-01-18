@@ -249,6 +249,15 @@ const uploadFile = async (videoUrl, uploadUrl) => {
   });
 };
 
+// Function to replace some constants in the text
+const replaceConstants = (text, constants) => {
+  let replacedText = text;
+  for (const key in constants) {
+    replacedText = replacedText.replace(new RegExp(`\\${key}`, "g"), constants[key]);
+  }
+  return replacedText;
+};
+
 module.exports.uploadFile = uploadFile;
 module.exports.removeFile = removeFile;
 module.exports.downloadFile = downloadFile;
@@ -262,6 +271,7 @@ module.exports.createUsername = createUsername;
 module.exports.setUserSession = setUserSession;
 module.exports.getAuthResponse = getAuthResponse;
 module.exports.redirectToWebapp = redirectToWebapp;
+module.exports.replaceConstants = replaceConstants;
 module.exports.generateAuthToken = generateAuthToken;
 module.exports.getFBAuthClient = getFacebookAuthClient;
 module.exports.liveStreamTheVideo = liveStreamTheVideo;

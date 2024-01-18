@@ -16,6 +16,7 @@ export const ResetPasswordPage = Loadable(lazy(() => import('../pages/auth/Reset
 export const ForgotPasswordPage = Loadable(lazy(() => import('../pages/auth/ForgotPasswordPage')));
 
 // DASHBOARD
+export const VotingPage = Loadable(lazy(() => import('../pages/dashboard/VotingPage')));
 export const Automations = Loadable(lazy(() => import('../pages/dashboard/Automations')));
 export const AccountAdmin = Loadable(lazy(() => import('../pages/dashboard/AccountAdmin')));
 export const NewAutomation = Loadable(lazy(() => import('../pages/dashboard/NewAutomation')));

@@ -167,3 +167,23 @@ export const deleteManyGuests = (ids) => async (dispatch) => {
     dispatch(hasError(error));
   }
 };
+
+// Get Poll for vote
+export const getPoll = (pollId) => {
+  return new Promise((resolve, reject) => {
+    axios
+      .get(`guests/vote/${pollId}`)
+      .then(({ data }) => resolve(data))
+      .catch((error) => reject(error));
+  });
+};
+
+// Get Poll for vote
+export const saveVote = (pollId, pollParams) => {
+  return new Promise((resolve, reject) => {
+    axios
+      .post(`guests/vote/${pollId}`, pollParams)
+      .then(({ data }) => resolve(data))
+      .catch((error) => reject(error));
+  });
+};

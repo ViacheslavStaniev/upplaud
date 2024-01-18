@@ -23,7 +23,7 @@ const {
 const { getS3Path } = require("../helpers/s3Helper");
 
 const router = express.Router();
-const { PROFILE, PAGE } = SOCIAL_SUB_TYPE;
+const { PROFILE, PAGE, GROUP } = SOCIAL_SUB_TYPE;
 const { LINKEDIN, FACEBOOK } = SOCIAL_TYPE;
 
 const { REACT_APP_URL, FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, LINKEDIN_APP_ID, LINKEDIN_APP_SECRET, LINKEDIN_VERSION } = process.env;
@@ -292,10 +292,7 @@ router.get("/init-auto-posting", async (req, res) => {
         title: "Click the link in the text to vote",
         description: getSocialShareText(poll, user),
         url: getS3Path(poll.socialShareFileSrc),
-        // url: "https://video-socials.s3.us-east-2.amazonaws.com/7/videos/uploads/video_1681880073_video_1676706027_tcmdemo25_1605085991.mp4",
       };
-
-      console.log("Posting Info", postInfo);
 
       // Initiate Posting
       if (type === SOCIAL_TYPE.FACEBOOK) {
@@ -419,22 +416,33 @@ async function initFacebookPosting(id, postInfo, access_token, subType = PROFILE
       // Post Content
       const { title, description, url } = postInfo;
 
-      // Live Stream on Facebook
-      const { data } = await authClient.post(`/${id}/live_videos`, {
-        title,
-        description,
-        access_token,
-        status: "LIVE_NOW",
-        privacy: { value: "EVERYONE" },
-      });
+      // Post video on Facebook
+      if ([PAGE, GROUP].includes(subType)) {
+        // Post on Page/Group
+        await authClient.post(`/${id}/videos`, { title, description, access_token, file_url: url, published: true });
 
-      // Live Stream the Video
-      const result = await liveStreamTheVideo({ video_url: url, stream_url: data.stream_url });
+        resolve({ error: false, msg: "Posted on Facebook" });
+      } else {
+        // Post on Profile
+        // await authClient.post(`/${id}/feed`, { message: `${title}\n\n${description}`, access_token, link: url });
 
-      // End the Live Stream
-      await authClient.post(`/${data.id}`, { end_live_video: true, access_token });
+        // Live Stream on Facebook
+        const { data } = await authClient.post(`/${id}/live_videos`, {
+          title,
+          description,
+          access_token,
+          status: "LIVE_NOW",
+          privacy: { value: "EVERYONE" },
+        });
 
-      resolve(result);
+        // Live Stream the Video
+        const result = await liveStreamTheVideo({ video_url: url, stream_url: data.stream_url });
+
+        // End the Live Stream
+        await authClient.post(`/${data.id}`, { end_live_video: true, access_token });
+
+        resolve(result);
+      }
     } catch (error) {
       console.log(error);
       reject({ error: true, msg: error?.response?.data?.error?.message || error?.message });
@@ -445,7 +453,7 @@ async function initFacebookPosting(id, postInfo, access_token, subType = PROFILE
 // Get Social Share Text
 function getSocialShareText(poll, user) {
   const { footer, header } = poll?.pollImageInfo || {};
-  const voteLink = getFrontendUrl(`poll/${poll?._id}`);
+  const voteLink = getFrontendUrl(`vote/${poll?._id}`);
 
   return `VOTE NOW: ${voteLink} \n\n${footer?.text || ""} \n${header?.text || ""}`;
 }
