@@ -11,10 +11,11 @@ const POLL_STATUS = { DRAFT: "DRAFT", PUBLISHED: "PUBLISHED" };
 
 const GuestSchema = new Schema(
   {
-    potentialTopics: [{ type: String }],
+    password: { type: String, default: "" },
     hostOfferUrl: { type: String, default: "" },
     guestOfferUrl: { type: String, default: "" },
     hostSpeakerLabel: { type: String, default: "" },
+    potentialTopics: [{ type: String, default: "" }],
     guestSpeakerLabel: { type: String, default: "" },
     socialShareFileSrc: { type: String, default: "" },
     recordingDate: { type: Date, default: new Date() },

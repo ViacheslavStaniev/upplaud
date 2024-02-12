@@ -1,3 +1,4 @@
+import * as ExcelJS from 'exceljs';
 import { GUEST_TYPE, SOCIAL_TITLES, SOCIAL_TYPE, SOCIAL_SUB_TYPE } from './types';
 
 const { FACEBOOK } = SOCIAL_TYPE;
@@ -76,4 +77,59 @@ export const getSocialsItems = (socialAccounts = []) => {
       ? [...newItems, getSocialItem(GROUP, group?.socialId, getSubTypeName(page))]
       : newItems;
   }, []);
+};
+
+// download votes
+export const downloadVotes = (votes) => {
+  const workbook = new ExcelJS.Workbook();
+  const sheet = workbook.addWorksheet('Voting Data');
+
+  sheet.columns = [
+    { header: 'Selected Topic', key: 'topic' },
+    { header: 'Voter', key: 'voter' },
+    { header: 'User Suggested', key: 'isSuggestion' },
+    { header: 'Suggestion', key: 'suggestion' },
+    { header: 'Question 1', key: 'quest1' },
+    { header: 'Question 2', key: 'quest2' },
+    { header: 'Question 3', key: 'quest3' },
+    { header: 'Question 4', key: 'quest4' },
+    { header: 'Timestamp', key: 'timestamp' },
+  ];
+
+  votes.forEach((vote) => {
+    const { selectedTopic, voter, isSuggestion, suggestions, createdAt, questionnaireAnswers } =
+      vote;
+
+    const [quest1, quest2, quest3, quest4] = questionnaireAnswers;
+
+    sheet.addRow({
+      topic: selectedTopic?.topic || 'Other',
+      voter: `Name: ${voter?.name} \nEmail: ${voter?.email} \nCell Phone:${voter?.cell_phone}`,
+      isSuggestion: isSuggestion ? 'Yes' : 'No',
+      suggestion: `Topic: ${suggestions?.topic} \nSpeaker: ${suggestions?.speaker}`,
+      quest1: quest1 ? quest1?.answers || '--' : '--',
+      quest2:
+        quest2 && quest2?.answers
+          ? `Comment: ${quest2?.answers?.comment || '--'}\nReferral 1: ${
+              quest2?.answers?.referral1 || '--'
+            }\nReferral 2: ${quest2?.answers?.referral2 || '--'}\nName: ${
+              quest2?.answers?.name || '--'
+            }\nEmail: ${quest2?.answers?.email || '--'}`
+          : '--',
+      quest3: quest3 ? quest3?.answers?.answer || '--' : '--',
+      quest4: quest4 ? `Shared: ${quest4?.doneSharing ? 'Yes' : 'No'}` : '--',
+      timestamp: new Date(createdAt).toLocaleString(),
+    });
+  });
+
+  workbook.xlsx.writeBuffer().then((buffer) => {
+    const blob = new Blob([buffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'VotingData.xlsx';
+    a.click();
+  });
 };

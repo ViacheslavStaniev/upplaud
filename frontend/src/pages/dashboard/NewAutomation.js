@@ -1,10 +1,12 @@
 import dayjs from 'dayjs';
 import { useState, useEffect } from 'react';
+import { getFullS3Url } from '../../config-global';
+import { PATH_DASHBOARD } from '../../routes/paths';
 import { getFiles } from '../../reducers/fileSlice';
 import { useSelector, useDispatch } from 'react-redux';
 import { useAuthContext } from '../../auth/AuthProvider';
-import { useParams, useNavigate } from 'react-router-dom';
-import { GUEST_TYPE, POLL_STATUS } from '../../utils/types';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { GUEST_TYPE, POLL_STATUS, SOCIAL_TITLES } from '../../utils/types';
 import { pollTypeOptions, getPollType, getSocialsItems } from '../../utils/common';
 import { addGuest, fetchGuest, updateGuest, updateState } from '../../reducers/guestsSlice';
 import {
@@ -20,12 +22,15 @@ import {
   Steps,
   Row,
   Col,
+  Modal,
 } from 'antd';
+import CopyText from '../../components/CopyText';
 import AppTitle from '../../components/AppTitle';
 import TextEditor from '../../components/TextEditor';
 import HeadshotImage from '../layouts/HeadshotImage';
 import PollSharingImage from './layouts/PollSharingImage';
 import SocialPostingItem from './layouts/SocialPostingItem';
+import { ArrowLeftOutlined, CheckOutlined, PlaySquareOutlined } from '@ant-design/icons';
 
 const { Text, Title, Paragraph } = Typography;
 const { HOST_GUEST, SOLO_SESSION } = GUEST_TYPE;
@@ -114,12 +119,14 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
   const { user } = useAuthContext();
 
   const [currentStep, setCurrentStep] = useState(1);
+  const [openVideoPreview, setOpenVideoPreview] = useState(false);
 
   const isNew = id === undefined; // new automation
   const guestTypeValue = Form.useWatch('guestType', form);
-
   const isSoloSession = guestTypeValue === SOLO_SESSION;
-  const { guest, error, isLoading } = useSelector((state) => state.guests);
+  const { guest, error, isLoading, isPublished, isPublishing } = useSelector(
+    (state) => state.guests
+  );
 
   const {
     audio = null,
@@ -137,7 +144,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
     potentialTopics = ['', ''],
     startHostAutomation = false,
     emailTemplate = {
-      subject: '',
+      subject: '[USER_FULLNAME] next steps',
       body: `Hi [GUEST_FIRSTNAME], it's [USER_FULLNAME]. [CUSTOMIZE THE FOLLOWING PHRASING & REMOVE THIS RED TEXT: I'm looking forward to featuring you on my podcast, "Branded Expert." Let's grow the audience even before we record. Here's how we'll increase your reach:
       We should start building interest in what we'll talk about now itself. We don't have to finalize our talking points yet: Instead of guessing what others want to know from us... Let's ask them (using social media & email).
       I chose 2 possible topics for our connections to vote on. They can even privately suggest their own topics for us.
@@ -212,7 +219,6 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
       .then((values) => {
         values.status = status;
         values.recordingDate = dayjs(values?.recordingDate).format();
-        console.log(values, isNew);
 
         if (isNew) {
           dispatch(addGuest(values));
@@ -373,14 +379,17 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
           </div>
 
           <Space size={20} className="mt-4">
-            <Button onClick={() => setCurrentStep((c) => c - 1)}>Previous Step</Button>
+            <Button onClick={() => setCurrentStep((c) => c - 1)}>Back</Button>
 
-            <Button loading={isLoading} onClick={() => onFormSubmit(POLL_STATUS.DRAFT)}>
+            <Button
+              loading={isLoading && !isPublishing}
+              onClick={() => onFormSubmit(POLL_STATUS.DRAFT)}
+            >
               SAVE DRAFT
             </Button>
             <Button
               type="primary"
-              loading={isLoading}
+              loading={isLoading && isPublishing}
               onClick={() => onFormSubmit(POLL_STATUS.PUBLISHED)}
             >
               LAUNCH AUTOMATION
@@ -391,80 +400,175 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
     },
   ];
 
+  const connectedSocials = socials.reduce((acc, item) => {
+    if (!item || !item.isConnected) return acc;
+
+    const { type, subType } = item;
+
+    return [...acc, `${SOCIAL_TITLES[type]} ${subType}`];
+  }, []);
+
+  console.log(connectedSocials);
+
   return (
     <div className="automation-form">
       {!isGuestAcceptance && <AppTitle title={`${isNew ? 'New' : 'Update'} Automation`} />}
 
       <div className="add-guest">
         <Title className="m-0">NEW UPPLAUD AUTOMATION</Title>
-        <Title level={5} className="fw-400" type="secondary">
-          Pull in more interest when your upplaud automation is posted automatically.
-        </Title>
+
+        {!isPublished && (
+          <Title level={5} className="fw-400" type="secondary">
+            Pull in more interest when your upplaud automation is posted automatically.
+          </Title>
+        )}
       </div>
 
-      <Form
-        form={form}
-        size="large"
-        labelWrap={true}
-        labelAlign="left"
-        layout="horizontal"
-        // requiredMark={false}
-        labelCol={{ span: 7 }}
-        wrapperCol={{ span: 17 }}
-        initialValues={initialValues}
-      >
-        <Form.Item hidden name="pollImageSrc" label="Poll Image">
-          <Input placeholder="Poll Image" />
-        </Form.Item>
+      {!isPublished && (
+        <Form
+          form={form}
+          size="large"
+          labelWrap={true}
+          labelAlign="left"
+          layout="horizontal"
+          // requiredMark={false}
+          labelCol={{ span: 7 }}
+          wrapperCol={{ span: 17 }}
+          initialValues={initialValues}
+        >
+          <Form.Item hidden name="pollImageSrc" label="Poll Image">
+            <Input placeholder="Poll Image" />
+          </Form.Item>
 
-        <Form.Item hidden name="socialShareFileSrc" label="Social Share File">
-          <Input placeholder="Social Share File" />
-        </Form.Item>
+          <Form.Item hidden name="socialShareFileSrc" label="Social Share File">
+            <Input placeholder="Social Share File" />
+          </Form.Item>
 
-        <Form.Item name="guestType" className="mb-1">
-          <Radio.Group options={pollTypeOptions} />
-        </Form.Item>
+          <Form.Item name="guestType" className="mb-1">
+            <Radio.Group options={pollTypeOptions} />
+          </Form.Item>
 
-        <Title level={4} className="mt-0">
-          Quick Steps:
-        </Title>
-        <Steps current={currentStep} items={stepItems} onChange={setCurrentStep} />
+          <Title level={4} className="mt-0">
+            Quick Steps:
+          </Title>
+          <Steps current={currentStep} items={stepItems} onChange={setCurrentStep} />
 
-        {stepItems.map((item, index) => (
-          <div
-            key={index}
-            className="mt-2 mb-2"
-            style={{ display: currentStep === index ? 'block' : 'none' }}
+          {stepItems.map((item, index) => (
+            <div
+              key={index}
+              className="mt-2 mb-2"
+              style={{ display: currentStep === index ? 'block' : 'none' }}
+            >
+              {item?.content}
+            </div>
+          ))}
+
+          {/* <div className="mt-2 mb-2">{stepItems[currentStep]?.content}</div> */}
+
+          {currentStep !== stepItems.length - 1 && (
+            <div className="flex-item gap-1 flex-center">
+              {currentStep < stepItems.length - 1 && (
+                <Button
+                  type="primary"
+                  onClick={() => {
+                    // form
+                    //   .validateFields()
+                    //   .then(() => setCurrentStep((c) => c + 1))
+                    //   .catch(console.log);
+                    setCurrentStep((c) => c + 1);
+                  }}
+                >
+                  Next Step
+                </Button>
+              )}
+
+              {currentStep > 1 && (
+                <Button onClick={() => setCurrentStep((c) => c - 1)}>Back</Button>
+              )}
+            </div>
+          )}
+        </Form>
+      )}
+
+      {isPublished && (
+        <div className="mt-2 bg-F7F3F9 p-3 br-5px">
+          <Title level={3}>👏 Congrats, your new Upplaud is ready to pull in new interest!</Title>
+          <Title level={5}>
+            Voters will be directed to:{' '}
+            <Link target="_blank" to={`/vote/${guest?._id}`}>
+              Voting Page
+            </Link>
+          </Title>
+
+          <Title level={5}>You've connected:</Title>
+          <ul>
+            {connectedSocials.map((item, key) => (
+              <li key={key} className="capitalize">
+                {item}
+              </li>
+            ))}
+          </ul>
+
+          <Title level={5}>
+            Preview your voter invitation video:{' '}
+            <Button
+              className="ml-1"
+              icon={<PlaySquareOutlined />}
+              onClick={() => setOpenVideoPreview(true)}
+            >
+              Preview Video
+            </Button>
+          </Title>
+          <Title level={5} className="mb-1">
+            Your guest will be invited to connect here:{' '}
+            <Link target="_blank" to={`/guest-acceptance/${guest?._id}`}>
+              Guest Invitation Page
+            </Link>
+          </Title>
+          <Title level={5} className="mt-0">
+            Their private invite password is:{' '}
+            <CopyText text={guest?.password} className="d-inline-block w-125px ml-1" />
+          </Title>
+
+          <Title level={4}>
+            We'll start posting {'<when your guest connects their social media or> <later today!>'}
+          </Title>
+
+          <Button
+            type="default"
+            size="large"
+            icon={<ArrowLeftOutlined />}
+            onClick={() => dispatch(updateState({ isPublished: false }))}
           >
-            {item?.content}
-          </div>
-        ))}
+            Go back to make any changes.
+          </Button>
 
-        {/* <div className="mt-2 mb-2">{stepItems[currentStep]?.content}</div> */}
+          <Button
+            type="primary"
+            size="large"
+            className="d-block mt-2"
+            icon={<CheckOutlined />}
+            onClick={() => navigate(PATH_DASHBOARD.dashboard.automations)}
+          >
+            CONFIRM YOUR NEW UPPLAUD & SEE YOUR OTHER AUTOMATIONS
+          </Button>
+        </div>
+      )}
 
-        {currentStep !== stepItems.length - 1 && (
-          <div className="flex-item gap-1 flex-center">
-            {currentStep < stepItems.length - 1 && (
-              <Button
-                type="primary"
-                onClick={() => {
-                  // form
-                  //   .validateFields()
-                  //   .then(() => setCurrentStep((c) => c + 1))
-                  //   .catch(console.log);
-                  setCurrentStep((c) => c + 1);
-                }}
-              >
-                Next Step
-              </Button>
-            )}
-
-            {currentStep > 1 && (
-              <Button onClick={() => setCurrentStep((c) => c - 1)}>Previous Step</Button>
-            )}
-          </div>
-        )}
-      </Form>
+      <Modal
+        centered
+        width={'50%'}
+        footer={false}
+        open={openVideoPreview}
+        title="Preview Video Invitation Post"
+        onCancel={() => setOpenVideoPreview(false)}
+      >
+        <video
+          controls
+          style={{ width: '100%', height: 'auto' }}
+          src={getFullS3Url(guest?.socialShareFileSrc)}
+        />
+      </Modal>
     </div>
   );
 }

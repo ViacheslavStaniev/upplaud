@@ -2,9 +2,9 @@ import Logo from '../components/Logo';
 import SimpleBar from 'simplebar-react';
 import UserNavMenu from './UserNavMenu';
 import SidebarNavMenu from './SidebarNavMenu';
-import TopNavSearchbar from './TopNavSearchbar';
-import NotificationPopover from './NotificationPopover';
-import { Layout, Divider } from 'antd';
+// import TopNavSearchbar from './TopNavSearchbar';
+// import NotificationPopover from './NotificationPopover';
+import { Layout } from 'antd';
 import { Link, Outlet } from 'react-router-dom';
 
 export default function DashboardLayout() {
@@ -17,11 +17,11 @@ export default function DashboardLayout() {
           <Logo />
         </Link>
 
-        <TopNavSearchbar />
+        {/* <TopNavSearchbar /> */}
 
         <div className="flex-item">
-          <NotificationPopover />
-          <Divider type="vertical" />
+          {/* <NotificationPopover /> */}
+          {/* <Divider type="vertical" /> */}
           <UserNavMenu />
         </div>
       </Header>

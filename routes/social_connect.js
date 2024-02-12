@@ -272,6 +272,7 @@ router.get("/init-auto-posting", async (req, res) => {
     if (activePostings.length === 0) return res.status(200).json({ error: false, msg: "No active posting found." });
 
     // Initiate Postings
+    const postingResults = [];
     for (let i = 0; i < activePostings.length; i++) {
       const posting = activePostings[i];
       const { poll, user, type, subType, subTypeId, frequency, frequencyPosted } = posting;
@@ -300,8 +301,10 @@ router.get("/init-auto-posting", async (req, res) => {
           const access_token = subType === PAGE ? page?.accounts.find((a) => a.id === subTypeId)?.access_token : accessToken;
           const tokenObj = await initFacebookPosting(subTypeId, postInfo, access_token, subType);
           console.log(tokenObj);
+          postingResults.push({ type, error: false, msg: "Posted on Facebook", posting });
         } catch (error) {
           console.log(error);
+          postingResults.push({ type, error: true, msg: error?.message || "Error posting on Facebook", posting });
         }
       } else if (type === SOCIAL_TYPE.LINKEDIN) {
         try {
@@ -318,14 +321,16 @@ router.get("/init-auto-posting", async (req, res) => {
             refreshToken: tokenObj.refresh_token,
             expiresInSeconds: tokenObj.refresh_token_expires_in,
           });
+          postingResults.push({ type, error: false, msg: "Posted on Linkedin", posting });
         } catch (error) {
           // await saveUserAccessTokens(user, { type, subType, isConnected: false, expiresInSeconds: 0 });
           console.log(error);
+          postingResults.push({ type, error: true, msg: error?.message || "Error posting on Linkedin", posting });
         }
       }
     }
 
-    res.status(200).json({ activePostings, error: false, msg: "Posting completed successfully." });
+    res.status(200).json({ postingResults, error: false, msg: "Posting completed successfully." });
   } catch (error) {
     // console.log(error);
     res.status(500).json({ error: true, msg: error?.response?.data?.error_description || error?.message });

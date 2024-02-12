@@ -24,8 +24,17 @@ const { PROFILE, PAGE, GROUP } = SOCIAL_SUB_TYPE;
 // @access  Public
 router.get("/", verifyAuth, async (req, res) => {
   try {
-    const guestList = await Guest.find({ user: req.userId }).populate("guest");
-    res.json(guestList);
+    const guestList = await Guest.find({ user: req.userId }).populate("guest socials");
+
+    // Fetch votes
+    const votes = await Vote.find({ poll: { $in: guestList.map((item) => item._id) } });
+    const list = guestList.map((guest) => guest?._doc);
+    const guestListWithVotes = list.map((guest) => ({
+      ...guest,
+      votes: votes.filter((vote) => vote?.poll.toString() === guest?._id.toString()),
+    }));
+
+    res.json(guestListWithVotes);
   } catch (err) {
     // throw err;
     console.error({ msg: err.message });
@@ -178,6 +187,7 @@ router.post("/", verifyAuth, async (req, res) => {
       socialShareFileSrc,
       startHostAutomation,
       pollImageInfo: null,
+      password: randomString(6),
     };
 
     // Save Email Template
@@ -289,6 +299,9 @@ router.put("/:pollId", verifyAuth, async (req, res) => {
       startHostAutomation,
       pollImageInfo: null,
     };
+
+    // Update Password
+    if (!poll?.password) pollInfo.password = randomString(6);
 
     // Save Email Template
     if (emailTemplate) pollInfo.emailTemplate = emailTemplate;

@@ -10,7 +10,7 @@ export default function SidebarNavMenu() {
   const { pathname } = useLocation();
   const pathArr = pathname.split('/');
   const path = pathArr.length > 2 ? `${pathArr[1]}/new` : pathArr[1];
-  const { newAutomation, automations, emailTemplates } = PATH_DASHBOARD.dashboard;
+  const { newAutomation, automations } = PATH_DASHBOARD.dashboard;
 
   const items = [
     {
@@ -38,11 +38,11 @@ export default function SidebarNavMenu() {
         //   label: 'Posting Template',
         //   icon: <CustomIcon name="edit_square" height={iconSize} width={iconSize} />,
         // },
-        {
-          key: emailTemplates,
-          label: 'Invitation Templates',
-          icon: <CustomIcon name="mail" height={iconSize} width={iconSize} />,
-        },
+        // {
+        //   key: emailTemplates,
+        //   label: 'Invitation Templates',
+        //   icon: <CustomIcon name="mail" height={iconSize} width={iconSize} />,
+        // },
         // {
         //   key: guestingAdmin,
         //   label: 'Guesting Admin',

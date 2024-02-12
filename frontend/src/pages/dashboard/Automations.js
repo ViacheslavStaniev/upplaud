@@ -1,35 +1,52 @@
 import { useState, useEffect } from 'react';
 import { POLL_STATUS } from '../../utils/types';
 import { useSelector, useDispatch } from 'react-redux';
-import { getRandomColor, getDateString, pollTypeOptions } from '../../utils/common';
 import { getGuestsList, deleteGuest, deleteManyGuests } from '../../reducers/guestsSlice';
-import { Tag, Tabs, Space, Table, Badge, Button, Tooltip, Typography, Popconfirm } from 'antd';
+import { getRandomColor, getDateString, pollTypeOptions, downloadVotes } from '../../utils/common';
+import {
+  Tag,
+  Tabs,
+  Modal,
+  Space,
+  Table,
+  Badge,
+  Button,
+  Tooltip,
+  Popover,
+  Typography,
+  Popconfirm,
+} from 'antd';
 import {
   EditOutlined,
   MailOutlined,
   DeleteOutlined,
-  SettingOutlined,
-  FileTextOutlined,
-  CalendarOutlined,
+  // FileTextOutlined,
   PauseCircleOutlined,
   CloudDownloadOutlined,
 } from '@ant-design/icons';
 import AppTitle from '../../components/AppTitle';
 
 const { PUBLISHED } = POLL_STATUS;
-const { Text, Title } = Typography;
+const { Text, Title, Paragraph } = Typography;
 
 export default function Automations() {
   const dispatch = useDispatch();
 
   const [selectedRows, setSelectedRows] = useState([]);
-  const totalSelected = selectedRows.length;
+  const [voteDetails, setVoteDetails] = useState(null);
 
+  const totalSelected = selectedRows.length;
   const { guests = [], isLoading = false } = useSelector((state) => state.guests);
 
   useEffect(() => {
     dispatch(getGuestsList());
   }, [dispatch]);
+
+  console.log('guests', guests);
+
+  const isSocialAccountActive = (socials = []) => {
+    return socials.reduce((y, { isActive }) => (y ? y : isActive), false);
+  };
 
   const columns = [
     {
@@ -101,55 +118,57 @@ export default function Automations() {
       ),
     },
     {
-      key: 'asqs',
+      key: 'votes',
       title: 'VOTES',
-      dataIndex: 'asqs',
-      render: ({ g = 0, h = 0, n = 0 }) => (
-        <div className="flex-item gap-1">
-          <Tag color="green">G: {g}</Tag>
-          <Tag color="cyan">H: {h}</Tag>
-          <Tag color="lime">N: {n}</Tag>
-        </div>
-      ),
+      dataIndex: 'votes',
+      sorter: (a, b) => a.votes?.length - b.votes?.length,
+      render: (votes) =>
+        // <Tooltip title="View Votes">
+        //   <Button
+        //     shape="round"
+        //     icon={<FileTextOutlined />}
+        //     onClick={() => setVoteDetails(votes)}
+        //     type={!votes?.length ? 'text' : 'default'}
+        //     className={!votes?.length ? 'pointer-none' : ''}
+        //   >
+        `Total Votes (${votes?.length})`,
+      //   </Button>
+      // </Tooltip>
     },
-    {
-      key: 'todo',
-      title: 'TASK TO DO',
-      dataIndex: 'todo',
-      sorter: (a, b) => a.todo.localeCompare(b.todo),
-    },
+    { key: 'todo', title: 'TASK TO DO', dataIndex: 'todo' },
     {
       key: 'action',
       title: 'Action',
-      render: ({ id, isAutomationActive }) => (
-        <Space direction="vertical">
-          <Space>
-            <Button icon={<MailOutlined />} />
-            <Tooltip title="Edit Automation Details">
-              <Button href={`/automations/${id}`} icon={<EditOutlined />} />
+      render: ({ id, isActive, votes }) => (
+        <Space>
+          <Tooltip title="Re-Send Invitation Email">
+            <Button disabled icon={<MailOutlined />} />
+          </Tooltip>
+          <Tooltip title="Edit Automation Details">
+            <Button href={`/automations/${id}`} icon={<EditOutlined />} />
+          </Tooltip>
+          <Tooltip title={`${isActive ? 'Pause' : 'Active'} Automation`}>
+            <Button danger={isActive} icon={<PauseCircleOutlined />} />
+          </Tooltip>
+          <Tooltip title="Download Voting Data">
+            <Button
+              disabled={!votes?.length}
+              icon={<CloudDownloadOutlined />}
+              onClick={() => {
+                downloadVotes(votes);
+              }}
+            />
+          </Tooltip>
+          <Popconfirm
+            placement="topLeft"
+            title="Are you sure?"
+            description="This action can't be undone."
+            onConfirm={() => dispatch(deleteGuest(id))}
+          >
+            <Tooltip title="Delete">
+              <Button icon={<DeleteOutlined />} />
             </Tooltip>
-            <Button icon={<CalendarOutlined />} />
-
-            <Tooltip title={`${isAutomationActive ? 'Pause' : 'Active'} Automation`}>
-              <Button danger={isAutomationActive} icon={<PauseCircleOutlined />} />
-            </Tooltip>
-          </Space>
-
-          <Space>
-            <Button icon={<CloudDownloadOutlined />} />
-            <Button icon={<SettingOutlined />} />
-            <Button icon={<FileTextOutlined />} />
-            <Popconfirm
-              placement="topLeft"
-              title="Are you sure?"
-              description="This action can't be undone."
-              onConfirm={() => dispatch(deleteGuest(id))}
-            >
-              <Tooltip title="Delete">
-                <Button icon={<DeleteOutlined />} />
-              </Tooltip>
-            </Popconfirm>
-          </Space>
+          </Popconfirm>
         </Space>
       ),
     },
@@ -158,18 +177,17 @@ export default function Automations() {
   const getDataSource = (key) => {
     return guests
       .filter(({ guestType }) => guestType === key)
-      .map(({ _id, guest, status, socials, recordingDate }) => ({
+      .map(({ _id, guest, status, socials, recordingDate, votes }) => ({
+        votes,
         guest,
         status,
         id: _id,
         key: _id,
+        todo: '',
         statusObj: { guest: null, host: null },
         recordingDate: new Date(recordingDate).getTime(),
         name: guest ? `${guest.firstName} ${guest.lastName}` : '--',
-        asqs: { g: 0, h: 0, n: 0 },
-        todo: '',
-        isAutomationActive:
-          status === PUBLISHED && socials.reduce((y, { isActive }) => (y ? y : isActive), false),
+        isActive: status === PUBLISHED && isSocialAccountActive(socials),
       }));
   };
 
@@ -236,6 +254,68 @@ export default function Automations() {
           tabBarExtraContent={{ right: <SelectedItemsAction /> }}
         />
       </div>
+
+      <VoteDetails votes={voteDetails} onClose={() => setVoteDetails(false)} />
     </>
+  );
+}
+
+function VoteDetails({ votes = [], onClose }) {
+  const columns = [
+    { title: '#', dataIndex: 'index' },
+    { title: 'Selected Topic', dataIndex: 'topic' },
+    Table.EXPAND_COLUMN,
+    { title: 'Suggestion', dataIndex: 'suggestion' },
+    { title: 'Voter', dataIndex: 'voter' },
+    { title: 'Timestamp', dataIndex: 'createdAt' },
+  ];
+  const dataSource = (votes || []).map((vote, i) => {
+    const { _id, createdAt, selectedTopic, suggestions, isSuggestion } = vote;
+
+    return {
+      ...vote,
+      key: _id,
+      index: i + 1,
+      createdAt: getDateString(createdAt),
+      topic: (
+        <Popover
+          title="Suggestions"
+          open={isSuggestion ? null : false}
+          content={
+            <div className="topic-suggestion">
+              <Paragraph className="m-0">
+                Topic: <Text strong>{suggestions?.topic}</Text>
+              </Paragraph>
+              <Paragraph className="m-0">
+                Speaker: <Text strong>{suggestions?.speaker || '--'}</Text>
+              </Paragraph>
+            </div>
+          }
+        >
+          <Tag bordered={!isSuggestion}>{selectedTopic?.topic || 'OTHER'}</Tag>
+        </Popover>
+      ),
+
+      suggestion: 'hello',
+    };
+  });
+
+  return (
+    <Modal
+      width={800}
+      footer={null}
+      open={!!votes}
+      onCancel={onClose}
+      title={`Voting Details (${votes?.length})`}
+    >
+      <Table
+        columns={columns}
+        dataSource={dataSource}
+        expandable={{
+          expandedRowRender: (record) => <p style={{ margin: 0 }}>{record.description}</p>,
+          rowExpandable: (record) => record?.questionnaireAnswers?.length > 0,
+        }}
+      />
+    </Modal>
   );
 }

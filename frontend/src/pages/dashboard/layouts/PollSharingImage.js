@@ -39,8 +39,6 @@ export default function PollSharingImage() {
   const audioDuration = Form.useWatch('audioDuration', form);
   const socialShareFileSrc = Form.useWatch('socialShareFileSrc', form);
 
-  console.log('audioDuration', audioDuration);
-
   // Local States
   const [countdownTime, setCountdownTime] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);

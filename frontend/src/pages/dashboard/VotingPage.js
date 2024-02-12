@@ -6,22 +6,10 @@ import { useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
 import { POLL_STATUS } from '../../utils/types';
 import { getFullS3Url } from '../../config-global';
+import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useParams, Navigate } from 'react-router-dom';
 import { getPoll, saveVote } from '../../reducers/guestsSlice';
-import { InfoCircleOutlined, ArrowLeftOutlined } from '@ant-design/icons';
-import {
-  Card,
-  Spin,
-  Flex,
-  Form,
-  Image,
-  Modal,
-  Input,
-  Button,
-  Avatar,
-  Progress,
-  Typography,
-} from 'antd';
+import { Card, Spin, Flex, Form, Image, Modal, Input, Button, Avatar, Typography } from 'antd';
 
 const { Text, Link, Title, Paragraph } = Typography;
 
@@ -56,7 +44,7 @@ const questionnaireQuestions = [
 // Final Result Object
 const finalResultObj = {
   poll: '',
-  isSuggestions: false,
+  isSuggestion: false,
   questionnaireAnswers: [],
   selectedTopic: { topic: '', index: 0 },
   suggestions: { topic: '', speaker: '' },
@@ -91,6 +79,10 @@ export default function VotingPage() {
     startQuestionnaire,
   } = state;
 
+  const questionnaireAnswers = finalResult?.questionnaireAnswers || [];
+  const preAnswers = questionnaireAnswers[currentQuestion - 1];
+  // console.log('finalResultObj', finalResult, preAnswers, thirdStepAnswers);
+
   const { guest, error, isLoading } = poll;
 
   useEffect(() => {
@@ -124,7 +116,7 @@ export default function VotingPage() {
       finalResult: {
         ...finalResult,
         poll: guestId,
-        isSuggestions: topic === '',
+        isSuggestion: topic === '',
         selectedTopic: { topic, index },
       },
     };
@@ -135,16 +127,19 @@ export default function VotingPage() {
   // On Questionnaire Answer
   const onQuestionnaireAnswer = (questionIndex = 0, answers = '') => {
     const showEndScreen = questionIndex === 3;
+    const { questionnaireAnswers = [] } = finalResult;
+
+    // Answers
+    if (questionnaireAnswers[questionIndex]) {
+      questionnaireAnswers[questionIndex] = { ...questionnaireAnswers[questionIndex], answers };
+    } else {
+      questionnaireAnswers.push({ ...questionnaireQuestions[questionIndex], answers });
+    }
+
     const newState = {
       showEndScreen,
+      finalResult: { ...finalResult, questionnaireAnswers },
       currentQuestion: showEndScreen ? currentQuestion : currentQuestion + 1,
-      finalResult: {
-        ...finalResult,
-        questionnaireAnswers: [
-          ...finalResult?.questionnaireAnswers,
-          { ...questionnaireQuestions[questionIndex], answers },
-        ],
-      },
     };
 
     updateState(newState);
@@ -161,36 +156,34 @@ export default function VotingPage() {
             Thank you for your help!
           </Title>
 
-          {!finalResult?.isSuggestions && (
-            <div className="reward-links">
-              <Title level={5} className="mt-2">
-                SEE YOUR REWARDS FROM:
-              </Title>
-              <Button
-                type="info"
-                size="large"
-                shape="round"
-                target="_blank"
-                className="fw-400"
-                href={guest?.guestOfferUrl}
-              >
-                {`${guest?.guest?.firstName} ${guest?.guest?.lastName}`}
-              </Button>
-              <Title level={5} className="mt-2">
-                SEE YOUR REWARDS FROM:
-              </Title>
-              <Button
-                size="large"
-                shape="round"
-                type="primary"
-                target="_blank"
-                className="fw-400"
-                href={guest?.hostOfferUrl}
-              >
-                {`${guest?.user?.firstName} ${guest?.user?.lastName}`}
-              </Button>
-            </div>
-          )}
+          <div className="reward-links">
+            <Title level={5} className="mt-2">
+              SEE YOUR REWARDS FROM:
+            </Title>
+            <Button
+              type="info"
+              size="large"
+              shape="round"
+              target="_blank"
+              className="fw-400"
+              href={guest?.guestOfferUrl}
+            >
+              {`${guest?.guest?.firstName} ${guest?.guest?.lastName}`}
+            </Button>
+            <Title level={5} className="mt-2">
+              SEE YOUR REWARDS FROM:
+            </Title>
+            <Button
+              size="large"
+              shape="round"
+              type="primary"
+              target="_blank"
+              className="fw-400"
+              href={guest?.hostOfferUrl}
+            >
+              {`${guest?.user?.firstName} ${guest?.user?.lastName}`}
+            </Button>
+          </div>
         </Card>
 
         <Paragraph type="secondary" className="mb-4">
@@ -208,14 +201,21 @@ export default function VotingPage() {
       <div className="questionnaire p-2">
         <div className="flex-item gap-2 mb-2">
           <Text className="color-0AB6B6">01</Text>
-          <Progress
-            steps={4}
-            size={[60, 8]}
-            showInfo={false}
-            strokeColor="#0AB6B6"
-            className="step-margin flex-1"
-            percent={Math.round((currentQuestion / 4) * 100)}
-          />
+          <div className="flex-1 flex-item gap-2">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div
+                key={index}
+                onClick={() => updateState({ currentQuestion: index + 1 })}
+                style={{
+                  flex: 1,
+                  height: 8,
+                  cursor: 'pointer',
+                  backgroundColor: currentQuestion - 1 >= index ? '#0AB6B6' : '#eeeeee',
+                  pointerEvents: questionnaireAnswers[index] ? 'auto' : 'none',
+                }}
+              />
+            ))}
+          </div>
           <Text className="color-0AB6B6">04</Text>
         </div>
 
@@ -237,6 +237,7 @@ export default function VotingPage() {
                   className="text-left"
                   icon={<CustomIcon name="circle" />}
                   onClick={() => onQuestionnaireAnswer(0, option)}
+                  type={preAnswers && preAnswers?.answers === option ? 'info' : 'default'}
                 >
                   {option}
                 </Button>
@@ -256,7 +257,13 @@ export default function VotingPage() {
 
             <Form
               onFinish={(values) => onQuestionnaireAnswer(1, values)}
-              initialValues={{ referral1: '', referral2: '', comment: '', name: '', email: '' }}
+              initialValues={{
+                name: preAnswers?.answers?.name || '',
+                email: preAnswers?.answers?.email || '',
+                comment: preAnswers?.answers?.comment || '',
+                referral1: preAnswers?.answers?.referral1 || '',
+                referral2: preAnswers?.answers?.referral2 || '',
+              }}
             >
               <Form.Item label="Referral Name 1" name="referral1" rules={[{ required: true }]}>
                 <Input placeholder="Referral Name 1" />
@@ -315,9 +322,14 @@ export default function VotingPage() {
                     size="large"
                     shape="round"
                     type={thirdStepAnswers?.answer === option ? 'info' : 'default'}
-                    onClick={() =>
-                      setThirdStepAnswers((prevState) => ({ ...prevState, answer: option }))
-                    }
+                    onClick={() => {
+                      const answers = { ...thirdStepAnswers, answer: option };
+
+                      setThirdStepAnswers(answers);
+
+                      // Move forward
+                      if (option === 'No') onQuestionnaireAnswer(2, answers);
+                    }}
                   >
                     {option}
                   </Button>
@@ -326,25 +338,33 @@ export default function VotingPage() {
             </Card>
 
             <Form
-              initialValues={thirdStepAnswers?.userInfo || {}}
+              initialValues={{
+                name: preAnswers?.answers?.userInfo?.name || '',
+                email: preAnswers?.answers?.userInfo?.email || '',
+                cell_phone: preAnswers?.answers?.userInfo?.cell_phone || '',
+              }}
               onFinish={({ userInfo }) =>
                 onQuestionnaireAnswer(2, { ...thirdStepAnswers, userInfo })
               }
             >
-              <Form.Item label="Your Name" name={['userInfo', 'name']} rules={[{ required: true }]}>
+              <Form.Item
+                label="Your Name"
+                name={['userInfo', 'name']}
+                rules={[{ required: thirdStepAnswers?.answer !== 'No' }]}
+              >
                 <Input placeholder="Your Name" />
               </Form.Item>
               <Form.Item
                 label="Your Email"
                 name={['userInfo', 'email']}
-                rules={[{ required: true }]}
+                rules={[{ required: thirdStepAnswers?.answer !== 'No' }]}
               >
                 <Input placeholder="Your Email" />
               </Form.Item>
               <Form.Item
                 label="Your Cell Phone"
                 name={['userInfo', 'cell_phone']}
-                rules={[{ required: true }]}
+                rules={[{ required: thirdStepAnswers?.answer !== 'No' }]}
               >
                 <Input placeholder="Your Cell Phone" />
               </Form.Item>
@@ -455,10 +475,6 @@ export default function VotingPage() {
 
           {!openSuggestionForm && (
             <div className="voting-form">
-              <Paragraph>
-                <InfoCircleOutlined /> About us & the episode
-              </Paragraph>
-
               <PollImage src={pollImageSrc} />
 
               <Title level={2} type="info" className="mt-2">
@@ -528,8 +544,8 @@ export default function VotingPage() {
               onBack={() => updateState({ openSuggestionForm: false })}
               onFinish={(values) => {
                 const newState = {
+                  startQuestionnaire: true,
                   finalResult: { ...finalResult, ...values },
-                  showEndScreen: true,
                 };
                 updateState(newState);
                 saveVoteHandler(newState.finalResult);

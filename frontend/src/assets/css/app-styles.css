@@ -59,6 +59,9 @@
 .mb-8px {
   margin-bottom: 8px !important;
 }
+.mt-0 {
+  margin-top: 0 !important;
+}
 .mt-2 {
   margin-top: 1rem !important;
 }
@@ -70,6 +73,12 @@
 }
 .mr-10px {
   margin-right: 10px !important;
+}
+.d-block {
+  display: block !important;
+}
+.d-inline-block {
+  display: inline-block !important;
 }
 .d-flex {
   display: flex !important;
@@ -355,6 +364,12 @@
 }
 .vl-textbottom {
   vertical-align: text-bottom;
+}
+.border-sky-1 {
+  border: 1px solid #e7e9f2;
+}
+.bg-sky-6 {
+  background-color: #f7f8fc !important;
 }
 
 .ant-layout-sider.main-menu,

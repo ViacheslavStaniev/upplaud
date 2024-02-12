@@ -1,14 +1,23 @@
 import axios from '../utils/axios';
 import { notification } from 'antd';
+import { POLL_STATUS } from '../utils/types';
 import { createSlice } from '@reduxjs/toolkit';
 
 const slice = createSlice({
   name: 'guests',
-  initialState: { guest: null, guests: [], shows: [], error: null, isLoading: false },
+  initialState: {
+    guest: null,
+    guests: [],
+    shows: [],
+    error: null,
+    isLoading: false,
+    isPublished: false,
+    isPublishing: false,
+  },
   reducers: {
     // START LOADING
-    startLoading(state) {
-      return { ...state, isLoading: true };
+    startLoading(state, { payload }) {
+      return { ...state, isLoading: true, ...payload };
     },
 
     // HAS ERROR
@@ -27,7 +36,13 @@ const slice = createSlice({
 
     // ADD GUEST
     onAddGuest(state, { payload }) {
-      return { ...state, isLoading: false, guests: [...state.guests, payload] };
+      return {
+        ...state,
+        isLoading: false,
+        isPublishing: false,
+        guests: [...state.guests, payload],
+        isPublished: payload?.status === POLL_STATUS.PUBLISHED,
+      };
     },
 
     // UPDATE GUEST
@@ -35,6 +50,8 @@ const slice = createSlice({
       return {
         ...state,
         isLoading: false,
+        isPublishing: false,
+        isPublished: payload?.status === POLL_STATUS.PUBLISHED,
         guests: state.guests.map((guest) => (guest._id === payload._id ? payload : guest)),
       };
     },
@@ -113,7 +130,7 @@ export const fetchGuest = (guestId) => async (dispatch) => {
 
 // Add a new Guest
 export const addGuest = (info) => async (dispatch) => {
-  dispatch(startLoading());
+  dispatch(startLoading({ isPublishing: info?.status === POLL_STATUS.PUBLISHED }));
 
   try {
     const { data } = await axios.post('guests', info);
@@ -128,7 +145,7 @@ export const addGuest = (info) => async (dispatch) => {
 
 // Update a guest
 export const updateGuest = (guestId, info) => async (dispatch) => {
-  dispatch(startLoading());
+  dispatch(startLoading({ isPublishing: info?.status === POLL_STATUS.PUBLISHED }));
 
   try {
     const { data } = await axios.put(`guests/${guestId}`, info);
