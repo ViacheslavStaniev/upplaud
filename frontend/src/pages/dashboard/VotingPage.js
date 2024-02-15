@@ -590,17 +590,13 @@ function SuccessModal({ open, onClose, onBack, finalResult, onFinish }) {
       </Title>
 
       <Form layout="vertical" onFinish={onFinish} initialValues={finalResult}>
-        <Form.Item label="Your Name" name={['voter', 'name']} rules={[{ required: true }]}>
+        <Form.Item label="Your Name" name={['voter', 'name']}>
           <Input placeholder="Your Name" />
         </Form.Item>
-        <Form.Item label="Your Email" name={['voter', 'email']} rules={[{ required: true }]}>
+        <Form.Item label="Your Email" name={['voter', 'email']}>
           <Input placeholder="Your Email" />
         </Form.Item>
-        <Form.Item
-          label="Your Cell Phone"
-          name={['voter', 'cell_phone']}
-          rules={[{ required: true }]}
-        >
+        <Form.Item label="Your Cell Phone" name={['voter', 'cell_phone']}>
           <Input placeholder="Your Cell Phone" />
         </Form.Item>
 
@@ -614,6 +610,10 @@ function SuccessModal({ open, onClose, onBack, finalResult, onFinish }) {
             className="flex-1"
           >
             UPDATE ME PLEASE
+          </Button>
+
+          <Button size="large" shape="round" block={isMobile} htmlType="submit" className="flex-1">
+            NO, THANKS
           </Button>
 
           <Button

@@ -1,36 +1,32 @@
 import dayjs from 'dayjs';
 import { useState, useEffect } from 'react';
-import { getFullS3Url } from '../../config-global';
-import { PATH_DASHBOARD } from '../../routes/paths';
 import { getFiles } from '../../reducers/fileSlice';
 import { useSelector, useDispatch } from 'react-redux';
 import { useAuthContext } from '../../auth/AuthProvider';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { GUEST_TYPE, POLL_STATUS, SOCIAL_TITLES } from '../../utils/types';
+import { useParams, useNavigate } from 'react-router-dom';
+import { GUEST_TYPE, POLL_STATUS } from '../../utils/types';
 import { pollTypeOptions, getPollType, getSocialsItems } from '../../utils/common';
 import { addGuest, fetchGuest, updateGuest, updateState } from '../../reducers/guestsSlice';
 import {
+  Row,
+  Col,
   List,
   Form,
   Space,
   Input,
+  Radio,
+  Steps,
   Button,
+  Switch,
   DatePicker,
   Typography,
-  Radio,
-  Switch,
-  Steps,
-  Row,
-  Col,
-  Modal,
 } from 'antd';
-import CopyText from '../../components/CopyText';
 import AppTitle from '../../components/AppTitle';
 import TextEditor from '../../components/TextEditor';
 import HeadshotImage from '../layouts/HeadshotImage';
 import PollSharingImage from './layouts/PollSharingImage';
 import SocialPostingItem from './layouts/SocialPostingItem';
-import { ArrowLeftOutlined, CheckOutlined, PlaySquareOutlined } from '@ant-design/icons';
+import AutomationCongrats from './layouts/AutomationCongrats';
 
 const { Text, Title, Paragraph } = Typography;
 const { HOST_GUEST, SOLO_SESSION } = GUEST_TYPE;
@@ -119,7 +115,6 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
   const { user } = useAuthContext();
 
   const [currentStep, setCurrentStep] = useState(1);
-  const [openVideoPreview, setOpenVideoPreview] = useState(false);
 
   const isNew = id === undefined; // new automation
   const guestTypeValue = Form.useWatch('guestType', form);
@@ -400,16 +395,6 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
     },
   ];
 
-  const connectedSocials = socials.reduce((acc, item) => {
-    if (!item || !item.isConnected) return acc;
-
-    const { type, subType } = item;
-
-    return [...acc, `${SOCIAL_TITLES[type]} ${subType}`];
-  }, []);
-
-  console.log(connectedSocials);
-
   return (
     <div className="automation-form">
       {!isGuestAcceptance && <AppTitle title={`${isNew ? 'New' : 'Update'} Automation`} />}
@@ -491,84 +476,12 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
       )}
 
       {isPublished && (
-        <div className="mt-2 bg-F7F3F9 p-3 br-5px">
-          <Title level={3}>👏 Congrats, your new Upplaud is ready to pull in new interest!</Title>
-          <Title level={5}>
-            Voters will be directed to:{' '}
-            <Link target="_blank" to={`/vote/${guest?._id}`}>
-              Voting Page
-            </Link>
-          </Title>
-
-          <Title level={5}>You've connected:</Title>
-          <ul>
-            {connectedSocials.map((item, key) => (
-              <li key={key} className="capitalize">
-                {item}
-              </li>
-            ))}
-          </ul>
-
-          <Title level={5}>
-            Preview your voter invitation video:{' '}
-            <Button
-              className="ml-1"
-              icon={<PlaySquareOutlined />}
-              onClick={() => setOpenVideoPreview(true)}
-            >
-              Preview Video
-            </Button>
-          </Title>
-          <Title level={5} className="mb-1">
-            Your guest will be invited to connect here:{' '}
-            <Link target="_blank" to={`/guest-acceptance/${guest?._id}`}>
-              Guest Invitation Page
-            </Link>
-          </Title>
-          <Title level={5} className="mt-0">
-            Their private invite password is:{' '}
-            <CopyText text={guest?.password} className="d-inline-block w-125px ml-1" />
-          </Title>
-
-          <Title level={4}>
-            We'll start posting {'<when your guest connects their social media or> <later today!>'}
-          </Title>
-
-          <Button
-            type="default"
-            size="large"
-            icon={<ArrowLeftOutlined />}
-            onClick={() => dispatch(updateState({ isPublished: false }))}
-          >
-            Go back to make any changes.
-          </Button>
-
-          <Button
-            type="primary"
-            size="large"
-            className="d-block mt-2"
-            icon={<CheckOutlined />}
-            onClick={() => navigate(PATH_DASHBOARD.dashboard.automations)}
-          >
-            CONFIRM YOUR NEW UPPLAUD & SEE YOUR OTHER AUTOMATIONS
-          </Button>
-        </div>
-      )}
-
-      <Modal
-        centered
-        width={'50%'}
-        footer={false}
-        open={openVideoPreview}
-        title="Preview Video Invitation Post"
-        onCancel={() => setOpenVideoPreview(false)}
-      >
-        <video
-          controls
-          style={{ width: '100%', height: 'auto' }}
-          src={getFullS3Url(guest?.socialShareFileSrc)}
+        <AutomationCongrats
+          guest={guest}
+          showActionBtns
+          onGoBack={() => dispatch(updateState({ isPublished: false }))}
         />
-      </Modal>
+      )}
     </div>
   );
 }

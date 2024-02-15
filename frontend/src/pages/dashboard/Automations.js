@@ -17,6 +17,7 @@ import {
   Popconfirm,
 } from 'antd';
 import {
+  LikeOutlined,
   EditOutlined,
   MailOutlined,
   DeleteOutlined,
@@ -25,6 +26,7 @@ import {
   CloudDownloadOutlined,
 } from '@ant-design/icons';
 import AppTitle from '../../components/AppTitle';
+import AutomationCongrats from './layouts/AutomationCongrats';
 
 const { PUBLISHED } = POLL_STATUS;
 const { Text, Title, Paragraph } = Typography;
@@ -34,6 +36,7 @@ export default function Automations() {
 
   const [selectedRows, setSelectedRows] = useState([]);
   const [voteDetails, setVoteDetails] = useState(null);
+  const [automationCongrats, setAutomationCongrats] = useState(null);
 
   const totalSelected = selectedRows.length;
   const { guests = [], isLoading = false } = useSelector((state) => state.guests);
@@ -43,6 +46,8 @@ export default function Automations() {
   }, [dispatch]);
 
   console.log('guests', guests);
+
+  const congratsGuest = guests.find(({ _id }) => _id === automationCongrats);
 
   const isSocialAccountActive = (socials = []) => {
     return socials.reduce((y, { isActive }) => (y ? y : isActive), false);
@@ -69,54 +74,54 @@ export default function Automations() {
       sorter: (a, b) => a.recordingDate - b.recordingDate,
       render: (timestamp) => <Text className="color-5D0578">{getDateString(timestamp)}</Text>,
     },
-    {
-      title: 'STATUS',
-      key: 'statusObj',
-      // align: 'center',
-      dataIndex: 'statusObj',
-      render: ({ guest, host }) => (
-        <div className="flex-item gap-1">
-          <Tag
-            color="rgb(184 209 196 / 20%)"
-            style={{
-              margin: 0,
-              color: '#6E8D7D',
-              padding: '10px 20px',
-              fontSize: 16,
-              borderRadius: 25,
-            }}
-          >
-            Guest
-            {guest ? (
-              <Text>
-                {guest.posted} {getDateString(guest.date)}
-              </Text>
-            ) : (
-              '--'
-            )}
-          </Tag>
-          <Tag
-            color="rgb(41 127 184 / 10%)"
-            style={{
-              margin: 0,
-              color: '#297FB8',
-              padding: '10px 20px',
-              fontSize: 16,
-              borderRadius: 25,
-            }}
-          >
-            Host
-            {host ? (
-              <Text>
-                {host.posted} {getDateString(host.date)}
-              </Text>
-            ) : (
-              '--'
-            )}
-          </Tag>
-        </div>
-      ),
-    },
+    // {
+    //   title: 'STATUS',
+    //   key: 'statusObj',
+    //   // align: 'center',
+    //   dataIndex: 'statusObj',
+    //   render: ({ guest, host }) => (
+    //     <div className="flex-item gap-1">
+    //       <Tag
+    //         color="rgb(184 209 196 / 20%)"
+    //         style={{
+    //           margin: 0,
+    //           color: '#6E8D7D',
+    //           padding: '10px 20px',
+    //           fontSize: 16,
+    //           borderRadius: 25,
+    //         }}
+    //       >
+    //         Guest
+    //         {guest ? (
+    //           <Text>
+    //             {guest.posted} {getDateString(guest.date)}
+    //           </Text>
+    //         ) : (
+    //           '--'
+    //         )}
+    //       </Tag>
+    //       <Tag
+    //         color="rgb(41 127 184 / 10%)"
+    //         style={{
+    //           margin: 0,
+    //           color: '#297FB8',
+    //           padding: '10px 20px',
+    //           fontSize: 16,
+    //           borderRadius: 25,
+    //         }}
+    //       >
+    //         Host
+    //         {host ? (
+    //           <Text>
+    //             {host.posted} {getDateString(host.date)}
+    //           </Text>
+    //         ) : (
+    //           '--'
+    //         )}
+    //       </Tag>
+    //     </div>
+    //   ),
+    // },
     {
       key: 'votes',
       title: 'VOTES',
@@ -135,12 +140,19 @@ export default function Automations() {
       //   </Button>
       // </Tooltip>
     },
-    { key: 'todo', title: 'TASK TO DO', dataIndex: 'todo' },
+    { key: 'sconnecctors', title: 'Social Connections', render: () => <Text>Not Connected</Text> },
     {
       key: 'action',
       title: 'Action',
-      render: ({ id, isActive, votes }) => (
+      render: ({ id, isActive, votes, isPublished }) => (
         <Space>
+          <Tooltip title="Congrats & Details">
+            <Button
+              icon={<LikeOutlined />}
+              disabled={!isPublished}
+              onClick={() => setAutomationCongrats(id)}
+            />
+          </Tooltip>
           <Tooltip title="Re-Send Invitation Email">
             <Button disabled icon={<MailOutlined />} />
           </Tooltip>
@@ -154,9 +166,7 @@ export default function Automations() {
             <Button
               disabled={!votes?.length}
               icon={<CloudDownloadOutlined />}
-              onClick={() => {
-                downloadVotes(votes);
-              }}
+              onClick={() => downloadVotes(votes)}
             />
           </Tooltip>
           <Popconfirm
@@ -184,6 +194,7 @@ export default function Automations() {
         id: _id,
         key: _id,
         todo: '',
+        isPublished: status === PUBLISHED,
         statusObj: { guest: null, host: null },
         recordingDate: new Date(recordingDate).getTime(),
         name: guest ? `${guest.firstName} ${guest.lastName}` : '--',
@@ -256,6 +267,16 @@ export default function Automations() {
       </div>
 
       <VoteDetails votes={voteDetails} onClose={() => setVoteDetails(false)} />
+
+      <Modal
+        footer={null}
+        open={!!congratsGuest}
+        width={'min(90%, 820px)'}
+        title="Automation Congrats & Details"
+        onCancel={() => setAutomationCongrats(null)}
+      >
+        {congratsGuest && <AutomationCongrats guest={congratsGuest} />}
+      </Modal>
     </>
   );
 }
