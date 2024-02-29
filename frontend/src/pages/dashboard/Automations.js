@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { POLL_STATUS } from '../../utils/types';
 import { useSelector, useDispatch } from 'react-redux';
+import { POLL_STATUS, SOCIAL_TYPE } from '../../utils/types';
 import { getGuestsList, deleteGuest, deleteManyGuests } from '../../reducers/guestsSlice';
 import { getRandomColor, getDateString, pollTypeOptions, downloadVotes } from '../../utils/common';
 import {
@@ -26,9 +26,11 @@ import {
   CloudDownloadOutlined,
 } from '@ant-design/icons';
 import AppTitle from '../../components/AppTitle';
+import CustomIcon from '../../components/CustomIcon';
 import AutomationCongrats from './layouts/AutomationCongrats';
 
 const { PUBLISHED } = POLL_STATUS;
+const { FACEBOOK, LINKEDIN } = SOCIAL_TYPE;
 const { Text, Title, Paragraph } = Typography;
 
 export default function Automations() {
@@ -44,8 +46,6 @@ export default function Automations() {
   useEffect(() => {
     dispatch(getGuestsList());
   }, [dispatch]);
-
-  console.log('guests', guests);
 
   const congratsGuest = guests.find(({ _id }) => _id === automationCongrats);
 
@@ -140,7 +140,42 @@ export default function Automations() {
       //   </Button>
       // </Tooltip>
     },
-    { key: 'sconnecctors', title: 'Social Connections', render: () => <Text>Not Connected</Text> },
+    {
+      align: 'center',
+      key: 'sconnecctors',
+      title: 'Social Connections',
+      render: ({ sconnecctors }) => {
+        const data = [
+          {
+            key: FACEBOOK,
+            slug: 'facebook',
+            isConnected: sconnecctors[FACEBOOK] || false,
+          },
+          {
+            key: LINKEDIN,
+            slug: 'linkedin',
+            isConnected: sconnecctors[LINKEDIN] || false,
+          },
+        ];
+
+        return (
+          <div className="flex-item gap-1 flex-center">
+            {data.map(({ key, slug, isConnected }) => (
+              <Tooltip key={key} title={isConnected ? 'Connected' : 'Not Connected'}>
+                <Badge key={key} dot color={isConnected ? 'blue' : 'red'}>
+                  <Button
+                    type="ghost"
+                    shape="circle"
+                    className={`color-${slug}`}
+                    icon={<CustomIcon name={slug} />}
+                  />
+                </Badge>
+              </Tooltip>
+            ))}
+          </div>
+        );
+      },
+    },
     {
       key: 'action',
       title: 'Action',
@@ -199,6 +234,13 @@ export default function Automations() {
         recordingDate: new Date(recordingDate).getTime(),
         name: guest ? `${guest.firstName} ${guest.lastName}` : '--',
         isActive: status === PUBLISHED && isSocialAccountActive(socials),
+        sconnecctors: guest?.socialAccounts?.reduce(
+          (y, { type, isConnected }) => ({ ...y, [type]: isConnected }),
+          {
+            [FACEBOOK]: false,
+            [LINKEDIN]: false,
+          }
+        ),
       }));
   };
 

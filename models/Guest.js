@@ -11,6 +11,7 @@ const POLL_STATUS = { DRAFT: "DRAFT", PUBLISHED: "PUBLISHED" };
 
 const GuestSchema = new Schema(
   {
+    uniqueId: { type: String, default: "" },
     password: { type: String, default: "" },
     hostOfferUrl: { type: String, default: "" },
     guestOfferUrl: { type: String, default: "" },

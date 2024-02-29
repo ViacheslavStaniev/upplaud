@@ -394,15 +394,16 @@
   color: white;
 }
 .ant-layout-sider.main-menu .ant-menu-light.ant-menu-inline .ant-menu-item {
+  color: white;
   height: 56px;
   margin: 0 !important;
   width: 100% !important;
 }
 .ant-layout-sider.main-menu .ant-menu-light .ant-menu-item-selected {
   font-weight: 600;
-  color: #54006e;
   border-radius: 0;
   background-color: white;
+  color: #54006e !important;
   /* -webkit-mask-image: radial-gradient(circle 10px at 0 0, transparent 0, transparent 20px, black 21px); */
 }
 

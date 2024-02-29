@@ -2,21 +2,24 @@ import axios from '../../utils/axios';
 import CustomIcon from '../../components/CustomIcon';
 import { useState, useEffect } from 'react';
 import { APP_BASEURL } from '../../config-global';
-import { useAuthContext } from '../../auth/AuthProvider';
 import { SOCIAL_TYPE, SOCIAL_TITLES } from '../../utils/types';
 import {
-  CheckCircleFilled,
-  CloseCircleFilled,
   StopOutlined,
   SyncOutlined,
+  CheckCircleFilled,
+  CloseCircleFilled,
 } from '@ant-design/icons';
 import { Button, Space, Typography, Dropdown, notification, Badge } from 'antd';
 
 const { Title, Text } = Typography;
 const { FACEBOOK, LINKEDIN } = SOCIAL_TYPE;
 
-export default function SocialMediaConnect({ showTitle = true, className = '' }) {
-  const { user, update } = useAuthContext();
+export default function SocialMediaConnect({
+  user,
+  className = '',
+  showTitle = true,
+  update = () => {},
+}) {
   const socialAccounts = user?.socialAccounts || [];
   const getItem = (type) => socialAccounts.find((item) => item.type === type);
 
@@ -57,8 +60,11 @@ export default function SocialMediaConnect({ showTitle = true, className = '' })
   const isSocialConnected = (type) => getItem(type)?.isConnected || false;
 
   // Get Social Connect Url
-  const getSocialConnectUrl = (type, disconnect = false) =>
-    `${APP_BASEURL}/auth/connect/${type}/${disconnect ? 'disconnect' : ''}`;
+  const getSocialConnectUrl = (type, disconnect = false) => {
+    return `${APP_BASEURL}/auth/connect/${type}/${user?.userName}/${
+      disconnect ? 'disconnect' : ''
+    }?returnUrl=${window.location.href}`;
+  };
 
   const getConnectIcon = (isConnected = false, size = 14) => {
     return isConnected ? (
@@ -73,7 +79,7 @@ export default function SocialMediaConnect({ showTitle = true, className = '' })
     setLoading(true);
 
     try {
-      await axios.get(`users/connect/${type}/${subType}/${id}`);
+      await axios.get(`users/${user?._id}/connect/${type}/${subType}/${id}`);
 
       // Update user
       const newUser = {
@@ -103,7 +109,7 @@ export default function SocialMediaConnect({ showTitle = true, className = '' })
     setLoading(true);
 
     try {
-      await axios.get(`users/disconnect/${type}`);
+      await axios.get(`users/${user?._id}/disconnect/${type}`);
 
       // Update user
       const newUser = {

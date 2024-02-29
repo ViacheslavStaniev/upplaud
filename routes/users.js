@@ -1,6 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
+const SocialPosting = require("../models/SocialPosting");
 const SocialAccount = require("../models/SocialAccount");
 const { USER_TYPE } = require("../models/User");
 const { ServiceError } = require("./errors");
@@ -115,11 +116,11 @@ router.post(
 // @route   POST api/users/connect/:type/:subType/:id
 // @desc    Connect user with facebook/linkedin page/group account
 // @access  Public
-router.get("/connect/:type/:subType/:id", verifyAuth, async (req, res) => {
-  const { type, subType, id } = req.params;
+router.get("/:userId/connect/:type/:subType/:id", async (req, res) => {
+  const { type, userId, subType, id } = req?.params;
 
   try {
-    const socialAccount = await SocialAccount.findOne({ user: req.userId, type });
+    const socialAccount = await SocialAccount.findOne({ user: userId, type });
     if (!socialAccount) throw new Error("SocialAccount doesn't exists.");
 
     await SocialAccount.findByIdAndUpdate(socialAccount._id, {
@@ -133,17 +134,75 @@ router.get("/connect/:type/:subType/:id", verifyAuth, async (req, res) => {
   }
 });
 
-// @route   POST api/users/disconnect/:type
+// @route   POST api/users/:userId/disconnect/:type
 // @desc    Disconnect user from facebook/linkedin page/group account
 // @access  Public
-router.get("/disconnect/:type", verifyAuth, async (req, res) => {
+router.get("/:userId/disconnect/:type", async (req, res) => {
   try {
-    const socialAccount = await SocialAccount.findOne({ user: req.userId, type: req.params.type });
+    const { type, userId } = req?.params;
+    const socialAccount = await SocialAccount.findOne({ user: userId, type });
     if (!socialAccount) throw new Error("SocialAccount doesn't exists.");
 
     await SocialAccount.findByIdAndUpdate(socialAccount._id, { isConnected: false });
 
     res.status(200).json({ error: false, msg: "Account disconnected successfully." });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: true, msg: error?.message });
+  }
+});
+
+// @route   POST api/users/:userId/socials/pollId
+// @desc    Get socials of a user
+// @access  Public
+router.get("/:userId/socials/:pollId", async (req, res) => {
+  try {
+    const { userId, pollId } = req?.params;
+    const socials = await SocialPosting.find({ user: userId, poll: pollId });
+
+    res.status(200).json(socials);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: true, msg: error?.message });
+  }
+});
+
+// @route   POST api/users/:userId/socials/pollId
+// @desc    Save socials of a user
+// @access  Public
+router.post("/:userId/socials/:pollId", async (req, res) => {
+  try {
+    const socials = req.body;
+    const { userId, pollId } = req?.params;
+
+    if (socials?.length) {
+      const socialsIds = socials.map(
+        async ({ type, subType, subTypeName, subTypeId, frequency, isActive = false, isConnected = false }) => {
+          let socialAccount = await SocialPosting.findOne({ poll: pollId, user: userId, type, subType });
+          if (socialAccount) await SocialPosting.findByIdAndUpdate(socialAccount._id, { subTypeId, subTypeName, frequency, isActive });
+          else {
+            socialAccount = new SocialPosting({
+              poll: pollId,
+              user: userId,
+              type,
+              subType,
+              subTypeId,
+              subTypeName,
+              frequency,
+              isActive,
+              isConnected,
+            });
+            await socialAccount.save();
+          }
+
+          return socialAccount._id;
+        }
+      );
+
+      await Promise.all(socialsIds);
+    }
+
+    res.status(200).json({ error: false, msg: "Socials saved successfully." });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: true, msg: error?.message });
@@ -161,6 +220,10 @@ async function getUserInfo(userId) {
 
 async function getBasicUserInfo(userId) {
   return await User.findById(userId);
+}
+
+async function getUserByUserName(userName = "") {
+  return await User.findOne({ userName }).populate("socialAccounts");
 }
 
 async function updateUserInfo(userId, info) {
@@ -210,4 +273,5 @@ module.exports.register = register;
 module.exports.getUserInfo = getUserInfo;
 module.exports.updateUserInfo = updateUserInfo;
 module.exports.getBasicUserInfo = getBasicUserInfo;
+module.exports.getUserByUserName = getUserByUserName;
 module.exports.createOrUpdateGuestUser = createOrUpdateGuestUser;

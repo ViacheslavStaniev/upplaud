@@ -24,7 +24,9 @@ const { PROFILE, PAGE, GROUP } = SOCIAL_SUB_TYPE;
 // @access  Public
 router.get("/", verifyAuth, async (req, res) => {
   try {
-    const guestList = await Guest.find({ user: req.userId }).populate("guest socials");
+    const guestList = await Guest.find({ user: req.userId })
+      .populate("socials")
+      .populate({ path: "guest", populate: "socialAccounts" });
 
     // Fetch votes
     const votes = await Vote.find({ poll: { $in: guestList.map((item) => item._id) } });
@@ -589,7 +591,8 @@ router.post("/generate-poll-image", verifyAuth, async (req, res) => {
 router.get("/vote/:pollId", async (req, res) => {
   try {
     const poll = await Guest.findById(req.params.pollId)
-      .populate("guest pollImageInfo")
+      .populate("pollImageInfo")
+      .populate({ path: "guest", populate: "socialAccounts" })
       .populate({ path: "user", select: "firstName lastName" });
     res.json(poll);
   } catch (err) {

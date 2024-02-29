@@ -204,3 +204,23 @@ export const saveVote = (pollId, pollParams) => {
       .catch((error) => reject(error));
   });
 };
+
+// Get Social items of a user
+export const getSocials = (userId, pollId) => {
+  return new Promise((resolve, reject) => {
+    axios
+      .get(`users/${userId}/socials/${pollId}`)
+      .then(({ data }) => resolve(data))
+      .catch((error) => reject(error));
+  });
+};
+
+// Save Social items of a user
+export const saveSocials = (userId, pollId, socials) => {
+  return new Promise((resolve, reject) => {
+    axios
+      .post(`users/${userId}/socials/${pollId}`, socials)
+      .then(({ data }) => resolve(data))
+      .catch((error) => reject(error));
+  });
+};

@@ -8,7 +8,7 @@ const { Text, Title, Paragraph } = Typography;
 
 export default function AccountAdmin() {
   const [form] = Form.useForm();
-  const { user, isLoading, updateUser } = useAuthContext();
+  const { user, update, isLoading, updateUser } = useAuthContext();
   const { firstName, lastName, email, userName, profile = {} } = user;
   const pictureSrc = Form.useWatch(['profile', 'picture'], form);
 
@@ -96,7 +96,7 @@ export default function AccountAdmin() {
 
         <Divider />
 
-        <SocialMediaConnect />
+        <SocialMediaConnect user={user} update={update} />
       </div>
     </>
   );

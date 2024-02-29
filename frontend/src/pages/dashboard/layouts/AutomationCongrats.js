@@ -1,17 +1,15 @@
-import { useState } from 'react';
-import { Modal, Button, Typography } from 'antd';
+import { Button, Typography } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
-import { getFullS3Url } from '../../../config-global';
 import { PATH_DASHBOARD } from '../../../routes/paths';
 import { SOCIAL_TITLES } from '../../../utils/types';
-import { ArrowLeftOutlined, CheckOutlined, PlaySquareOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, CheckOutlined } from '@ant-design/icons';
 import CopyText from '../../../components/CopyText';
+import PreviewAutomationVideo from './PreviewAutomationVideo';
 
 const { Title } = Typography;
 
 export default function AutomationCongrats({ guest, showActionBtns = false, onGoBack = () => {} }) {
   const navigate = useNavigate();
-  const [openVideoPreview, setOpenVideoPreview] = useState(false);
 
   const connectedSocials = (guest?.socials || []).reduce((acc, item) => {
     if (!item || !item.isConnected) return acc;
@@ -42,14 +40,9 @@ export default function AutomationCongrats({ guest, showActionBtns = false, onGo
 
       <Title level={5}>
         Preview your voter invitation video:{' '}
-        <Button
-          className="ml-1"
-          icon={<PlaySquareOutlined />}
-          onClick={() => setOpenVideoPreview(true)}
-        >
-          Preview Video
-        </Button>
+        <PreviewAutomationVideo className="ml-1" socialShareFileSrc={guest?.socialShareFileSrc} />{' '}
       </Title>
+
       <Title level={5} className="mb-1">
         Your guest will be invited to connect here:{' '}
         <Link target="_blank" to={`/guest-acceptance/${guest?._id}`}>
@@ -67,13 +60,7 @@ export default function AutomationCongrats({ guest, showActionBtns = false, onGo
 
       {showActionBtns && (
         <>
-          <Button
-            type="default"
-            size="large"
-            onClick={onGoBack}
-            icon={<ArrowLeftOutlined />}
-            // onClick={() => dispatch(updateState({ isPublished: false }))}
-          >
+          <Button type="default" size="large" onClick={onGoBack} icon={<ArrowLeftOutlined />}>
             Go back to make any changes.
           </Button>
 
@@ -88,21 +75,6 @@ export default function AutomationCongrats({ guest, showActionBtns = false, onGo
           </Button>
         </>
       )}
-
-      <Modal
-        centered
-        width={'50%'}
-        footer={false}
-        open={openVideoPreview}
-        title="Preview Video Invitation Post"
-        onCancel={() => setOpenVideoPreview(false)}
-      >
-        <video
-          controls
-          style={{ width: '100%', height: 'auto' }}
-          src={getFullS3Url(guest?.socialShareFileSrc)}
-        />
-      </Modal>
     </div>
   );
 }

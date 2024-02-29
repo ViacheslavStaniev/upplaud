@@ -1,42 +1,65 @@
 import Logo from '../../components/Logo';
 import AppTitle from '../../components/AppTitle';
-import CustomIcon from '../../components/CustomIcon';
 import SocialMediaConnect from './SocialMediaConnect';
-import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import LoadingScreen from '../../components/LoadingScreen';
+import SocialPostingItem from './layouts/SocialPostingItem';
+import PreviewAutomationVideo from './layouts/PreviewAutomationVideo';
+import { useState, useEffect } from 'react';
+import { useParams, Navigate } from 'react-router-dom';
+import { getDateString, getSocialsItems } from '../../utils/common';
+import { getPoll, getSocials, saveSocials } from '../../reducers/guestsSlice';
 import {
+  App,
+  Row,
+  Col,
   List,
   Form,
   Input,
-  Button,
-  Row,
-  Col,
-  Divider,
-  Checkbox,
-  Typography,
   Modal,
-  DatePicker,
   Space,
+  Button,
+  Divider,
+  Typography,
   ConfigProvider,
-  Switch,
-  Select,
 } from 'antd';
 
-const { Text, Link, Title, Paragraph } = Typography;
+const { Link, Title, Paragraph } = Typography;
 
 export default function GuestAcceptance() {
-  const params = useParams();
-  console.log(params);
+  const { guestId } = useParams();
 
-  const [currentStep, setCurrentStep] = useState(1);
+  const [state, setState] = useState({
+    poll: null,
+    errorMsg: '',
+    loading: false,
+    validatedPolls: {},
+    passwordValidated: false,
+  });
+  const { poll, errorMsg, loading, validatedPolls, passwordValidated } = state;
+  const guest = poll?.guest || {};
 
-  const listItems = [
-    '- Make them feel part of us',
-    '- Give them what they want.',
-    '- They’ll share us more:',
-    '- We grow our reach & impact',
-    '- We do business better!',
-  ];
+  const updateState = (data) => setState((d) => ({ ...d, ...data }));
+
+  useEffect(() => {
+    if (guestId) {
+      const validatedPolls = JSON.parse(window.localStorage.getItem('validatedPolls')) || {};
+      const passwordValidated = validatedPolls[guestId] || false;
+
+      // Fetch Poll
+      updateState({ loading: true, passwordValidated, validatedPolls });
+      getPoll(guestId)
+        .then((poll) => updateState({ poll }))
+        .catch(console.error)
+        .finally(() => updateState({ loading: false }));
+    }
+
+    return () => {
+      updateState({ poll: null, loading: false });
+    };
+  }, [guestId]);
+
+  if (loading) return <LoadingScreen />;
+  if (!guestId) return <Navigate to="/404" />;
 
   return (
     <ConfigProvider theme={{ token: { fontSize: 16 } }}>
@@ -54,12 +77,18 @@ export default function GuestAcceptance() {
             <List
               size="small"
               className="mb-4"
-              dataSource={listItems}
+              dataSource={[
+                '- Make them feel part of us',
+                '- Give them what they want.',
+                '- They’ll share us more:',
+                '- We grow our reach & impact',
+                '- We do business better!',
+              ]}
               renderItem={(item) => <List.Item className="border-0">{item}</List.Item>}
             />
 
             <Paragraph>
-              Mic.vote makes polling & voting fast and easy, pulling together votes from multiple
+              Upplaud makes polling & voting fast and easy, pulling together votes from multiple
               sources. We’re also able to capture referrals, email addresses, and offer gifts &
               rewards to voters.
             </Paragraph>
@@ -67,20 +96,70 @@ export default function GuestAcceptance() {
         </Col>
 
         <Col span={18} className="p-50px">
-          {currentStep === 1 && <ConnectSocialsInfo onClickNext={() => setCurrentStep(2)} />}
-
-          {currentStep === 2 && <ConfirmScheduleInfo onClickPrev={() => setCurrentStep(1)} />}
+          {poll && guest && <ConnectSocialsInfo poll={poll} guest={guest} />}
         </Col>
       </Row>
+
+      <Modal
+        footer={false}
+        closable={false}
+        maskClosable={false}
+        open={!passwordValidated}
+        styles={{ mask: { backgroundColor: '#fdeffff0' } }}
+      >
+        <div className="p-2">
+          <Title level={3} className="mt-0">
+            Password Required!
+          </Title>
+
+          {errorMsg && <Paragraph type="danger">{errorMsg}</Paragraph>}
+
+          <Form
+            size="large"
+            layout="vertical"
+            initialValues={{ password: '' }}
+            onFinish={({ password = '' }) => {
+              if (password?.trim() === poll?.password) {
+                const newValidatedPolls = { ...validatedPolls, [guestId]: true };
+                window.localStorage.setItem('validatedPolls', JSON.stringify(newValidatedPolls));
+                updateState({ passwordValidated: true, newValidatedPolls });
+              } else updateState({ errorMsg: 'Invalid password!' });
+            }}
+          >
+            <Form.Item name="password" label="Enter your password">
+              <Input.Password placeholder="Enter your password" />
+            </Form.Item>
+
+            <Button type="primary" htmlType="submit">
+              Submit
+            </Button>
+          </Form>
+        </div>
+      </Modal>
     </ConfigProvider>
   );
 }
 
-function ConnectSocialsInfo({ onClickNext }) {
+function ConnectSocialsInfo({ poll, guest }) {
+  const { modal } = App.useApp();
+  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
+  const defaultSocials = getSocialsItems(guest?.socialAccounts || []);
+
+  useEffect(() => {
+    setLoading(true);
+    getSocials(guest?._id, poll?._id)
+      .then((socials) => {
+        form.setFieldsValue({ socials: socials?.length > 0 ? socials : defaultSocials });
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [guest?._id, poll?._id]);
+
   return (
     <>
       <Title className="color-6b0d88 fw-600 m-0 mb-2">
-        Hi Mark, <strong>thank you</strong> for being our guest!
+        Hi {guest?.firstName}, <strong>thank you</strong> for being our guest!
       </Title>
 
       <Title className="m-0 mb-2">Let’s grow the biggest audience for you...</Title>
@@ -89,9 +168,9 @@ function ConnectSocialsInfo({ onClickNext }) {
         by asking our connections to vote on our topics.
       </Title>
 
-      <Paragraph italic>
-        Optional: Watch our mic.vote <Link href="#">tutorial video</Link>
-      </Paragraph>
+      {/* <Paragraph italic>
+        Optional: Watch our Upplaud <Link href="#">tutorial video</Link>
+      </Paragraph> */}
 
       {/* <NewAutomation isGuestAcceptance /> */}
 
@@ -99,172 +178,50 @@ function ConnectSocialsInfo({ onClickNext }) {
         Start polling each other’s social media:
       </Title>
 
-      <SocialMediaConnect showTitle={false} className="mb-2 mt-2" />
+      <SocialMediaConnect user={guest} showTitle={false} className="mb-2 mt-2" />
 
       <Space className="d-flex mb-4">
-        <Text>Offer a free gift to voters</Text>
+        <Link href={poll?.guestOfferUrl} target="_blank">
+          Offer a free gift to voters
+        </Link>
         <Divider type="vertical" className="border-000000" />
-        <Text>See our poll page & add topics</Text>
+        <Link href={`/vote/${poll?._id}`} target="_blank">
+          See our Upplaud voting page
+        </Link>
         <Divider type="vertical" className="border-000000" />
-        <Text>Preview posts</Text>
+        <PreviewAutomationVideo
+          text="Preview posts"
+          socialShareFileSrc={poll?.socialShareFileSrc}
+        />
       </Space>
 
-      <Paragraph className="m-0">
-        To reach the most people, we'll repeat our mic.vote until June 15, 2023:
+      <Paragraph>
+        To reach the most people, we'll repeat our Upplaud until{' '}
+        {getDateString(poll?.recordingDate)}:
       </Paragraph>
-      <Paragraph strong>
-        Re-post the poll <RepostSchedule />.{' '}
-        <Button className="primary-outlined" onClick={onClickNext}>
+
+      <Form
+        form={form}
+        size="large"
+        labelWrap={true}
+        labelAlign="left"
+        layout="horizontal"
+        initialValues={{ socials: defaultSocials }}
+        onFinish={(values) => {
+          setLoading(true);
+
+          saveSocials(guest?._id, poll?._id, values.socials)
+            .then(() => modal.success({ title: 'Success', content: 'Socials saved successfully.' }))
+            .catch((err) => modal.error({ title: 'Error', content: err?.message }))
+            .finally(() => setLoading(false));
+        }}
+      >
+        <SocialPostingItem />
+
+        <Button loading={loading} type="primary" htmlType="submit" className="mt-2">
           SAVE
         </Button>
-      </Paragraph>
-    </>
-  );
-}
-
-function ConfirmScheduleInfo({ onClickPrev }) {
-  const [form] = Form.useForm();
-
-  const [openModal, setOpenModal] = useState(false);
-
-  const initialValues = {
-    showName: '',
-    showLogo: '',
-    hostName: '',
-    hostEmail: '',
-    recordingDate: '',
-  };
-
-  const onSubmit = async (data) => {
-    try {
-      console.log(data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  return (
-    <>
-      <Title className="color-6b0d88 fw-600 m-0 mb-4">Thank you for voting & sharing!</Title>
-      <Paragraph italic>
-        Optional: Watch our mic.vote <Link href="#">welcome video</Link>
-      </Paragraph>
-
-      <Title level={2} className="mt-2">
-        To access gifts & goodies from us, please sign your vote:
-      </Title>
-
-      <Form size="large" layout="vertical" onFinish={console.log}>
-        <Form.Item name="name" label="First Name" className="mb-1">
-          <Input placeholder="First Name" />
-        </Form.Item>
-        <Form.Item name="email" label="Email" className="mb-1">
-          <Input placeholder="Email" />
-        </Form.Item>
-        <Form.Item name="zipCode" label="Zip Code" className="mb-1">
-          <Input placeholder="Zip Code" />
-        </Form.Item>
-
-        <Form.Item name="knowHost" className="m-0">
-          <Checkbox>I know Mark Bullock, the host</Checkbox>
-        </Form.Item>
-        <Form.Item name="knowGuest">
-          <Checkbox>I know Ada Hasloecher, the guest</Checkbox>
-        </Form.Item>
       </Form>
-
-      <Paragraph strong>Yes, I'm happy to share this poll on my social media:</Paragraph>
-      <SocialMediaConnect showTitle={false} className="mb-4" />
-
-      <Paragraph>
-        <Switch /> To reach more of my connections, re-post until June 15, 2023: _3_ times every 30
-        days.
-      </Paragraph>
-
-      <Button
-        type="info"
-        shape="round"
-        size="large"
-        className="uppercase"
-        onClick={() => setOpenModal(true)}
-      >
-        SAVE VOTE
-      </Button>
-
-      <Modal
-        centered
-        footer={false}
-        closable={false}
-        open={openModal}
-        width={`min(700px, 100%)`}
-        bodyStyle={{ padding: '0px 50px 20px' }}
-      >
-        <CustomIcon name="star_flower" className="position-absolute top--60px left--60px" />
-        <CustomIcon name="success_cup" className="position-absolute top--60px right-0" />
-
-        <Title className="color-6b0d88 fw-400 m-0">Congratulations</Title>
-        <Paragraph className="font-20px">Your pre episode promotion has started!</Paragraph>
-        <Divider />
-
-        <Title level={2}>Going to be a guest on other shows?</Title>
-        <Paragraph>Invite those hosts to use Podasq to automate your episode promotion:</Paragraph>
-
-        <Form
-          form={form}
-          size="large"
-          layout="vertical"
-          onFinish={onSubmit}
-          initialValues={initialValues}
-        >
-          <Form.Item name="showName" label="Show Name (Optional)">
-            <Input placeholder="Show Name (Optional)" />
-          </Form.Item>
-          <Form.Item name="hostName" label="Host name">
-            <Input placeholder="Host name" />
-          </Form.Item>
-          <Form.Item name="hostEmail" label="Host Email">
-            <Input placeholder="Host Email" />
-          </Form.Item>
-          <Form.Item name="recordingDate" label="Recording Date">
-            <DatePicker className="w-100" />
-          </Form.Item>
-          <Form.Item name="showLogo" label="Upload the show's logo (optional)">
-            <Input
-              readOnly
-              placeholder="Select file to attach"
-              suffix={
-                <Button type="info" size="small">
-                  Attach file
-                </Button>
-              }
-            />
-          </Form.Item>
-
-          <Button block type="info" shape="round" className="uppercase mb-1" htmlType="submit">
-            Invite HOST & Add More Shows
-          </Button>
-
-          <Button block type="text" shape="round" onClick={() => setOpenModal(false)}>
-            I’m done automating my social media, thanks!
-          </Button>
-        </Form>
-      </Modal>
     </>
-  );
-}
-
-function RepostSchedule() {
-  const getOptions = (size) =>
-    Array(size)
-      .fill(0)
-      .map((_, i) => ({ label: i + 1, value: i + 1 }));
-
-  return (
-    <Text style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-      <Select defaultValue={3} options={getOptions(4)} style={{ minWidth: 30 }} />
-      times every
-      <Select showSearch defaultValue={30} options={getOptions(31)} style={{ minWidth: 30 }} />
-      days
-    </Text>
   );
 }

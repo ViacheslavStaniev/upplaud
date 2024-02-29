@@ -1,7 +1,5 @@
 const express = require("express");
 const passport = require("passport");
-const User = require("../models/User");
-const verifyAuth = require("../config/verifyAuth");
 const SocialAccount = require("./../models/SocialAccount");
 const SocialPosting = require("./../models/SocialPosting");
 const FacebookStrategy = require("passport-facebook").Strategy;
@@ -20,6 +18,7 @@ const {
   liveStreamTheVideo,
   getLNAuthRestClients,
 } = require("../helpers/utills");
+const { getUserByUserName } = require("./users");
 const { getS3Path } = require("../helpers/s3Helper");
 
 const router = express.Router();
@@ -31,7 +30,25 @@ const AuthOptions = { failureRedirect: "/auth/connect/error", failureFlash: fals
 
 const getAuthCallbackURL = (urlFor) => getBaseDomain(`auth/connect/${urlFor}-callback`);
 
-const responseBackToWebapp = async (req, res) => res.redirect(REACT_APP_URL + "?isConnected=1");
+const responseBackToWebapp = async (req, res) => {
+  res.redirect(`${req?.authInfo?.returnUrl || REACT_APP_URL}?isConnected=1`);
+};
+
+const attachUserToReq = async (req, res, next) => {
+  const { returnUrl } = req?.query;
+  const { username } = req?.params;
+  if (!username) return res.status(401).json({ msg: "No username, authorization denied" });
+
+  try {
+    const user = await getUserByUserName(username);
+    req.userObj = user;
+    req.userId = user.id;
+    req.returnUrl = returnUrl;
+    next();
+  } catch (error) {
+    res.status(401).json({ error: true, msg: "User doesn't exists." });
+  }
+};
 
 const saveUserAccessTokens = async (user, infoObj) => {
   const {
@@ -89,42 +106,37 @@ const setFacebookStrategy = async (req, res, next) => {
         scope: ["email", "public_profile", "publish_to_groups", "pages_manage_posts", "pages_read_engagement", "publish_video"],
       },
       async (accessToken, refreshToken, profile, done) => {
-        // Add Email if not exists
-        if (!profile.emails || profile.emails.length === 0) profile.emails = [{ value: req.userObj.email }];
-
         try {
-          const { id, emails, profileUrl } = profile;
-          if (emails && emails[0]?.value) {
-            const email = emails[0]?.value;
-            const user = await User.findOne({ email }).populate("socialAccounts");
-            if (user) {
-              const authClient = getFBAuthClient();
+          const user = req?.userObj;
+          const { id, profileUrl } = profile;
 
-              // Fetch user's pages and groups
-              const [page, group] = await Promise.all(
-                ["page", "group"].map(async (type) => {
-                  const {
-                    data: { data },
-                  } = await authClient.get(`/me/${type === "page" ? "accounts" : "groups"}?admin_only=1&access_token=${accessToken}`);
-                  return { socialId: data.length > 1 ? "" : data[0]?.id, accounts: data, askToChoose: data.length > 1 };
-                })
-              );
+          if (user && id) {
+            const authClient = getFBAuthClient();
 
-              const updateInfo = {
-                page,
-                group,
-                accessToken,
-                refreshToken,
-                socialId: id,
-                type: FACEBOOK,
-                isConnected: true,
-                publicUrl: profileUrl,
-              };
+            // Fetch user's pages and groups
+            const [page, group] = await Promise.all(
+              ["page", "group"].map(async (type) => {
+                const {
+                  data: { data },
+                } = await authClient.get(`/me/${type === "page" ? "accounts" : "groups"}?admin_only=1&access_token=${accessToken}`);
+                return { socialId: data.length > 1 ? "" : data[0]?.id, accounts: data, askToChoose: data.length > 1 };
+              })
+            );
 
-              const updatedUser = await saveUserAccessTokens(user, updateInfo);
+            const updateInfo = {
+              page,
+              group,
+              accessToken,
+              refreshToken,
+              socialId: id,
+              type: FACEBOOK,
+              isConnected: true,
+              publicUrl: profileUrl,
+            };
 
-              done(null, updatedUser);
-            } else done(null, null);
+            const updatedUser = await saveUserAccessTokens(user, updateInfo);
+
+            done(null, updatedUser, { returnUrl: req?.returnUrl });
           } else done(null, null);
         } catch (error) {
           console.log(error?.response?.data || error?.message);
@@ -149,84 +161,81 @@ const setLinkedinStrategy = async (req, res, next) => {
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
-          const { id, emails, _json } = profile;
-          if (emails && emails[0]?.value) {
-            const email = emails[0]?.value;
-            const user = await User.findOne({ email }).populate("socialAccounts");
-            if (user) {
-              // Fetch Pages if exists
-              const { restliClient } = getLNAuthRestClients();
+          const user = req?.userObj;
+          const { id, _json } = profile;
 
-              const result = await restliClient.finder({
-                accessToken,
-                finderName: "search",
-                versionString: LINKEDIN_VERSION,
-                resourcePath: "/organizationAcls",
-                queryParams: { q: "roleAssignee", state: "APPROVED", role: "ADMINISTRATOR" },
-              });
+          if (user && id) {
+            // Fetch Pages if exists
+            const { restliClient } = getLNAuthRestClients();
 
-              // Fetch Organisation
-              const organizations = await Promise.all(
-                result.data.elements.map(async ({ organization }) => {
-                  const orgId = Number(organization.split("urn:li:organization:")[1]);
-                  const result = await restliClient.get({
-                    accessToken,
-                    versionString: LINKEDIN_VERSION,
-                    resourcePath: `/organizations/${orgId}`,
-                  });
+            const result = await restliClient.finder({
+              accessToken,
+              finderName: "search",
+              versionString: LINKEDIN_VERSION,
+              resourcePath: "/organizationAcls",
+              queryParams: { q: "roleAssignee", state: "APPROVED", role: "ADMINISTRATOR" },
+            });
 
-                  return result.data;
-                })
-              );
+            // Fetch Organisation
+            const organizations = await Promise.all(
+              result.data.elements.map(async ({ organization }) => {
+                const orgId = Number(organization.split("urn:li:organization:")[1]);
+                const result = await restliClient.get({
+                  accessToken,
+                  versionString: LINKEDIN_VERSION,
+                  resourcePath: `/organizations/${orgId}`,
+                });
 
-              const accounts = organizations.map(
-                ({
-                  id,
-                  logoV2,
-                  foundedOn,
-                  vanityName,
-                  coverPhotoV2,
-                  localizedName,
-                  localizedWebsite,
-                  organizationType,
-                  localizedDescription,
-                  ...otherParams
-                }) => ({
-                  id,
-                  logoV2,
-                  foundedOn,
-                  vanityName,
-                  coverPhotoV2,
-                  organizationType,
-                  name: localizedName,
-                  urn: otherParams["$URN"],
-                  website: localizedWebsite,
-                  description: localizedDescription,
-                })
-              );
+                return result.data;
+              })
+            );
 
-              // Public URL
-              const publicUrl = _json && _json.vanityName ? `www.linkedin.com/in/${_json.vanityName}` : "";
+            const accounts = organizations.map(
+              ({
+                id,
+                logoV2,
+                foundedOn,
+                vanityName,
+                coverPhotoV2,
+                localizedName,
+                localizedWebsite,
+                organizationType,
+                localizedDescription,
+                ...otherParams
+              }) => ({
+                id,
+                logoV2,
+                foundedOn,
+                vanityName,
+                coverPhotoV2,
+                organizationType,
+                name: localizedName,
+                urn: otherParams["$URN"],
+                website: localizedWebsite,
+                description: localizedDescription,
+              })
+            );
 
-              const moreThanOnePages = accounts.length > 1;
+            // Public URL
+            const publicUrl = _json && _json.vanityName ? `www.linkedin.com/in/${_json.vanityName}` : "";
 
-              const updateInfo = {
-                publicUrl,
-                accessToken,
-                refreshToken,
-                socialId: id,
-                type: LINKEDIN,
-                isConnected: true,
-                page: { socialId: moreThanOnePages ? "" : accounts[0]?.id, accounts, askToChoose: moreThanOnePages },
-              };
+            const moreThanOnePages = accounts.length > 1;
 
-              const updatedUser = await saveUserAccessTokens(user, updateInfo);
+            const updateInfo = {
+              publicUrl,
+              accessToken,
+              refreshToken,
+              socialId: id,
+              type: LINKEDIN,
+              isConnected: true,
+              page: { socialId: moreThanOnePages ? "" : accounts[0]?.id, accounts, askToChoose: moreThanOnePages },
+            };
 
-              done(null, updatedUser);
-            } else done(null, null);
+            const updatedUser = await saveUserAccessTokens(user, updateInfo);
+
+            done(null, updatedUser, { returnUrl: req?.returnUrl });
           } else done(null, null);
         } catch (error) {
-          console.log(error);
           done(null, null);
         }
       }
@@ -244,7 +253,7 @@ router.get("/error", redirectToWebapp);
 // @route   GET auth/connect/facebook
 // @desc    Connnect user with facebook account
 // @access  Public
-router.get("/facebook", verifyAuth, setFacebookStrategy, passport.authenticate("facebook"), redirectToWebapp);
+router.get("/facebook/:username", attachUserToReq, setFacebookStrategy, passport.authenticate("facebook"), redirectToWebapp);
 
 // @route   GET auth/connect/facebook-callback
 // @desc    Handle response from facebook
@@ -254,7 +263,7 @@ router.get("/facebook-callback", passport.authenticate("facebook", AuthOptions),
 // @route   GET auth/connect/linkedin
 // @desc    Connect user with linkedin account
 // @access  Public
-router.get("/linkedin", verifyAuth, setLinkedinStrategy, passport.authenticate("linkedin"), redirectToWebapp);
+router.get("/linkedin/:username", attachUserToReq, setLinkedinStrategy, passport.authenticate("linkedin"), redirectToWebapp);
 
 // @route   GET auth/connect/linkedin-callback
 // @desc    Handle response from linkedin
@@ -428,9 +437,6 @@ async function initFacebookPosting(id, postInfo, access_token, subType = PROFILE
 
         resolve({ error: false, msg: "Posted on Facebook" });
       } else {
-        // Post on Profile
-        // await authClient.post(`/${id}/feed`, { message: `${title}\n\n${description}`, access_token, link: url });
-
         // Live Stream on Facebook
         const { data } = await authClient.post(`/${id}/live_videos`, {
           title,
@@ -449,7 +455,6 @@ async function initFacebookPosting(id, postInfo, access_token, subType = PROFILE
         resolve(result);
       }
     } catch (error) {
-      console.log(error);
       reject({ error: true, msg: error?.response?.data?.error?.message || error?.message });
     }
   });
