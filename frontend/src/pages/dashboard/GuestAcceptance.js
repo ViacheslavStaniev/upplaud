@@ -154,7 +154,7 @@ function ConnectSocialsInfo({ poll, guest }) {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [guest?._id, poll?._id]);
+  }, [guest?._id, poll?._id, form, defaultSocials]);
 
   return (
     <>

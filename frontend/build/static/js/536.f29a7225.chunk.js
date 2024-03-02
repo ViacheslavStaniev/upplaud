@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkpdsq_frontend=self.webpackChunkpdsq_frontend||[]).push([[536],{1536:function(t,e,r){r.r(e),r.d(e,{default:function(){return i}});var n=r(38935),s=r(2556),u=r(83769),a=r(80184);function i(){return(0,a.jsxs)(a.Fragment,{children:[(0,a.jsx)(u.Z,{title:"403 Not authorized"}),(0,a.jsx)(n.ZP,{title:"403",status:"403",subTitle:"Sorry, you are not authorized to access this page.",extra:(0,a.jsx)(s.ZP,{href:"/",type:"primary",children:"Back Home"})})]})}}}]);
-//# sourceMappingURL=536.f29a7225.chunk.js.map
