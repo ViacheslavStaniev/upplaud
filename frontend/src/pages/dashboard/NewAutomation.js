@@ -165,6 +165,8 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
 
     if (!isNew && id) dispatch(fetchGuest(id));
 
+    if (isNew) dispatch(updateState({ guest: null, isPublished: false }));
+
     return () => dispatch(updateState({ guest: null }));
   }, [isNew, id, dispatch]);
 

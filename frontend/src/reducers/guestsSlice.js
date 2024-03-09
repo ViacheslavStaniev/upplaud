@@ -38,6 +38,7 @@ const slice = createSlice({
     onAddGuest(state, { payload }) {
       return {
         ...state,
+        guest: payload,
         isLoading: false,
         isPublishing: false,
         guests: [...state.guests, payload],

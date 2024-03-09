@@ -237,6 +237,9 @@ router.post("/", verifyAuth, async (req, res) => {
       await poll.save(options);
     }
 
+    // Send Email in case of Publish
+    await sendEmailToGuest(poll);
+
     await session.commitTransaction();
     session.endSession();
 
@@ -368,34 +371,15 @@ router.put("/:pollId", verifyAuth, async (req, res) => {
     // Update PollINfo
     await Guest.findByIdAndUpdate(pollId, pollInfo);
 
+    const pollInfo2 = await getPoll(pollId);
+
     // Send Email in case of Publish
-    if (status === POLL_STATUS.PUBLISHED && pollInfo?.emailTemplate && guestType !== GUEST_TYPE.SOLO_SESSION) {
-      const { guest, emailTemplate } = pollInfo;
-      const guestInfo = await getUserInfo(guest);
-      const userInfo = await getUserInfo(userId);
-
-      const paramsToReplace = {
-        "[GUEST_FIRSTNAME]": guestInfo?.firstName,
-        "[GUEST_LASTNAME]": guestInfo?.lastName,
-        "[GUEST_FULLNAME]": `${guestInfo?.firstName} ${guestInfo?.lastName}`,
-        "[USER_FIRSTNAME]": userInfo?.firstName,
-        "[USER_LASTNAME]": userInfo?.lastName,
-        "[USER_FULLNAME]": `${userInfo?.firstName} ${userInfo?.lastName}`,
-      };
-
-      if (emailTemplate) {
-        const { subject, body } = emailTemplate;
-        const emailBody = replaceConstants(body, paramsToReplace);
-        const emailSubject = replaceConstants(subject, paramsToReplace);
-        await sendEmail({ to: guestInfo.email, subject: emailSubject, body: emailBody });
-        console.log("Email Sent!");
-      }
-    }
+    await sendEmailToGuest(pollInfo2);
 
     await session.commitTransaction();
     session.endSession();
 
-    res.json(await getPoll(pollId));
+    res.json(pollInfo2);
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
@@ -563,17 +547,25 @@ router.post("/generate-poll-image", verifyAuth, async (req, res) => {
       },
     };
 
+    // console.log("Generating ImageFile", info);
+
     // Generate ImageFile
     const { imageBase64 } = await generateImage(info);
 
+    // console.log("ImageFile Generated");
+
     // Upload ImageFile to S3
     const imageS3Path = await uploadImage(imageBase64, `${req.userId}/images`, true);
+
+    // console.log("ImageFile Uploaded", imageS3Path);
 
     // Generate Video if audio is present
     if (audio) {
       const audioObj = await UserFile.findById(audio);
       const audioS3Path = getS3Path(audioObj?.s3Path);
+      // console.log("Generating Video", { audioS3Path, imageS3Path });
       const { videoFileBuffer } = await generateVideo(getS3Path(imageS3Path), audioS3Path);
+      // console.log("Video Generated");
       const videoS3Path = await uploadFile(videoFileBuffer, `${req.userId}/videos`, `Video_${Date.now()}.mp4`, "video/mp4");
       console.log("Video Generated", { imageS3Path, videoS3Path });
       res.json({ imageS3Path, videoS3Path });
@@ -641,6 +633,46 @@ async function createPollSharingImage(pollId, obj) {
   const pollImageInfo = new PollImage({ poll: pollId, ...getPollSharingInfoObj(obj) });
   await pollImageInfo.save();
   return pollImageInfo;
+}
+
+// Send Email to Guest
+async function sendEmailToGuest(poll) {
+  if (!poll) return { msg: "Poll not found!", success: false };
+
+  const { status, guest, user, guestType, emailTemplate } = poll;
+
+  // Send Email in case of Publish
+  if (status === POLL_STATUS.PUBLISHED && emailTemplate && guestType !== GUEST_TYPE.SOLO_SESSION) {
+    const guestInfo = await getUserInfo(guest);
+    const userInfo = await getUserInfo(user);
+
+    const paramsToReplace = {
+      "[GUEST_FIRSTNAME]": guestInfo?.firstName,
+      "[GUEST_LASTNAME]": guestInfo?.lastName,
+      "[GUEST_FULLNAME]": `${guestInfo?.firstName} ${guestInfo?.lastName}`,
+      "[USER_FIRSTNAME]": userInfo?.firstName,
+      "[USER_LASTNAME]": userInfo?.lastName,
+      "[USER_FULLNAME]": `${userInfo?.firstName} ${userInfo?.lastName}`,
+    };
+
+    if (emailTemplate) {
+      const { subject, body } = emailTemplate;
+      let emailBody = replaceConstants(body, paramsToReplace);
+      const emailSubject = replaceConstants(subject, paramsToReplace);
+
+      // Add Password to emailBody
+      if (poll?.password) {
+        emailBody += `<br><br> Guest Invitation Page Password: <b>${poll.password}</b>`;
+      }
+
+      await sendEmail({ to: guestInfo.email, subject: emailSubject, body: emailBody });
+      console.log("Email Sent!");
+
+      return { msg: "Email Sent!", success: true };
+    }
+  }
+
+  return { msg: "Email not sent!", success: false };
 }
 
 module.exports = router;

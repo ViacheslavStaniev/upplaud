@@ -154,7 +154,8 @@ function ConnectSocialsInfo({ poll, guest }) {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [guest?._id, poll?._id, form, defaultSocials]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [guest?._id, poll?._id]);
 
   return (
     <>
