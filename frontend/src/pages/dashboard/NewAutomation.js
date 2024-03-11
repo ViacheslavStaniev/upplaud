@@ -140,18 +140,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
     startHostAutomation = false,
     emailTemplate = {
       subject: '[USER_FULLNAME] next steps',
-      body: `Hi [GUEST_FIRSTNAME], it's [USER_FULLNAME]. [CUSTOMIZE THE FOLLOWING PHRASING & REMOVE THIS RED TEXT: I'm looking forward to featuring you on my podcast, "Branded Expert." Let's grow the audience even before we record. Here's how we'll increase your reach:
-      We should start building interest in what we'll talk about now itself. We don't have to finalize our talking points yet: Instead of guessing what others want to know from us... Let's ask them (using social media & email).
-      I chose 2 possible topics for our connections to vote on. They can even privately suggest their own topics for us.
-      I've already setup everything through a website called Upplaud. It'll post on our Facebook and LinkedIn, inviting our connections to vote. 
-      It doesn't matter how active you are on social media: People on Facebook & LinkedIn love participating like this (and will even share you with others). We can even share our Upplaud through email, etc. 
-      All you need to do is click the button below. Upplaud will post on our social media, inviting our connections to vote on the topics. (I've already connected my Facebook & LinkedIn.)
-      It only takes a few seconds to do. Thanks for doing it now: Every day counts to grow our audience interest. More time for more votes, more shares & more results.
-      The button to click is right below my name (be sure to save the Private Invite Password, since only you can connect & toggle your social media). I'm happy we're growing this together!
-      
-      Thanks, see you soon.
-      - [USER_FIRSTNAME]
-    `,
+      body: `<blockquote>Hi [GUEST_FIRSTNAME], it's [USER_FULLNAME]. (To reach me, please reply all.) I use Upplaud to grow my audience; you can use it at no cost to reach more people too:</blockquote><blockquote>Can we post on our LinkedIn &amp; Facebook about [PODCAST / PRESENTATION NAME] before we do it? Upplaud makes it easy &amp; engaging. (See your private link &amp; password at the end.)</blockquote><blockquote>Here's how Upplaud grows our audience:</blockquote><blockquote>Instead of guessing what others want to know from both of us... Let's ask them! I chose 2 possible topics for our connections to vote on. They can even suggest their own topics privately.</blockquote><blockquote>I've already setup everything, including voting invitation posts for our Facebook &amp; LinkedIn. (It doesn't matter how active you are: Influencers on social media love engaging like this, and will share you with more people!)</blockquote><blockquote>We can also share our Upplaud voting page through email &amp; elsewhere. All you need to do is click the Grow Audience link below. It only takes a few seconds to connect your LinkedIn and/or Facebook to Upplaud. (I've connected mine already.)</blockquote><blockquote>Thanks for doing this now (and not procrastinating!) Every day counts to grow our audience: More time for more votes, more shares &amp; more results.</blockquote><blockquote>The link to click is below my name (be sure to reference your Private Password, to securely connect your social media). I'm excited to grow together.</blockquote><blockquote><br></blockquote><blockquote>Thanks again, see you soon. - [USER_FIRSTNAME]</blockquote><p><br></p>`,
     },
   } = guest || {};
   console.log('guest', guest);

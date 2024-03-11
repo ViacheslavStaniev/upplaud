@@ -10,6 +10,7 @@ const { Title } = Typography;
 
 export default function AutomationCongrats({ guest, showActionBtns = false, onGoBack = () => {} }) {
   const navigate = useNavigate();
+  const startHostAutomation = guest?.startHostAutomation || false;
 
   const connectedSocials = (guest?.socials || []).reduce((acc, item) => {
     if (!item || !item.isConnected) return acc;
@@ -55,7 +56,8 @@ export default function AutomationCongrats({ guest, showActionBtns = false, onGo
       </Title>
 
       <Title level={4}>
-        We'll start posting {'<when your guest connects their social media or> <later today!>'}
+        We'll start posting{' '}
+        {startHostAutomation ? 'when your guest connects their social media.' : 'later today!'}
       </Title>
 
       {showActionBtns && (
