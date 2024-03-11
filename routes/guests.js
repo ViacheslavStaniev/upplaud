@@ -547,27 +547,18 @@ router.post('/generate-poll-image', verifyAuth, async (req, res) => {
       },
     };
 
-    // console.log("Generating ImageFile", info);
-
     // Generate ImageFile
-    const { imageBase64 } = await generateImage(info);
-
-    // console.log("ImageFile Generated");
+    const { imageBase64, output } = await generateImage(info);
 
     // Upload ImageFile to S3
     const imageS3Path = await uploadImage(imageBase64, `${req.userId}/images`, true);
-
-    // console.log("ImageFile Uploaded", imageS3Path);
 
     // Generate Video if audio is present
     if (audio) {
       const audioObj = await UserFile.findById(audio);
       const audioS3Path = getS3Path(audioObj?.s3Path);
-      // console.log("Generating Video", { audioS3Path, imageS3Path });
-      const { videoFileBuffer } = await generateVideo(getS3Path(imageS3Path), audioS3Path);
-      // console.log("Video Generated");
+      const { videoFileBuffer } = await generateVideo(output, audioS3Path);
       const videoS3Path = await uploadFile(videoFileBuffer, `${req.userId}/videos`, `Video_${Date.now()}.mp4`, 'video/mp4');
-      console.log('Video Generated', { imageS3Path, videoS3Path });
       res.json({ imageS3Path, videoS3Path });
     } else res.json({ imageS3Path, videoS3Path: '' });
   } catch (err) {

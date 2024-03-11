@@ -1,14 +1,14 @@
-const fs = require("fs");
-const path = require("path");
-const https = require("https");
-const axios = require("axios");
-const jwt = require("jsonwebtoken");
-const { exec } = require("child_process");
-const { AuthClient, RestliClient } = require("linkedin-api-client");
+const fs = require('fs');
+const path = require('path');
+const https = require('https');
+const axios = require('axios');
+const jwt = require('jsonwebtoken');
+const { exec } = require('child_process');
+const { AuthClient, RestliClient } = require('linkedin-api-client');
 
 const { REACT_APP_URL, SERVER_URL, JWT_SECRET, LINKEDIN_APP_ID, LINKEDIN_APP_SECRET, LINKEDIN_VERSION } = process.env;
 
-const randomString = (length = 30) => Array.from({ length }, () => Math.random().toString(36)[2]).join("");
+const randomString = (length = 30) => Array.from({ length }, () => Math.random().toString(36)[2]).join('');
 
 const generateAuthToken = (user, expiresIn = 7 * 24 * 60 * 60) => {
   return new Promise((resolve, reject) => {
@@ -18,12 +18,12 @@ const generateAuthToken = (user, expiresIn = 7 * 24 * 60 * 60) => {
 
 const getAuthResponse = async (user) => ({ accessToken: await generateAuthToken(user), user });
 
-const createUsername = ({ firstName = "", lastName = "" }) => {
-  const cleanString = (str) => str.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+const createUsername = ({ firstName = '', lastName = '' }) => {
+  const cleanString = (str) => str.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
 
-  let username = "";
+  let username = '';
   if (firstName) username += cleanString(firstName);
-  if (lastName) username += "-" + cleanString(lastName);
+  if (lastName) username += '-' + cleanString(lastName);
 
   return `${username}-${randomString(8)}`;
 };
@@ -42,13 +42,12 @@ const setUserSession = (req, user) => {
 };
 
 // Get Asset Path
-const getAssetPath = (pathStr = "") => path.join(__dirname, "../assets", pathStr);
+const getAssetPath = (pathStr = '') => path.join(__dirname, '../assets', pathStr);
 
 // Get Circles User Image
 const getCircledUserImage = (userLogo) => {
   const maskImage = getAssetPath(`mask.png`);
-  // const ffmpegPath = getAssetPath("ffmpeg-build/ffmpeg");
-  const output = getAssetPath(`temp/temp_${Date.now()}.png`);
+  const output = getAssetPath(`temp/temp_${Date.now()}_${randomString()}.png`);
 
   return new Promise((resolve, reject) => {
     // FFmpeg command
@@ -60,20 +59,20 @@ const getCircledUserImage = (userLogo) => {
       // if (stderr) console.log(`FFmpeg Error: ${stderr}`);
 
       // Reject if output file not generated
-      if (!fs.existsSync(output)) return reject({ error: true, message: "Unable to generate image" });
+      if (!fs.existsSync(output)) return reject({ error: true, message: 'Unable to generate image' });
 
-      resolve({ error: false, message: "Image generated successfully", filePath: output });
+      resolve({ error: false, message: 'Image generated successfully', filePath: output });
     });
   });
 };
 
 // Function to generate image using FFmpeg
-const generateImage = (info) => {
-  const arialFont = getAssetPath("arial.ttf");
-  const baseImage = getAssetPath("base_image.png");
-  const breeFont = getAssetPath("BreeSerif-Regular.ttf");
-  // const ffmpegPath = getAssetPath("ffmpeg-build/ffmpeg");
-  const output = getAssetPath(`temp/temp_${Date.now()}.png`);
+const generateImage = async (info) => {
+  const arialFont = getAssetPath('arial.ttf');
+  const baseImage = getAssetPath('base_image.png');
+  const breeFont = getAssetPath('BreeSerif-Regular.ttf');
+  // const ffmpegPath = getAssetPath('ffmpeg-build/ffmpeg');
+  const output = getAssetPath(`temp/temp_${Date.now()}_${randomString()}.png`);
 
   const { showLogo, userLogo, header, footer, host, guest } = info;
 
@@ -82,25 +81,27 @@ const generateImage = (info) => {
       // Get Circled User Image
       const { filePath } = await getCircledUserImage(userLogo);
 
-      console.log(filePath);
+      // Get file name from the URL
+      const logoName = showLogo.split('/').pop();
+      const logoFile = await downloadFile(showLogo, `${logoName.split('.')[0]}_${Date.now()}_${randomString()}.png`);
 
       // FFmpeg command
-      const command = `ffmpeg -i '${baseImage}' -i '${showLogo}' -i '${filePath}' -filter_complex "[1:v]scale=400:400[top_left_scaled]; [2:v]scale=330:330[center_scaled]; [0:v][top_left_scaled]overlay=35:(h-h/2)-168/2[tmp_overlay]; [tmp_overlay][center_scaled]overlay=660:210, drawbox=x=0:y=0:w=iw:h=85:t=fill:color=${header.bgColor}@1[bg]; [bg]drawtext=text='${header.text}':x=(w-tw)/2:y=15:fontsize=58:fontcolor=${header.fontColor}:fontfile='${breeFont}', drawbox=x=0:y=ih-85:w=iw:h=85:t=fill:color=${footer.bgColor}@1[bg_bottom]; [bg_bottom]drawtext=text='${footer.text}':x=(w-tw)/2:y=h-th-15:fontsize=58:fontcolor=${footer.fontColor}:fontfile='${breeFont}', drawtext=text='${host.label} - ${host.text}':x=450:y=120:fontsize=24:fontcolor=${host.fontColor}:fontfile='${arialFont}', drawtext=text='${guest.label} - ${guest.text}':x=450:y=160:fontsize=24:fontcolor=${guest.fontColor}:fontfile='${arialFont}'" -vframes 1 '${output}'`;
+      const command = `ffmpeg -i '${baseImage}' -i '${logoFile}' -i '${filePath}' -filter_complex "[1:v]scale=400:400[top_left_scaled]; [2:v]scale=330:330[center_scaled]; [0:v][top_left_scaled]overlay=35:(h-h/2)-168/2[tmp_overlay]; [tmp_overlay][center_scaled]overlay=660:210, drawbox=x=0:y=0:w=iw:h=85:t=fill:color=${header.bgColor}@1[bg]; [bg]drawtext=text='${header.text}':x=(w-tw)/2:y=15:fontsize=58:fontcolor=${header.fontColor}:fontfile='${breeFont}', drawbox=x=0:y=ih-85:w=iw:h=85:t=fill:color=${footer.bgColor}@1[bg_bottom]; [bg_bottom]drawtext=text='${footer.text}':x=(w-tw)/2:y=h-th-15:fontsize=58:fontcolor=${footer.fontColor}:fontfile='${breeFont}', drawtext=text='${host.label} - ${host.text}':x=450:y=120:fontsize=24:fontcolor=${host.fontColor}:fontfile='${arialFont}', drawtext=text='${guest.label} - ${guest.text}':x=450:y=160:fontsize=24:fontcolor=${guest.fontColor}:fontfile='${arialFont}'" -vframes 1 '${output}'`;
 
       // Execute FFmpeg command
       exec(command, (error, stdout, stderr) => {
         if (error) return reject({ error: true, message: error.message });
-        // if (stderr) console.log(`FFmpeg Error: ${stderr}`);
+        if (stderr) console.log(`FFmpeg Error: ${stderr}`);
 
         // Reject if output file not generated
-        if (!fs.existsSync(output)) return reject({ error: true, message: "Unable to generate image" });
+        if (!fs.existsSync(output)) return reject({ error: true, message: 'Unable to generate image' });
 
-        const imageBase64 = fs.readFileSync(output, { encoding: "base64" });
+        const imageBase64 = fs.readFileSync(output, { encoding: 'base64' });
 
         // Delete file after reading
-        fs.unlinkSync(output);
+        // fs.unlinkSync(output);
 
-        resolve({ error: false, message: "Image generated successfully", imageBase64 });
+        resolve({ error: false, message: 'Image generated successfully', imageBase64, output });
       });
     } catch (error) {
       console.log(error);
@@ -109,11 +110,11 @@ const generateImage = (info) => {
 };
 
 // Function to generate video using FFmpeg
-const generateVideo = (imgS3Path = "", audioS3Path = "") => {
+const generateVideo = (imgPath = '', audioS3Path = '') => {
   // const ffmpegPath = getAssetPath("ffmpeg-build/ffmpeg");
   // const ffprobePath = getAssetPath("ffmpeg-build/ffprobe");
-  const outputMp3 = getAssetPath(`temp/temp_${Date.now()}.mp3`);
-  const outputMp4 = getAssetPath(`temp/temp_${Date.now()}.mp4`);
+  const outputMp3 = getAssetPath(`temp/temp_${Date.now()}_${randomString()}.mp3`);
+  const outputMp4 = getAssetPath(`temp/temp_${Date.now()}_${randomString()}.mp4`);
 
   return new Promise((resolve, reject) => {
     // convert webm to mp3
@@ -125,11 +126,10 @@ const generateVideo = (imgS3Path = "", audioS3Path = "") => {
       // if (stderr) console.log(`FFmpeg Error: ${stderr}`);
 
       // Reject if output file not generated
-      if (!fs.existsSync(outputMp3)) return reject({ error: true, message: "Unable to convert audio" });
+      if (!fs.existsSync(outputMp3)) return reject({ error: true, message: 'Unable to convert audio' });
 
       // generate video command
-      const command = `ffmpeg -loop 1 -i '${imgS3Path}' -i '${outputMp3}' -c:v libx264 -t $(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 '${outputMp3}') -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -c:a aac -strict experimental -b:a 192k -shortest '${outputMp4}'`;
-      console.log(command);
+      const command = `ffmpeg -loop 1 -i '${imgPath}' -i '${outputMp3}' -c:v libx264 -t $(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 '${outputMp3}') -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -c:a aac -strict experimental -b:a 192k -shortest '${outputMp4}'`;
 
       // Execute FFmpeg command
       exec(command, (error, stdout, stderr) => {
@@ -137,12 +137,12 @@ const generateVideo = (imgS3Path = "", audioS3Path = "") => {
         // if (stderr) console.log(`FFmpeg Error: ${stderr}`);
 
         // Reject if output file not generated
-        if (!fs.existsSync(outputMp4)) return reject({ error: true, message: "Unable to generate video" });
+        if (!fs.existsSync(outputMp4)) return reject({ error: true, message: 'Unable to generate video' });
 
         // Delete file after reading
         fs.unlinkSync(outputMp3);
 
-        resolve({ error: false, message: "Video generated successfully", videoFileBuffer: fs.readFileSync(outputMp4) });
+        resolve({ error: false, message: 'Video generated successfully', videoFileBuffer: fs.readFileSync(outputMp4) });
       });
     });
   });
@@ -162,16 +162,16 @@ const liveStreamTheVideo = (info) => {
       if (error) return reject({ error: true, message: error.message });
       // if (stderr) console.log(`FFmpeg Error: ${stderr}`);
 
-      resolve({ error: false, message: "Video streamed successfully" });
+      resolve({ error: false, message: 'Video streamed successfully' });
     });
   });
 };
 
 // Get Base Domain URL
-const getBaseDomain = (path = "") => `${SERVER_URL}/${path}`;
+const getBaseDomain = (path = '') => `${SERVER_URL}/${path}`;
 
 // Get Frontend URL
-const getFrontendUrl = (path = "") => `${REACT_APP_URL}/${path}`;
+const getFrontendUrl = (path = '') => `${REACT_APP_URL}/${path}`;
 
 // Redirect to Webapp
 const redirectToWebapp = (req, res) => res.redirect(REACT_APP_URL);
@@ -179,13 +179,13 @@ const redirectToWebapp = (req, res) => res.redirect(REACT_APP_URL);
 // Get Facebook Auth Client
 const getFacebookAuthClient = () => {
   return axios.create({
-    baseURL: "https://graph.facebook.com",
-    headers: { "Content-Type": "application/json" },
+    baseURL: 'https://graph.facebook.com',
+    headers: { 'Content-Type': 'application/json' },
   });
 };
 
 // LinkedIn Auth/Rest Clients
-const getLinkedInAuthRestClients = (authType = "connect") => {
+const getLinkedInAuthRestClients = (authType = 'connect') => {
   const authClient = new AuthClient({
     clientId: LINKEDIN_APP_ID,
     clientSecret: LINKEDIN_APP_SECRET,
@@ -197,34 +197,34 @@ const getLinkedInAuthRestClients = (authType = "connect") => {
 
   // Axios Rest Client
   const axiosRestClient = axios.create({
-    baseURL: "https://api.linkedin.com/rest",
-    headers: { "Content-Type": "application/json", "X-Restli-Protocol-Version": "2.0.0", "LinkedIn-Version": LINKEDIN_VERSION },
+    baseURL: 'https://api.linkedin.com/rest',
+    headers: { 'Content-Type': 'application/json', 'X-Restli-Protocol-Version': '2.0.0', 'LinkedIn-Version': LINKEDIN_VERSION },
   });
 
   return { authClient, restliClient, axiosRestClient };
 };
 
 // Function to download the file from the URL
-const downloadFile = async (url, fileName = "") => {
+async function downloadFile(url, fileName = '') {
   const destination = getAssetPath(`temp/${fileName}`);
 
   const writer = fs.createWriteStream(destination);
 
   return axios({
     url: url,
-    method: "get",
-    responseType: "stream",
+    method: 'get',
+    responseType: 'stream',
     httpsAgent: new https.Agent({ rejectUnauthorized: false }), // In case of self-signed certificates
   }).then((response) => {
     response.data.pipe(writer);
     console.log(`Downloading file from ${url} to ${destination}`, response.status, response.statusText);
 
     return new Promise((resolve, reject) => {
-      writer.on("finish", () => resolve(destination));
-      writer.on("error", reject);
+      writer.on('finish', () => resolve(destination));
+      writer.on('error', reject);
     });
   });
-};
+}
 
 // Function to remove the file from the path
 const removeFile = (filePath) => {
@@ -250,7 +250,7 @@ const uploadFile = async (videoUrl, uploadUrl) => {
 const replaceConstants = (text, constants) => {
   let replacedText = text;
   for (const key in constants) {
-    replacedText = replacedText.replace(new RegExp(`\\${key}`, "g"), constants[key]);
+    replacedText = replacedText.replace(new RegExp(`\\${key}`, 'g'), constants[key]);
   }
   return replacedText;
 };
