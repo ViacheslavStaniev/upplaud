@@ -79,6 +79,11 @@ const pollInfoFields = [
     name: 'guestOfferUrl',
     label: 'THEIR REWARD URL',
   },
+  {
+    required: true,
+    name: 'presentationName',
+    label: 'Name of presentation or podcast',
+  },
 ];
 
 const getGuesUsertObj = (userObj = null) => {
@@ -132,6 +137,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
     hostOfferUrl = null,
     guestOfferUrl = null,
     recordingDate = null,
+    presentationName = '',
     guestType = HOST_GUEST,
     hostSpeakerLabel = '',
     guestSpeakerLabel = '',
@@ -139,7 +145,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
     potentialTopics = ['', ''],
     startHostAutomation = false,
     emailTemplate = {
-      subject: '[USER_FULLNAME] next steps',
+      subject: '[PRESENTATION_NAME] NEXT STEPS',
       body: `<blockquote>Hi [GUEST_FIRSTNAME], it's [USER_FULLNAME]. (To reach me, please reply all.) I use Upplaud to grow my audience; you can use it at no cost to reach more people too:</blockquote><blockquote>Can we post on our LinkedIn &amp; Facebook about [PODCAST / PRESENTATION NAME] before we do it? Upplaud makes it easy &amp; engaging. (See your private link &amp; password at the end.)</blockquote><blockquote>Here's how Upplaud grows our audience:</blockquote><blockquote>Instead of guessing what others want to know from both of us... Let's ask them! I chose 2 possible topics for our connections to vote on. They can even suggest their own topics privately.</blockquote><blockquote>I've already setup everything, including voting invitation posts for our Facebook &amp; LinkedIn. (It doesn't matter how active you are: Influencers on social media love engaging like this, and will share you with more people!)</blockquote><blockquote>We can also share our Upplaud voting page through email &amp; elsewhere. All you need to do is click the Grow Audience link below. It only takes a few seconds to connect your LinkedIn and/or Facebook to Upplaud. (I've connected mine already.)</blockquote><blockquote>Thanks for doing this now (and not procrastinating!) Every day counts to grow our audience: More time for more votes, more shares &amp; more results.</blockquote><blockquote>The link to click is below my name (be sure to reference your Private Password, to securely connect your social media). I'm excited to grow together.</blockquote><blockquote><br></blockquote><blockquote>Thanks again, see you soon. - [USER_FIRSTNAME]</blockquote><p><br></p>`,
     },
   } = guest || {};
@@ -187,6 +193,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
     emailTemplate,
     guestOfferUrl,
     potentialTopics,
+    presentationName,
     hostSpeakerLabel,
     guestSpeakerLabel,
     socialShareFileSrc,
@@ -259,12 +266,13 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
             </Form.Item>
           ))}
 
-          {pollInfoFields.map(({ name, label }, i) => {
+          {pollInfoFields.map(({ name, label, required = false }, i) => {
             return (
               <Form.Item
                 key={label}
                 name={name}
                 label={label}
+                rules={[{ required }]}
                 className={pollInfoFields.length - 1 === i ? 'm-0' : ''}
               >
                 <Input placeholder={label} />
@@ -325,6 +333,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
                 '[GUEST_FIRSTNAME]',
                 '[GUEST_LASTNAME]',
                 '[GUEST_FULLNAME]',
+                '[PRESENTATION_NAME]',
               ]}
             />
           </Col>

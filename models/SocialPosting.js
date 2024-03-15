@@ -36,6 +36,14 @@ const SocialPostingSchema = new Schema(
       type: Number,
       default: 0,
     },
+    daysFrequency: {
+      type: Number,
+      default: 1,
+    },
+    nextPostDate: {
+      type: Date,
+      default: Date.now,
+    },
     isActive: {
       type: Boolean,
       default: false,

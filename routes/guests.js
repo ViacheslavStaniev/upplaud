@@ -1,18 +1,18 @@
-const express = require('express');
-const Vote = require('../models/Vote');
-const Guest = require('../models/Guest');
-const UserFile = require('../models/UserFile');
-const PollImage = require('../models/PollImage');
-const verifyAuth = require('../config/verifyAuth');
-const SocialPosting = require('../models/SocialPosting');
-const { USER_TYPE } = require('../models/User');
-const { sendEmail } = require('../helpers/email');
-const { FILE_TYPE } = require('../models/UserFile');
-const { POLL_STATUS, GUEST_TYPE } = require('../models/Guest');
-const { SOCIAL_TYPE, SOCIAL_SUB_TYPE } = require('../models/SocialAccount');
-const { getS3Path, uploadImage, uploadFile } = require('../helpers/s3Helper');
-const { createOrUpdateGuestUser, getUserInfo, updateUserInfo } = require('./users');
-const { randomString, generateImage, generateVideo, replaceConstants, getFrontendUrl } = require('../helpers/utills');
+const express = require("express");
+const Vote = require("../models/Vote");
+const Guest = require("../models/Guest");
+const UserFile = require("../models/UserFile");
+const PollImage = require("../models/PollImage");
+const verifyAuth = require("../config/verifyAuth");
+const SocialPosting = require("../models/SocialPosting");
+const { USER_TYPE } = require("../models/User");
+const { sendEmail } = require("../helpers/email");
+const { FILE_TYPE } = require("../models/UserFile");
+const { POLL_STATUS, GUEST_TYPE } = require("../models/Guest");
+const { SOCIAL_TYPE, SOCIAL_SUB_TYPE } = require("../models/SocialAccount");
+const { getS3Path, uploadImage, uploadFile } = require("../helpers/s3Helper");
+const { createOrUpdateGuestUser, getUserInfo, updateUserInfo } = require("./users");
+const { randomString, generateImage, generateVideo, replaceConstants, getFrontendUrl } = require("../helpers/utills");
 
 const router = express.Router();
 
@@ -22,11 +22,11 @@ const { PROFILE, PAGE, GROUP } = SOCIAL_SUB_TYPE;
 // @route   GET api/guests
 // @desc    Fetchs the list of guests for the current logged-in user.
 // @access  Public
-router.get('/', verifyAuth, async (req, res) => {
+router.get("/", verifyAuth, async (req, res) => {
   try {
     const guestList = await Guest.find({ user: req.userId })
-      .populate('socials')
-      .populate({ path: 'guest', populate: 'socialAccounts' });
+      .populate("socials")
+      .populate({ path: "guest", populate: "socialAccounts" });
 
     // Fetch votes
     const votes = await Vote.find({ poll: { $in: guestList.map((item) => item._id) } });
@@ -40,21 +40,21 @@ router.get('/', verifyAuth, async (req, res) => {
   } catch (err) {
     // throw err;
     console.error({ msg: err.message });
-    res.status(500).send('Internal Server Error');
+    res.status(500).send("Internal Server Error");
   }
 });
 
 // @route   GET api/guests/pollId
 // @desc    gets guest details
 // @access  Public
-router.get('/:pollId', verifyAuth, async (req, res) => {
+router.get("/:pollId", verifyAuth, async (req, res) => {
   try {
     const user = await getUserInfo(req.userId);
     const poll = await getPoll(req.params.pollId);
 
     // Check if user authorized to access this poll
     if (!poll || poll?.user?._id.toString() !== user?._id.toString()) {
-      return res.status(403).send('You are not authorized to access this poll.');
+      return res.status(403).send("You are not authorized to access this poll.");
     }
 
     const { socialAccounts } = user;
@@ -67,7 +67,7 @@ router.get('/:pollId', verifyAuth, async (req, res) => {
       const { type, socialId, isConnected, page, group } = socialAccounts[i];
 
       // Create new Social
-      const createNewSocial = async (subType, subTypeId, subTypeName = '') => {
+      const createNewSocial = async (subType, subTypeId, subTypeName = "") => {
         const basicObj = { type, isConnected, isActive: false, frequency: 4, poll: poll._id, user: req.userId };
         const newItem = new SocialPosting({ ...basicObj, subTypeName, subType, subTypeId });
         return await newItem.save();
@@ -92,7 +92,7 @@ router.get('/:pollId', verifyAuth, async (req, res) => {
       // Update Page/Group
       const updatePageGroup = async (obj, subType) => {
         const socialItem = getSocial(type, subType);
-        const subTypeName = obj?.accounts.find(({ id }) => id === obj?.socialId)?.name || '';
+        const subTypeName = obj?.accounts.find(({ id }) => id === obj?.socialId)?.name || "";
 
         if (socialItem) {
           // check and update page if required
@@ -139,26 +139,27 @@ router.get('/:pollId', verifyAuth, async (req, res) => {
   } catch (err) {
     // throw err;
     console.error({ msg: err.message });
-    res.status(500).send('Internal Server Error');
+    res.status(500).send("Internal Server Error");
   }
 });
 
 // @route   POST api/guests
 // @desc    Creates a Guest
 // @access  Public
-router.post('/', verifyAuth, async (req, res) => {
+router.post("/", verifyAuth, async (req, res) => {
   const {
     audio = null,
     socials = [],
     guest = null,
-    pollImageSrc = '',
-    hostOfferUrl = '',
-    guestOfferUrl = '',
+    pollImageSrc = "",
+    hostOfferUrl = "",
+    guestOfferUrl = "",
     emailTemplate = null,
     potentialTopics = [],
-    hostSpeakerLabel = '',
-    guestSpeakerLabel = '',
-    socialShareFileSrc = '',
+    presentationName = "",
+    hostSpeakerLabel = "",
+    guestSpeakerLabel = "",
+    socialShareFileSrc = "",
     pollSharingImage = null,
     status = POLL_STATUS.DRAFT,
     recordingDate = new Date(),
@@ -184,6 +185,7 @@ router.post('/', verifyAuth, async (req, res) => {
       guestOfferUrl,
       recordingDate,
       potentialTopics,
+      presentationName,
       hostSpeakerLabel,
       guestSpeakerLabel,
       socialShareFileSrc,
@@ -197,10 +199,10 @@ router.post('/', verifyAuth, async (req, res) => {
 
     // Create Guest User && update it if guestType is not SOLO_SESSION
     if (guestType !== GUEST_TYPE.SOLO_SESSION) {
-      const { fullName = '', email = '', phone = '', about = '', picture = '', jobTitle = '', organization = '' } = guest;
-      const nameArr = fullName.split(' ');
+      const { fullName = "", email = "", phone = "", about = "", picture = "", jobTitle = "", organization = "" } = guest;
+      const nameArr = fullName.split(" ");
       const firstName = nameArr.shift();
-      const lastName = nameArr.join(' ');
+      const lastName = nameArr.join(" ");
 
       const newUser = await createOrUpdateGuestUser(firstName, lastName, email, randomString(8), USER_TYPE.GUEST);
       if (newUser) {
@@ -249,26 +251,27 @@ router.post('/', verifyAuth, async (req, res) => {
     session.endSession();
 
     console.error(err.message);
-    res.status(500).send('Internal Server Error');
+    res.status(500).send("Internal Server Error");
   }
 });
 
 // @route   PUT api/guests/:pollId
 // @desc    Updates a Poll
 // @access  Public
-router.put('/:pollId', verifyAuth, async (req, res) => {
+router.put("/:pollId", verifyAuth, async (req, res) => {
   const {
     audio = null,
     socials = [],
     guest = null,
-    pollImageSrc = '',
-    hostOfferUrl = '',
-    guestOfferUrl = '',
+    pollImageSrc = "",
+    hostOfferUrl = "",
+    guestOfferUrl = "",
     emailTemplate = null,
     potentialTopics = [],
-    hostSpeakerLabel = '',
-    guestSpeakerLabel = '',
-    socialShareFileSrc = '',
+    presentationName = "",
+    hostSpeakerLabel = "",
+    guestSpeakerLabel = "",
+    socialShareFileSrc = "",
     pollSharingImage = null,
     status = POLL_STATUS.DRAFT,
     recordingDate = new Date(),
@@ -298,6 +301,7 @@ router.put('/:pollId', verifyAuth, async (req, res) => {
       guestOfferUrl,
       recordingDate,
       potentialTopics,
+      presentationName,
       hostSpeakerLabel,
       guestSpeakerLabel,
       socialShareFileSrc,
@@ -313,10 +317,10 @@ router.put('/:pollId', verifyAuth, async (req, res) => {
 
     // Create Guest User && update it if guestType is not SOLO_SESSION
     if (guestType !== GUEST_TYPE.SOLO_SESSION) {
-      const { fullName = '', phone = '', about = '', picture = '', jobTitle = '', organization = 'organization' } = guest;
-      const nameArr = fullName.split(' ');
+      const { fullName = "", phone = "", about = "", picture = "", jobTitle = "", organization = "organization" } = guest;
+      const nameArr = fullName.split(" ");
       const firstName = nameArr.shift();
-      const lastName = nameArr.join(' ');
+      const lastName = nameArr.join(" ");
 
       const userObj = poll.guest;
       if (userObj) {
@@ -385,14 +389,14 @@ router.put('/:pollId', verifyAuth, async (req, res) => {
     session.endSession();
 
     console.error(err.message);
-    res.status(500).send('Internal Server Error');
+    res.status(500).send("Internal Server Error");
   }
 });
 
 // @route   DELETE api/guests
 // @desc    Deletes a Guest
 // @access  Public
-router.delete('/:guestId', verifyAuth, async (req, res) => {
+router.delete("/:guestId", verifyAuth, async (req, res) => {
   const session = await Guest.startSession();
   session.startTransaction();
 
@@ -402,20 +406,20 @@ router.delete('/:guestId', verifyAuth, async (req, res) => {
     await session.commitTransaction();
     session.endSession();
 
-    res.json({ msg: 'Guest deleted successfully.' });
+    res.json({ msg: "Guest deleted successfully." });
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
 
     console.error(err.message);
-    res.status(500).send('Internal Server Error');
+    res.status(500).send("Internal Server Error");
   }
 });
 
 // @route   POST api/guests/batch-delete
 // @desc    Batch Delete
 // @access  Public
-router.post('/batch-delete', verifyAuth, async (req, res) => {
+router.post("/batch-delete", verifyAuth, async (req, res) => {
   const session = await Guest.startSession();
   session.startTransaction();
 
@@ -427,34 +431,34 @@ router.post('/batch-delete', verifyAuth, async (req, res) => {
     await session.commitTransaction();
     session.endSession();
 
-    res.json({ msg: 'Guests deleted successfully.' });
+    res.json({ msg: "Guests deleted successfully." });
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
 
     console.error(err.message);
-    res.status(500).send('Internal Server Error');
+    res.status(500).send("Internal Server Error");
   }
 });
 
 // @route   GET api/guests/images/:userId
 // @desc    gets guest images
 // @access  Public
-router.get('/images/:userId', verifyAuth, async (req, res) => {
+router.get("/images/:userId", verifyAuth, async (req, res) => {
   try {
     const images = await UserFile.find({ user: req.params.userId, type: FILE_TYPE.IMAGE });
     res.json(images);
   } catch (err) {
     // throw err;
     console.error({ msg: err.message });
-    res.status(500).send('Internal Server Error');
+    res.status(500).send("Internal Server Error");
   }
 });
 
 // @route   POST api/guests/images/:userId
 // @desc    creates guest images
 // @access  Public
-router.post('/images/:userId', verifyAuth, async (req, res) => {
+router.post("/images/:userId", verifyAuth, async (req, res) => {
   const { name, imageData } = req.body;
 
   try {
@@ -468,15 +472,15 @@ router.post('/images/:userId', verifyAuth, async (req, res) => {
   } catch (err) {
     // throw err;
     console.error({ msg: err.message });
-    res.status(500).send('Internal Server Error');
+    res.status(500).send("Internal Server Error");
   }
 });
 
 // @route   POST api/guests/poll-image-info/:pollId
 // @desc    Save Poll ImageFile Info
 // @access  Public
-router.post('/poll-image-info/:pollId', verifyAuth, async (req, res) => {
-  const { logo = '', footer = {}, header = {} } = req.body;
+router.post("/poll-image-info/:pollId", verifyAuth, async (req, res) => {
+  const { logo = "", footer = {}, header = {} } = req.body;
 
   try {
     const pollId = req.params.pollId;
@@ -490,31 +494,31 @@ router.post('/poll-image-info/:pollId', verifyAuth, async (req, res) => {
   } catch (err) {
     // throw err;
     console.error({ msg: err.message });
-    res.status(500).send('Internal Server Error');
+    res.status(500).send("Internal Server Error");
   }
 });
 
 // @route   PUT api/guests/poll-image-info/:pollImageId
 // @desc    Update Poll ImageFile Info
 // @access  Public
-router.put('/poll-image-info/:pollImageId', verifyAuth, async (req, res) => {
-  const { logo = '', footer = {}, header = {} } = req.body;
+router.put("/poll-image-info/:pollImageId", verifyAuth, async (req, res) => {
+  const { logo = "", footer = {}, header = {} } = req.body;
 
   try {
     await PollImage.findByIdAndUpdate(req.params.pollImageId, { logo, footer, header });
 
-    res.json({ msg: 'Poll Image Info updated successfully.' });
+    res.json({ msg: "Poll Image Info updated successfully." });
   } catch (err) {
     // throw err;
     console.error({ msg: err.message });
-    res.status(500).send('Internal Server Error');
+    res.status(500).send("Internal Server Error");
   }
 });
 
 // @route   POST api/guests/generate-poll-image
 // @desc    Generate Poll ImageFile
 // @access  Public
-router.post('/generate-poll-image', verifyAuth, async (req, res) => {
+router.post("/generate-poll-image", verifyAuth, async (req, res) => {
   try {
     const {
       host,
@@ -558,37 +562,37 @@ router.post('/generate-poll-image', verifyAuth, async (req, res) => {
       const audioObj = await UserFile.findById(audio);
       const audioS3Path = getS3Path(audioObj?.s3Path);
       const { videoFileBuffer } = await generateVideo(output, audioS3Path);
-      const videoS3Path = await uploadFile(videoFileBuffer, `${req.userId}/videos`, `Video_${Date.now()}.mp4`, 'video/mp4');
+      const videoS3Path = await uploadFile(videoFileBuffer, `${req.userId}/videos`, `Video_${Date.now()}.mp4`, "video/mp4");
       res.json({ imageS3Path, videoS3Path });
-    } else res.json({ imageS3Path, videoS3Path: '' });
+    } else res.json({ imageS3Path, videoS3Path: "" });
   } catch (err) {
     // throw err;
     console.error({ msg: err.message });
-    res.status(500).send('Internal Server Error');
+    res.status(500).send("Internal Server Error");
   }
 });
 
 // @route   GET api/guests/vote/pollId
 // @desc    gets guest details
 // @access  Public
-router.get('/vote/:pollId', async (req, res) => {
+router.get("/vote/:pollId", async (req, res) => {
   try {
     const poll = await Guest.findById(req.params.pollId)
-      .populate('pollImageInfo')
-      .populate({ path: 'guest', populate: 'socialAccounts' })
-      .populate({ path: 'user', select: 'firstName lastName' });
+      .populate("pollImageInfo")
+      .populate({ path: "guest", populate: "socialAccounts" })
+      .populate({ path: "user", select: "firstName lastName" });
     res.json(poll);
   } catch (err) {
     // throw err;
     console.error({ msg: err.message });
-    res.status(500).send('Internal Server Error');
+    res.status(500).send("Internal Server Error");
   }
 });
 
 // @route   POST api/guests/vote/pollId
 // @desc    save vote details
 // @access  Public
-router.post('/vote/:pollId', async (req, res) => {
+router.post("/vote/:pollId", async (req, res) => {
   try {
     const pollInfo = req.body;
 
@@ -599,17 +603,17 @@ router.post('/vote/:pollId', async (req, res) => {
       res.json(vote);
     } else {
       await Vote.findByIdAndUpdate(pollInfo._id, pollInfo);
-      res.json({ msg: 'Vote updated successfully.' });
+      res.json({ msg: "Vote updated successfully." });
     }
   } catch (err) {
     // throw err;
     console.error({ msg: err.message });
-    res.status(500).send('Internal Server Error');
+    res.status(500).send("Internal Server Error");
   }
 });
 
 async function getPoll(pollId) {
-  return await Guest.findById(pollId).populate('guest audio pollImageInfo socials');
+  return await Guest.findById(pollId).populate("guest audio pollImageInfo socials");
 }
 
 function getPollSharingInfoObj(obj) {
@@ -628,22 +632,25 @@ async function createPollSharingImage(pollId, obj) {
 
 // Send Email to Guest
 async function sendEmailToGuest(poll) {
-  if (!poll) return { msg: 'Poll not found!', success: false };
+  if (!poll) return { msg: "Poll not found!", success: false };
 
-  const { status, guest, user, guestType, emailTemplate } = poll;
+  const { status, guest, user, guestType, emailTemplate, presentationName = "" } = poll;
 
   // Send Email in case of Publish
   if (status === POLL_STATUS.PUBLISHED && emailTemplate && guestType !== GUEST_TYPE.SOLO_SESSION) {
     const guestInfo = await getUserInfo(guest);
     const userInfo = await getUserInfo(user);
 
+    const userFullname = `${userInfo?.firstName} ${userInfo?.lastName}`;
+
     const paramsToReplace = {
-      '[GUEST_FIRSTNAME]': guestInfo?.firstName,
-      '[GUEST_LASTNAME]': guestInfo?.lastName,
-      '[GUEST_FULLNAME]': `${guestInfo?.firstName} ${guestInfo?.lastName}`,
-      '[USER_FIRSTNAME]': userInfo?.firstName,
-      '[USER_LASTNAME]': userInfo?.lastName,
-      '[USER_FULLNAME]': `${userInfo?.firstName} ${userInfo?.lastName}`,
+      "[GUEST_FIRSTNAME]": guestInfo?.firstName,
+      "[GUEST_LASTNAME]": guestInfo?.lastName,
+      "[GUEST_FULLNAME]": `${guestInfo?.firstName} ${guestInfo?.lastName}`,
+      "[USER_FIRSTNAME]": userInfo?.firstName,
+      "[USER_LASTNAME]": userInfo?.lastName,
+      "[USER_FULLNAME]": userFullname,
+      "[PRESENTATION_NAME]": presentationName,
     };
 
     if (emailTemplate) {
@@ -654,16 +661,16 @@ async function sendEmailToGuest(poll) {
       // Add Password to emailBody
       if (poll?.password) {
         const guestLink = getFrontendUrl(`guest-acceptance/${poll._id}`);
-        emailBody += `<br><br>Your Upplaud Password: ${poll.password}<br/> <strong>CLICK HERE TO GROW OUR AUDIENCE <a href="${guestLink}">${guestLink}</a></strong>`;
+        emailBody += `<br><br>Your Upplaud Password: ${poll.password}<br/> <strong><a href="${guestLink}">CLICK HERE</a> TO GROW OUR AUDIENCE (<a href="${guestLink}">${guestLink}</a>)</strong>`;
       }
 
-      await sendEmail({ to: guestInfo.email, subject: emailSubject, body: emailBody });
+      await sendEmail({ to: guestInfo.email, subject: emailSubject, body: emailBody, fromName: userFullname });
 
-      return { msg: 'Email Sent!', success: true };
+      return { msg: "Email Sent!", success: true };
     }
   }
 
-  return { msg: 'Email not sent!', success: false };
+  return { msg: "Email not sent!", success: false };
 }
 
 module.exports = router;
