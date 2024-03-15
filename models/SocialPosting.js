@@ -36,6 +36,10 @@ const SocialPostingSchema = new Schema(
       type: Number,
       default: 0,
     },
+    frequencyToBePosted: {
+      type: Number,
+      default: 0,
+    },
     daysFrequency: {
       type: Number,
       default: 1,

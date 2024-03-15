@@ -230,7 +230,22 @@ router.post("/", verifyAuth, async (req, res) => {
     if (socials.length) {
       const socialAccounts = socials.map(
         ({ type, subType, subTypeName, subTypeId, frequency, isActive = false, isConnected = false }) => {
-          return { poll: poll._id, user: req.userId, type, subType, subTypeId, subTypeName, frequency, isActive, isConnected };
+          // update posting details
+          const { nextPostDate, daysFrequency, frequencyToBePosted } = getSocialAutomationDetails(pollInfo?.recordingDate, frequency);
+          return {
+            poll: poll._id,
+            user: req.userId,
+            type,
+            subType,
+            subTypeId,
+            subTypeName,
+            frequency,
+            isActive,
+            isConnected,
+            nextPostDate,
+            daysFrequency,
+            frequencyToBePosted,
+          };
         }
       );
 
@@ -348,8 +363,20 @@ router.put("/:pollId", verifyAuth, async (req, res) => {
     if (socials.length) {
       const socialsIds = socials.map(
         async ({ type, subType, subTypeName, subTypeId, frequency, isActive = false, isConnected = false }) => {
+          // update posting details
+          const { nextPostDate, daysFrequency, frequencyToBePosted } = getSocialAutomationDetails(pollInfo?.recordingDate, frequency);
+
           let socialAccount = await SocialPosting.findOne({ poll: pollId, type, subType });
-          if (socialAccount) await SocialPosting.findByIdAndUpdate(socialAccount._id, { subTypeId, subTypeName, frequency, isActive });
+          if (socialAccount)
+            await SocialPosting.findByIdAndUpdate(socialAccount._id, {
+              subTypeId,
+              subTypeName,
+              frequency,
+              isActive,
+              nextPostDate,
+              daysFrequency,
+              frequencyToBePosted,
+            });
           else {
             socialAccount = new SocialPosting({
               poll: pollId,
@@ -361,6 +388,9 @@ router.put("/:pollId", verifyAuth, async (req, res) => {
               frequency,
               isActive,
               isConnected,
+              nextPostDate,
+              daysFrequency,
+              frequencyToBePosted,
             });
             await socialAccount.save();
           }
@@ -671,6 +701,30 @@ async function sendEmailToGuest(poll) {
   }
 
   return { msg: "Email not sent!", success: false };
+}
+
+// Get daysFrequency/nextPostDate & frequencyToBePosted
+function getSocialAutomationDetails(recordingDate = null, frequency = 0) {
+  const obj = { daysFrequency: 1, frequencyToBePosted: 0, nextPostDate: new Date() };
+
+  if (!recordingDate) return obj;
+
+  const currentDate = new Date();
+  const recordDate = new Date(recordingDate);
+
+  // total number of days between dates
+  const numberOfDays = Math.round((recordDate - currentDate) / (1000 * 60 * 60 * 24));
+  const frequencyToBePosted = (recordDate.getMonth() - currentDate.getMonth() + 1) * frequency;
+
+  // Calcuale days frequency
+  const daysFrequency = Math.round(numberOfDays / frequencyToBePosted);
+
+  // find next post date by adding daysfrequency to current date
+  // const nextPostDate = new Date();
+  // nextPostDate.setDate(nextPostDate.getDate() + daysFrequency);
+  const nextPostDate = new Date(new Date().getTime() + 10 * 60000); // For testing purpose - 10 minutes
+
+  return { daysFrequency, frequencyToBePosted, nextPostDate };
 }
 
 module.exports = router;

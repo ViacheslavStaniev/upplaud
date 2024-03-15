@@ -275,7 +275,10 @@ router.get("/linkedin-callback", passport.authenticate("linkedin", AuthOptions),
 // @access Public
 router.get("/init-auto-posting", async (req, res) => {
   try {
-    const activePostings = await SocialPosting.find({ isActive: true })
+    // Fetch Active Postings whose nextPostDate is between now and 10 minutes
+    const currentTime = new Date();
+    const next10Minutes = new Date(currentTime.getTime() + 10 * 60000);
+    const activePostings = await SocialPosting.find({ isActive: true, nextPostDate: { $gte: currentTime, $lte: next10Minutes } })
       .populate({ path: "poll", populate: { path: "pollImageInfo" } })
       .populate({ path: "user", populate: { path: "socialAccounts" } });
     if (activePostings.length === 0) return res.status(200).json({ error: false, msg: "No active posting found." });
@@ -284,7 +287,10 @@ router.get("/init-auto-posting", async (req, res) => {
     const postingResults = [];
     for (let i = 0; i < activePostings.length; i++) {
       const posting = activePostings[i];
-      const { poll, user, type, subType, subTypeId, frequency, frequencyPosted } = posting;
+      const { poll, user, type, subType, subTypeId, frequencyToBePosted, frequencyPosted } = posting;
+
+      // Check if frequency is completed
+      if (frequencyToBePosted === frequencyPosted) continue;
 
       // Check is poll is published
       if (!poll || poll.status === POLL_STATUS.DRAFT || !subTypeId || !poll?.socialShareFileSrc) continue;
@@ -308,8 +314,14 @@ router.get("/init-auto-posting", async (req, res) => {
       if (type === SOCIAL_TYPE.FACEBOOK) {
         try {
           const access_token = subType === PAGE ? page?.accounts.find((a) => a.id === subTypeId)?.access_token : accessToken;
-          const tokenObj = await initFacebookPosting(subTypeId, postInfo, access_token, subType);
-          console.log(tokenObj);
+          await initFacebookPosting(subTypeId, postInfo, access_token, subType);
+
+          // Update Frequency Posted
+          posting.frequencyPosted = frequencyPosted + 1;
+          posting.nextPostDate = new Date(new Date().getTime() + 10 * 60000); // For testing purpose - 10 minutes
+          // posting.nextPostDate = new Date(currentTime.getTime() + posting.daysFrequency * 24 * 60 * 60 * 1000);
+          await posting.save();
+
           postingResults.push({ type, error: false, msg: "Posted on Facebook", posting });
         } catch (error) {
           console.log(error);
@@ -330,6 +342,13 @@ router.get("/init-auto-posting", async (req, res) => {
             refreshToken: tokenObj.refresh_token,
             expiresInSeconds: tokenObj.refresh_token_expires_in,
           });
+
+          // Update Frequency Posted
+          posting.frequencyPosted = frequencyPosted + 1;
+          posting.nextPostDate = new Date(new Date().getTime() + 10 * 60000); // For testing purpose - 10 minutes
+          // posting.nextPostDate = new Date(currentTime.getTime() + posting.daysFrequency * 24 * 60 * 60 * 1000);
+          await posting.save();
+
           postingResults.push({ type, error: false, msg: "Posted on Linkedin", posting });
         } catch (error) {
           // await saveUserAccessTokens(user, { type, subType, isConnected: false, expiresInSeconds: 0 });
