@@ -9,9 +9,7 @@ const { Title, Paragraph } = Typography;
 
 export default function ResetPasswordPage() {
   const { token } = useParams();
-  const { forgotPassword, update, errors, isLoading } = useAuthContext();
-
-  console.log(token);
+  const { changePassword, update, errors, isLoading } = useAuthContext();
 
   return (
     <LoginLayout title="Reset Password">
@@ -35,9 +33,13 @@ export default function ResetPasswordPage() {
       <Form
         size="large"
         layout="vertical"
-        onFinish={forgotPassword}
-        initialValues={{ password: '', confirmPassword: '' }}
+        onFinish={changePassword}
+        initialValues={{ token, password: '', confirmPassword: '' }}
       >
+        <Form.Item name="token" hidden>
+          <Input />
+        </Form.Item>
+
         <Form.Item
           name="password"
           label="Password"
