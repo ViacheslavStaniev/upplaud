@@ -31,6 +31,7 @@ import {
   EmailTemplates,
   PostingTemplate,
   GuestAcceptance,
+  UserAutomations,
 } from './elements';
 
 export default function Router() {
@@ -104,6 +105,7 @@ export default function Router() {
         { path: '404', element: <Page404 /> },
         { path: '403', element: <Page403 /> },
         { path: 'vote/:guestId', element: <VotingPage /> },
+        { path: 'vote/:pollUniqueId/:guestUserName', element: <UserAutomations /> },
       ],
     },
     { path: 'guest-acceptance/:guestId', element: <GuestAcceptance /> },

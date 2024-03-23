@@ -3,6 +3,8 @@ const ROOTS_DASHBOARD = '';
 
 const path = (root, sublink) => `${root}${sublink}`;
 
+export const getFullPath = (path) => window.location.origin + path;
+
 export const PATH_AUTH = {
   root: ROOTS_AUTH,
   login: path(ROOTS_AUTH, '/login'),

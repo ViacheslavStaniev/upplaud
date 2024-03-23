@@ -13,21 +13,24 @@ export default function DashboardLayout() {
   return (
     <Layout>
       <Header className="sticky-header flex-item space-between">
-        <Link to="/">
+        {/* <Link to="/">
           <Logo />
-        </Link>
+        </Link> */}
 
         {/* <TopNavSearchbar /> */}
 
-        <div className="flex-item">
+        <div className="flex-item p-2 pl-0">
           {/* <NotificationPopover /> */}
           {/* <Divider type="vertical" /> */}
           <UserNavMenu />
         </div>
       </Header>
 
-      <Layout style={{ height: 'calc(100vh - 90px)' }}>
+      <Layout style={{ height: 'calc(100vh - 59px)' }}>
         <Sider width={280} className="main-menu">
+          <Link to="/">
+            <Logo rootClassName="p-2 sidebar-navlogo" />
+          </Link>
           <SidebarNavMenu />
         </Sider>
 
