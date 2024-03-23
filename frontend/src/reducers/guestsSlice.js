@@ -225,3 +225,13 @@ export const saveSocials = (userId, pollId, socials) => {
       .catch((error) => reject(error));
   });
 };
+
+// Update some info of poll
+export const updatePoll = (pollId, info) => {
+  return new Promise((resolve, reject) => {
+    axios
+      .put(`guests/${pollId}/info`, info)
+      .then(({ data }) => resolve(data))
+      .catch((error) => reject(error));
+  });
+};

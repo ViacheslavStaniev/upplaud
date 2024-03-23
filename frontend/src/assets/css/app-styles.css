@@ -2,6 +2,11 @@
   width: 110px !important;
   max-height: 56px !important;
 }
+.sidebar-navlogo img.app-logo {
+  width: 100% !important;
+  max-height: none !important;
+  background: white;
+}
 .p-50px {
   padding: 50px !important;
 }
@@ -100,6 +105,9 @@
 .flex-center {
   justify-content: center !important;
 }
+.flex-nowrap {
+  flex-wrap: nowrap !important;
+}
 .space-between {
   justify-content: space-between !important;
 }
@@ -126,6 +134,9 @@
 }
 .minw-200px {
   min-width: 200px;
+}
+.minw-fit-content {
+  min-width: fit-content;
 }
 .maxw-125px {
   max-width: 125px !important;
@@ -300,6 +311,12 @@
 }
 .color-red {
   color: red !important;
+}
+.color-2196F3 {
+  color: #2196f3 !important;
+}
+.color-36c102 {
+  color: #36c102 !important;
 }
 .border-E0E0E0 {
   border: 1px solid #e0e0e0;

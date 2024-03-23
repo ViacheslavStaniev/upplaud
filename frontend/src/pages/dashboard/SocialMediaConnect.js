@@ -19,6 +19,7 @@ export default function SocialMediaConnect({
   className = '',
   showTitle = true,
   update = () => {},
+  btnSize = 'large',
 }) {
   const socialAccounts = user?.socialAccounts || [];
   const getItem = (type) => socialAccounts.find((item) => item.type === type);
@@ -266,10 +267,10 @@ export default function SocialMediaConnect({
               } else setOpenDropdown(open ? key : null);
             }}
           >
-            <Badge count={getConnectIcon(isConnected, 32)}>
+            <Badge count={getConnectIcon(isConnected, btnSize === 'large' ? 32 : 26)}>
               <Button
                 type={key}
-                size="large"
+                size={btnSize}
                 shape="round"
                 loading={loading}
                 disabled={disabled}

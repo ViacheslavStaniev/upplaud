@@ -3,27 +3,27 @@ import AppTitle from '../../components/AppTitle';
 import SocialMediaConnect from './SocialMediaConnect';
 import LoadingScreen from '../../components/LoadingScreen';
 import SocialPostingItem from './layouts/SocialPostingItem';
-import PreviewAutomationVideo from './layouts/PreviewAutomationVideo';
 import { useState, useEffect } from 'react';
-import { useParams, Navigate } from 'react-router-dom';
+import { getFullPath } from '../../routes/paths';
+import { useParams, Navigate, Link } from 'react-router-dom';
 import { getDateString, getSocialsItems } from '../../utils/common';
-import { getPoll, getSocials, saveSocials } from '../../reducers/guestsSlice';
+import { getPoll, getSocials, saveSocials, updatePoll } from '../../reducers/guestsSlice';
 import {
   App,
   Row,
   Col,
+  Card,
   List,
   Form,
   Input,
   Modal,
-  Space,
   Button,
-  Divider,
+  Avatar,
   Typography,
   ConfigProvider,
 } from 'antd';
 
-const { Link, Title, Paragraph } = Typography;
+const { Text, Title, Paragraph } = Typography;
 
 export default function GuestAcceptance() {
   const { guestId } = useParams();
@@ -66,21 +66,21 @@ export default function GuestAcceptance() {
       <AppTitle title="Guest Acceptance" />
 
       <Row className="h-100vh guest-acceptance">
-        <Col span={6} className="p-4 leftbg">
-          <Logo />
+        <Col span={5} className="p-2 leftbg">
+          <Logo rootClassName="sidebar-navlogo" />
 
-          <div style={{ marginTop: 50 }} className="bg-white p-2 br-8px">
-            <Title level={3} className="text-center">
-              Why does polling grow our audience?
+          <div className="bg-white p-2 br-8px mt-2">
+            <Title level={3} className="text-center color-36c102">
+              How does Upplaud grow our audience?
             </Title>
-            <Title level={5}>It’s proven that when we ask others for input, we get to:</Title>
+            <Title level={5}>It's proven that when we ask others for input, we get to:</Title>
             <List
               size="small"
               className="mb-4"
               dataSource={[
                 '- Make them feel part of us',
                 '- Give them what they want.',
-                '- They’ll share us more:',
+                "- They'll share us more:",
                 '- We grow our reach & impact',
                 '- We do business better!',
               ]}
@@ -88,14 +88,14 @@ export default function GuestAcceptance() {
             />
 
             <Paragraph>
-              Upplaud makes polling & voting fast and easy, pulling together votes from multiple
-              sources. We’re also able to capture referrals, email addresses, and offer gifts &
-              rewards to voters.
+              Upplaud captures voter referrals, email addresses & offers rewards to voters; while
+              pulling interest from multiple sources: Co-presenters' Facebook, LinkedIn, email,
+              presentations, etc.
             </Paragraph>
           </div>
         </Col>
 
-        <Col span={18} className="p-50px">
+        <Col span={19} className="p-4">
           {poll && guest && <ConnectSocialsInfo poll={poll} guest={guest} />}
         </Col>
       </Row>
@@ -141,9 +141,10 @@ export default function GuestAcceptance() {
 }
 
 function ConnectSocialsInfo({ poll, guest }) {
-  const { modal } = App.useApp();
   const [form] = Form.useForm();
+  const { modal, notification } = App.useApp();
   const [loading, setLoading] = useState(false);
+  const [loading2, setLoading2] = useState(false);
   const defaultSocials = getSocialsItems(guest?.socialAccounts || []);
 
   useEffect(() => {
@@ -157,72 +158,134 @@ function ConnectSocialsInfo({ poll, guest }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [guest?._id, poll?._id]);
 
+  const onGuestOfferSave = ({ guestOfferUrl }) => {
+    setLoading2(true);
+
+    updatePoll(poll?._id, { guestOfferUrl })
+      .then(({ msg }) => notification.success({ message: 'Success', description: msg }))
+      .catch((err) => notification.error({ message: 'Error', description: err?.message }))
+      .finally(() => setLoading2(false));
+  };
+
   return (
-    <>
-      <Title className="color-6b0d88 fw-600 m-0 mb-2">
-        Hi {guest?.firstName}, <strong>thank you</strong> for being our guest!
+    <div className="guest-acceptance-content">
+      <Title level={2} className="color-6b0d88 fw-600 m-0 mb-2">
+        Hi {guest?.firstName}, I'm looking forward to doing {poll?.presentationName || 'an event'}{' '}
+        with you!
       </Title>
 
-      <Title className="m-0 mb-2">Let’s grow the biggest audience for you...</Title>
-
-      <Title level={2} className="m-0 mb-3">
-        by asking our connections to vote on our topics.
+      <Title level={3} className="m-0 mb-2">
+        Let's grow the best audience for us…
       </Title>
 
-      {/* <Paragraph italic>
-        Optional: Watch our Upplaud <Link href="#">tutorial video</Link>
-      </Paragraph> */}
-
-      {/* <NewAutomation isGuestAcceptance /> */}
-
-      <Title level={3} className="fw-400">
-        Start polling each other’s social media:
+      <Title level={3} className="m-0 mb-2">
+        By inviting our connections to vote & share our topics:
       </Title>
 
-      <SocialMediaConnect user={guest} showTitle={false} className="mb-2 mt-2" />
-
-      <Space className="d-flex mb-4">
-        <Link href={poll?.guestOfferUrl} target="_blank">
-          Offer a free gift to voters
-        </Link>
-        <Divider type="vertical" className="border-000000" />
-        <Link href={`/vote/${poll?._id}`} target="_blank">
-          See our Upplaud voting page
-        </Link>
-        <Divider type="vertical" className="border-000000" />
-        <PreviewAutomationVideo
-          text="Preview posts"
-          socialShareFileSrc={poll?.socialShareFileSrc}
+      <Card>
+        <TitleText
+          index={1}
+          className="color-2196F3"
+          title="Connect your social media (as I have already)..."
+          avatarStyles={{ backgroundColor: '#2196f3', color: '#ffffff' }}
         />
-      </Space>
 
-      <Paragraph>
-        To reach the most people, we'll repeat our Upplaud until{' '}
-        {getDateString(poll?.recordingDate)}:
-      </Paragraph>
+        <SocialMediaConnect
+          user={guest}
+          btnSize="default"
+          showTitle={false}
+          className="mb-4 mt-2"
+        />
 
-      <Form
-        form={form}
-        size="large"
-        labelWrap={true}
-        labelAlign="left"
-        layout="horizontal"
-        initialValues={{ socials: defaultSocials }}
-        onFinish={(values) => {
-          setLoading(true);
+        <TitleText index={2} type="secondary" title="Optional: Reward for voting..." />
 
-          saveSocials(guest?._id, poll?._id, values.socials)
-            .then(() => modal.success({ title: 'Success', content: 'Socials saved successfully.' }))
-            .catch((err) => modal.error({ title: 'Error', content: err?.message }))
-            .finally(() => setLoading(false));
-        }}
-      >
-        <SocialPostingItem />
+        <div className="flex-item gap-1 mb-4">
+          <Text className="minw-fit-content">Website address of your gift offer:</Text>
 
-        <Button loading={loading} type="primary" htmlType="submit" className="mt-2">
-          SAVE
-        </Button>
-      </Form>
-    </>
+          <Form
+            layout="inline"
+            onFinish={onGuestOfferSave}
+            className="flex-item gap-1 flex-nowrap"
+            initialValues={{ guestOfferUrl: poll?.guestOfferUrl }}
+          >
+            <Form.Item
+              noStyle
+              name="guestOfferUrl"
+              rules={[{ required: true, message: 'Please enter the offer url.' }]}
+            >
+              <Input type="url" placeholder="Enter your offer url" />
+            </Form.Item>
+            <Form.Item noStyle>
+              <Button type="primary" htmlType="submit" loading={loading2}>
+                Save
+              </Button>
+            </Form.Item>
+          </Form>
+        </div>
+
+        <TitleText
+          index={3}
+          type="secondary"
+          title="Confirm: Posting frequency..."
+          avatarStyles={{ backgroundColor: '#9e9e9e', color: '#ffffff' }}
+        />
+
+        <Paragraph>
+          To reach the most people, we'll repeat our Upplaud until{' '}
+          {getDateString(poll?.recordingDate)}:
+        </Paragraph>
+
+        <Form
+          form={form}
+          size="large"
+          className="mb-4"
+          labelWrap={true}
+          labelAlign="left"
+          layout="horizontal"
+          initialValues={{ socials: defaultSocials }}
+          onFinish={(values) => {
+            setLoading(true);
+
+            saveSocials(guest?._id, poll?._id, values.socials)
+              .then(() =>
+                modal.success({ title: 'Success', content: 'Socials saved successfully.' })
+              )
+              .catch((err) => modal.error({ title: 'Error', content: err?.message }))
+              .finally(() => setLoading(false));
+          }}
+        >
+          <SocialPostingItem />
+
+          <Button loading={loading} type="primary" htmlType="submit" className="mt-2">
+            SAVE
+          </Button>
+        </Form>
+
+        <TitleText
+          index={4}
+          title="Grow even more interest..."
+          avatarStyles={{ backgroundColor: '#000000', color: '#ffffff' }}
+        />
+
+        <Paragraph className="m-0">
+          We should include the following Upplaud voting page in our email blasts, slides &
+          elsewhere:{' '}
+          <Link to={`/vote/${poll?.uniqueId}/${guest?.userName}`} target="_blank">
+            {getFullPath(`/vote/${poll?.uniqueId}/${guest?.userName}`)}
+          </Link>
+        </Paragraph>
+      </Card>
+    </div>
+  );
+}
+
+function TitleText({ title = '', index = 1, type = '', className = '', avatarStyles = {} }) {
+  return (
+    <Title type={type} level={4} className={`flex-item gap-1 ${className}`}>
+      <Avatar size="small" style={avatarStyles}>
+        {index}
+      </Avatar>
+      {title}
+    </Title>
   );
 }

@@ -25,6 +25,8 @@ export const EmailTemplates = Loadable(lazy(() => import('../pages/dashboard/Ema
 export const PostingTemplate = Loadable(lazy(() => import('../pages/dashboard/PostingTemplate')));
 export const GuestAcceptance = Loadable(lazy(() => import('../pages/dashboard/GuestAcceptance')));
 
+export const UserAutomations = Loadable(lazy(() => import('../pages/dashboard/UserAutomations')));
+
 // USERS
 // export const UserProfilePage = Loadable(lazy(() => import("../pages/users/UserProfilePage")));
 // export const UserCardsPage = Loadable(lazy(() => import("../pages/users/UserCardsPage")));

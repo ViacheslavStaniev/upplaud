@@ -642,6 +642,20 @@ router.post("/vote/:pollId", async (req, res) => {
   }
 });
 
+// @route PUT api/guests/poll/:pollId/info
+// @desc Update Poll Info
+// @access Public
+router.put("/:pollId/info", async (req, res) => {
+  try {
+    await Guest.findByIdAndUpdate(req.params.pollId, req.body);
+    res.json({ msg: "Poll Info updated successfully." });
+  } catch (err) {
+    // throw err;
+    console.error({ msg: err.message });
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 async function getPoll(pollId) {
   return await Guest.findById(pollId).populate("guest audio pollImageInfo socials");
 }
