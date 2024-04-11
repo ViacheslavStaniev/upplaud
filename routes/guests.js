@@ -12,7 +12,14 @@ const { POLL_STATUS, GUEST_TYPE } = require("../models/Guest");
 const { SOCIAL_TYPE, SOCIAL_SUB_TYPE } = require("../models/SocialAccount");
 const { getS3Path, uploadImage, uploadFile } = require("../helpers/s3Helper");
 const { createOrUpdateGuestUser, getUserInfo, updateUserInfo } = require("./users");
-const { randomString, generateImage, generateVideo, replaceConstants, getFrontendUrl } = require("../helpers/utills");
+const {
+  randomString,
+  generateImage,
+  generateVideo,
+  replaceConstants,
+  getFrontendUrl,
+  getSocialAutomationDetails,
+} = require("../helpers/utills");
 
 const router = express.Router();
 
@@ -715,30 +722,6 @@ async function sendEmailToGuest(poll) {
   }
 
   return { msg: "Email not sent!", success: false };
-}
-
-// Get daysFrequency/nextPostDate & frequencyToBePosted
-function getSocialAutomationDetails(recordingDate = null, frequency = 0) {
-  const obj = { daysFrequency: 1, frequencyToBePosted: 0, nextPostDate: new Date() };
-
-  if (!recordingDate) return obj;
-
-  const currentDate = new Date();
-  const recordDate = new Date(recordingDate);
-
-  // total number of days between dates
-  const numberOfDays = Math.round((recordDate - currentDate) / (1000 * 60 * 60 * 24));
-  const frequencyToBePosted = (recordDate.getMonth() - currentDate.getMonth() + 1) * frequency;
-
-  // Calcuale days frequency
-  const daysFrequency = Math.round(numberOfDays / frequencyToBePosted);
-
-  // find next post date by adding daysfrequency to current date
-  // const nextPostDate = new Date();
-  // nextPostDate.setDate(nextPostDate.getDate() + daysFrequency);
-  const nextPostDate = new Date(new Date().getTime() + 10 * 60000); // For testing purpose - 10 minutes
-
-  return { daysFrequency, frequencyToBePosted, nextPostDate };
 }
 
 module.exports = router;

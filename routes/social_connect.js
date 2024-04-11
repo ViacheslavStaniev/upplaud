@@ -318,8 +318,8 @@ router.get("/init-auto-posting", async (req, res) => {
 
           // Update Frequency Posted
           posting.frequencyPosted = frequencyPosted + 1;
-          posting.nextPostDate = new Date(new Date().getTime() + 10 * 60000); // For testing purpose - 10 minutes
-          // posting.nextPostDate = new Date(currentTime.getTime() + posting.daysFrequency * 24 * 60 * 60 * 1000);
+          // posting.nextPostDate = new Date(new Date().getTime() + 10 * 60000); // For testing purpose - 10 minutes
+          posting.nextPostDate = new Date(currentTime.getTime() + posting.daysFrequency * 24 * 60 * 60 * 1000);
           await posting.save();
 
           postingResults.push({ type, error: false, msg: "Posted on Facebook", posting });
@@ -345,8 +345,8 @@ router.get("/init-auto-posting", async (req, res) => {
 
           // Update Frequency Posted
           posting.frequencyPosted = frequencyPosted + 1;
-          posting.nextPostDate = new Date(new Date().getTime() + 10 * 60000); // For testing purpose - 10 minutes
-          // posting.nextPostDate = new Date(currentTime.getTime() + posting.daysFrequency * 24 * 60 * 60 * 1000);
+          // posting.nextPostDate = new Date(new Date().getTime() + 10 * 60000); // For testing purpose - 10 minutes
+          posting.nextPostDate = new Date(currentTime.getTime() + posting.daysFrequency * 24 * 60 * 60 * 1000);
           await posting.save();
 
           postingResults.push({ type, error: false, msg: "Posted on Linkedin", posting });
@@ -358,7 +358,7 @@ router.get("/init-auto-posting", async (req, res) => {
       }
     }
 
-    res.status(200).json({ postingResults, error: false, msg: "Posting completed successfully." });
+    res.status(200).json({ postingResults, error: false, msg: "Posting completed successfully.", activePostings });
   } catch (error) {
     // console.log(error);
     res.status(500).json({ error: true, msg: error?.response?.data?.error_description || error?.message });

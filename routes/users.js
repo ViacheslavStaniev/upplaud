@@ -1,13 +1,14 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
+const Guest = require("../models/Guest");
+const verifyAuth = require("../config/verifyAuth");
 const SocialPosting = require("../models/SocialPosting");
 const SocialAccount = require("../models/SocialAccount");
-const { USER_TYPE } = require("../models/User");
 const { ServiceError } = require("./errors");
-const verifyAuth = require("../config/verifyAuth");
-const { createUsername } = require("../helpers/utills");
+const { USER_TYPE } = require("../models/User");
 const { check, validationResult } = require("express-validator");
+const { createUsername, getSocialAutomationDetails } = require("../helpers/utills");
 
 const router = express.Router();
 
@@ -176,10 +177,23 @@ router.post("/:userId/socials/:pollId", async (req, res) => {
     const { userId, pollId } = req?.params;
 
     if (socials?.length) {
-      const socialsIds = socials.map(
+      const poll = await Guest.findById(pollId);
+
+      const socialAccountAccounts = socials.map(
         async ({ type, subType, subTypeName, subTypeId, frequency, isActive = false, isConnected = false }) => {
+          const { nextPostDate, daysFrequency, frequencyToBePosted } = getSocialAutomationDetails(poll?.recordingDate, frequency);
+
           let socialAccount = await SocialPosting.findOne({ poll: pollId, user: userId, type, subType });
-          if (socialAccount) await SocialPosting.findByIdAndUpdate(socialAccount._id, { subTypeId, subTypeName, frequency, isActive });
+          if (socialAccount)
+            await SocialPosting.findByIdAndUpdate(socialAccount._id, {
+              subTypeId,
+              subTypeName,
+              frequency,
+              isActive,
+              nextPostDate,
+              daysFrequency,
+              frequencyToBePosted,
+            });
           else {
             socialAccount = new SocialPosting({
               poll: pollId,
@@ -191,15 +205,18 @@ router.post("/:userId/socials/:pollId", async (req, res) => {
               frequency,
               isActive,
               isConnected,
+              nextPostDate,
+              daysFrequency,
+              frequencyToBePosted,
             });
             await socialAccount.save();
           }
 
-          return socialAccount._id;
+          return socialAccount;
         }
       );
 
-      await Promise.all(socialsIds);
+      await Promise.all(socialAccountAccounts);
     }
 
     res.status(200).json({ error: false, msg: "Socials saved successfully." });
