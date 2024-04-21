@@ -1,5 +1,6 @@
 import RecordRTC from 'recordrtc';
 import Simplebar from 'simplebar-react';
+import { isMobile } from 'react-device-detect';
 import { PlusOutlined } from '@ant-design/icons';
 import { FILE_TYPE } from '../../../utils/types';
 import { useDispatch, useSelector } from 'react-redux';
@@ -118,8 +119,8 @@ export default function PollAudioRecord() {
     <>
       <Form.Item name="audioDuration" hidden />
 
-      <div className="flex-item gap-2 mb-2">
-        <Form.Item name="audio" label="Audio" className="w-40 m-0">
+      <div className={`flex-item gap-2 mb-2 ${isMobile && 'flex-column'}`}>
+        <Form.Item name="audio" label="Audio" className={`m-0 ${isMobile ? 'w-100' : 'w-40'}`}>
           <Select
             loading={isLoading}
             disabled={isLoading}
@@ -141,11 +142,11 @@ export default function PollAudioRecord() {
 
       <Modal
         centered
-        width={600}
         open={open}
         footer={false}
         maskClosable={false}
         title="Add/Manage Audios"
+        width={isMobile ? '100%' : 600}
         onCancel={() => updateState({ blob: null, open: false })}
       >
         <Paragraph strong className="m-0">
@@ -168,8 +169,13 @@ export default function PollAudioRecord() {
             </Form.Item>
           )}
 
-          <div className="flex-item gap-1 mb-1">
-            <Button htmlType="button" onClick={startRecording} loading={isRecording}>
+          <div className={`flex-item gap-1 mb-1 ${isMobile && 'flex-column'}`}>
+            <Button
+              block={isMobile}
+              htmlType="button"
+              onClick={startRecording}
+              loading={isRecording}
+            >
               {isRecording ? (
                 <>
                   Recording... <span>{secondsToMinutes(timeLeft)}</span>{' '}
@@ -179,11 +185,17 @@ export default function PollAudioRecord() {
               )}
             </Button>
 
-            <Button htmlType="button" onClick={stopRecording} disabled={!isRecording}>
+            <Button
+              block={isMobile}
+              htmlType="button"
+              onClick={stopRecording}
+              disabled={!isRecording}
+            >
               Stop Recording
             </Button>
 
             <Button
+              block={isMobile}
               type="primary"
               htmlType="button"
               loading={isUploading}
@@ -197,6 +209,7 @@ export default function PollAudioRecord() {
 
         <Simplebar style={{ maxHeight: 420, paddingRight: 10 }}>
           <List
+            size="small"
             footer={false}
             bordered={false}
             loading={isLoading}
@@ -204,6 +217,7 @@ export default function PollAudioRecord() {
             header="Available Audios"
             renderItem={({ _id, name }, i) => (
               <List.Item
+                className="pl-0 pr-0"
                 actions={[
                   <Popconfirm
                     key="delete"

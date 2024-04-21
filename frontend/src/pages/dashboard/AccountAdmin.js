@@ -2,6 +2,7 @@ import AppTitle from '../../components/AppTitle';
 import HeadshotImage from '../layouts/HeadshotImage';
 import SocialMediaConnect from './SocialMediaConnect';
 import { useAuthContext } from '../../auth/AuthProvider';
+import { isMobile, isDesktop } from 'react-device-detect';
 import { Form, Input, Button, Divider, Typography, Space } from 'antd';
 
 const { Text, Title, Paragraph } = Typography;
@@ -17,21 +18,23 @@ export default function AccountAdmin() {
       <AppTitle title="Account Admin" />
 
       <div className="account-admin">
-        <Title className="m-0 mb-1">Account Admin</Title>
+        <Title level={isMobile ? 3 : 1} className="m-0 mb-1">
+          Account Admin
+        </Title>
 
-        <Title level={5} className="m-0 mb-4 fw-400 color-45485C">
+        <Title level={5} className={`m-0 fw-400 color-45485C ${isMobile ? 'mb-2' : 'mb-4'}`}>
           Here you can track the automation of your guests:
         </Title>
 
         <Form
           form={form}
           size="large"
-          className="w-80"
           layout="vertical"
           onFinish={updateUser}
+          className={isDesktop ? 'w-80' : 'w-100'}
           initialValues={{ email, lastName, firstName, profile: { ...profile } }}
         >
-          <div className="flex-item gap-2">
+          <div className={`flex-item gap-2 ${isMobile && 'flex-column full-width-cols'}`}>
             <Form.Item
               name="firstName"
               label="FIRST NAME"
@@ -56,7 +59,11 @@ export default function AccountAdmin() {
             </Form.Item>
           </div>
 
-          <div className="flex-item align-baseline gap-2">
+          <div
+            className={`flex-item gap-2 align-baseline ${
+              isMobile && 'flex-column full-width-cols'
+            }`}
+          >
             <Form.Item name={['profile', 'phone']} label="CELL PHONE" className="flex-1">
               <Input placeholder="CELL PHONE" />
             </Form.Item>
@@ -71,9 +78,10 @@ export default function AccountAdmin() {
             </Form.Item>
           </div>
 
-          <Space size={24}>
+          <Space size={24} direction={isMobile ? 'vertical' : 'horizontal'}>
             <Button
               shape="round"
+              block={isMobile}
               htmlType="submit"
               loading={isLoading}
               className="minw-110px primary-outlined"

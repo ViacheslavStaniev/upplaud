@@ -235,3 +235,10 @@ export const updatePoll = (pollId, info) => {
       .catch((error) => reject(error));
   });
 };
+
+// resend-invite-email
+export const resendEmailInvite = (pollId) => {
+  return new Promise((resolve, reject) => {
+    axios.post(`guests/${pollId}/resend-invite-email`).then(resolve).catch(reject);
+  });
+};

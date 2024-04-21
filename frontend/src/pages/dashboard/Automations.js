@@ -1,7 +1,15 @@
 import { useState, useEffect } from 'react';
+import { isMobile } from 'react-device-detect';
 import { useSelector, useDispatch } from 'react-redux';
 import { POLL_STATUS, SOCIAL_TYPE } from '../../utils/types';
-import { getGuestsList, deleteGuest, deleteManyGuests } from '../../reducers/guestsSlice';
+import {
+  updatePoll,
+  updateState,
+  deleteGuest,
+  getGuestsList,
+  deleteManyGuests,
+  resendEmailInvite,
+} from '../../reducers/guestsSlice';
 import { getRandomColor, getDateString, pollTypeOptions, downloadVotes } from '../../utils/common';
 import {
   Tag,
@@ -15,6 +23,7 @@ import {
   Popover,
   Typography,
   Popconfirm,
+  notification,
 } from 'antd';
 import {
   LikeOutlined,
@@ -29,7 +38,7 @@ import AppTitle from '../../components/AppTitle';
 import CustomIcon from '../../components/CustomIcon';
 import AutomationCongrats from './layouts/AutomationCongrats';
 
-const { PUBLISHED } = POLL_STATUS;
+const { DRAFT, PUBLISHED } = POLL_STATUS;
 const { FACEBOOK, LINKEDIN } = SOCIAL_TYPE;
 const { Text, Title, Paragraph } = Typography;
 
@@ -58,6 +67,7 @@ export default function Automations() {
       key: 'name',
       title: 'NAME',
       dataIndex: 'name',
+      className: 'minw-150px',
       render: (name, record) => (
         <Space className={!record.guest ? 'disabled' : ''}>
           <Badge color={getRandomColor()} count={name.charAt()} />
@@ -70,62 +80,16 @@ export default function Automations() {
     {
       key: 'recordingDate',
       title: 'RECORDING DATE',
+      className: 'minw-200px',
       dataIndex: 'recordingDate',
       sorter: (a, b) => a.recordingDate - b.recordingDate,
       render: (timestamp) => <Text className="color-5D0578">{getDateString(timestamp)}</Text>,
     },
-    // {
-    //   title: 'STATUS',
-    //   key: 'statusObj',
-    //   // align: 'center',
-    //   dataIndex: 'statusObj',
-    //   render: ({ guest, host }) => (
-    //     <div className="flex-item gap-1">
-    //       <Tag
-    //         color="rgb(184 209 196 / 20%)"
-    //         style={{
-    //           margin: 0,
-    //           color: '#6E8D7D',
-    //           padding: '10px 20px',
-    //           fontSize: 16,
-    //           borderRadius: 25,
-    //         }}
-    //       >
-    //         Guest
-    //         {guest ? (
-    //           <Text>
-    //             {guest.posted} {getDateString(guest.date)}
-    //           </Text>
-    //         ) : (
-    //           '--'
-    //         )}
-    //       </Tag>
-    //       <Tag
-    //         color="rgb(41 127 184 / 10%)"
-    //         style={{
-    //           margin: 0,
-    //           color: '#297FB8',
-    //           padding: '10px 20px',
-    //           fontSize: 16,
-    //           borderRadius: 25,
-    //         }}
-    //       >
-    //         Host
-    //         {host ? (
-    //           <Text>
-    //             {host.posted} {getDateString(host.date)}
-    //           </Text>
-    //         ) : (
-    //           '--'
-    //         )}
-    //       </Tag>
-    //     </div>
-    //   ),
-    // },
     {
       key: 'votes',
       title: 'VOTES',
       dataIndex: 'votes',
+      className: 'minw-150px',
       sorter: (a, b) => a.votes?.length - b.votes?.length,
       render: (votes) =>
         // <Tooltip title="View Votes">
@@ -179,7 +143,7 @@ export default function Automations() {
     {
       key: 'action',
       title: 'Action',
-      render: ({ id, isActive, votes, isPublished }) => (
+      render: ({ id, votes, status, isPublished }) => (
         <Space>
           <Tooltip title="Congrats & Details">
             <Button
@@ -188,15 +152,22 @@ export default function Automations() {
               onClick={() => setAutomationCongrats(id)}
             />
           </Tooltip>
-          <Tooltip title="Re-Send Invitation Email">
-            <Button disabled icon={<MailOutlined />} />
-          </Tooltip>
+          <EmailInviteResendBtn id={id} />
           <Tooltip title="Edit Automation Details">
             <Button href={`/automations/${id}`} icon={<EditOutlined />} />
           </Tooltip>
-          <Tooltip title={`${isActive ? 'Pause' : 'Active'} Automation`}>
-            <Button danger={isActive} icon={<PauseCircleOutlined />} />
-          </Tooltip>
+          <StatueUpdateBtn
+            id={id}
+            status={status}
+            isPublished={isPublished}
+            onSuccess={(updateConfig) => {
+              dispatch(
+                updateState({
+                  guests: guests.map((g) => (g?._id === id ? { ...g, ...updateConfig } : g)),
+                })
+              );
+            }}
+          />
           <Tooltip title="Download Voting Data">
             <Button
               disabled={!votes?.length}
@@ -276,6 +247,7 @@ export default function Automations() {
           loading={isLoading}
           dataSource={getDataSource(key)}
           pagination={{ defaultPageSize: 5 }}
+          scroll={{ x: '100%' }}
           rowSelection={{ type: 'checkbox', onChange: (_, rows) => setSelectedRows(rows) }}
         />
       ),
@@ -287,16 +259,21 @@ export default function Automations() {
       <AppTitle title="Automations" />
 
       <div className="account-admin">
-        <Title className="m-0 mb-1">Automations</Title>
+        <Title level={isMobile ? 3 : 1} className="m-0 mb-1">
+          Automations
+        </Title>
 
-        <div className="flex-item">
-          <Title level={5} className="m-0 mb-4 fw-400 color-45485C flex-auto">
+        <div className={`flex-item ${isMobile && 'flex-column'}`}>
+          <Title
+            level={5}
+            className={`m-0 fw-400 color-45485C flex-auto ${isMobile ? 'mb-2' : 'mb-4'}`}
+          >
             Manage the automations of your guests & track the numbers of votes from your Guest (G),
             your connections (H), or Neither (N). You can also export voters’ email addresses, topic
             suggestions, referral names, etc.
           </Title>
 
-          <Button type="info" shape="round" size="large">
+          <Button block={isMobile} type="info" shape="round" size="large">
             REMIND INVITES
           </Button>
         </div>
@@ -380,5 +357,55 @@ function VoteDetails({ votes = [], onClose }) {
         }}
       />
     </Modal>
+  );
+}
+
+function EmailInviteResendBtn({ id }) {
+  const [loading, setLoading] = useState(false);
+
+  // Re-Send email invites
+  const onResendEmailInvite = () => {
+    setLoading(true);
+
+    resendEmailInvite(id)
+      .then(() => notification.success({ message: 'Invite email re-sent successfully.' }))
+      .catch(() => notification.error({ message: 'Unable to send invite. Please try again.' }))
+      .finally(() => setLoading(false));
+  };
+
+  return (
+    <Tooltip title="Re-Send Invitation Email">
+      <Button icon={<MailOutlined />} loading={loading} onClick={onResendEmailInvite} />
+    </Tooltip>
+  );
+}
+
+function StatueUpdateBtn({ id, status = DRAFT, isPublished = false, onSuccess }) {
+  const [loading, setLoading] = useState(false);
+
+  // Update Statsu
+  const onStatusUpdate = () => {
+    setLoading(true);
+
+    const updateConfig = { status: status === DRAFT ? PUBLISHED : DRAFT };
+
+    updatePoll(id, updateConfig)
+      .then(() => {
+        onSuccess(updateConfig);
+        notification.success({ message: 'Status updated successfully.' });
+      })
+      .catch(() => notification.error({ message: 'Unable to update. Please try again.' }))
+      .finally(() => setLoading(false));
+  };
+
+  return (
+    <Tooltip title={`${isPublished ? 'Pause' : 'Active'} Automation`}>
+      <Button
+        danger={isPublished}
+        icon={<PauseCircleOutlined />}
+        loading={loading}
+        onClick={onStatusUpdate}
+      />
+    </Tooltip>
   );
 }

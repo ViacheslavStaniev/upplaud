@@ -5,6 +5,7 @@ import LoadingScreen from '../../components/LoadingScreen';
 import SocialPostingItem from './layouts/SocialPostingItem';
 import { useState, useEffect } from 'react';
 import { getFullPath } from '../../routes/paths';
+import { isMobile, isDesktop } from 'react-device-detect';
 import { useParams, Navigate, Link } from 'react-router-dom';
 import { getDateString, getSocialsItems } from '../../utils/common';
 import { getPoll, getSocials, saveSocials, updatePoll } from '../../reducers/guestsSlice';
@@ -62,21 +63,23 @@ export default function GuestAcceptance() {
   if (!guestId) return <Navigate to="/404" />;
 
   return (
-    <ConfigProvider theme={{ token: { fontSize: 16 } }}>
+    <ConfigProvider theme={{ token: { fontSize: isMobile ? 14 : 16 } }}>
       <AppTitle title="Guest Acceptance" />
 
-      <Row className="h-100vh guest-acceptance">
-        <Col span={5} className="p-2 leftbg">
-          <Logo rootClassName="sidebar-navlogo" />
+      <Row className="h-100vh guest-acceptance" style={{ flexFlow: 'row-revers' }}>
+        <Col span={isMobile ? 24 : 5} className="p-2 leftbg">
+          <Logo rootClassName={isMobile ? 'mb-2' : 'sidebar-navlogo'} />
 
-          <div className="bg-white p-2 br-8px mt-2">
-            <Title level={3} className="text-center color-36c102">
+          <div className={`bg-white p-2 br-8px ${isDesktop && 'mt-2'}`}>
+            <Title level={isMobile ? 4 : 3} className="text-center color-36c102">
               How does Upplaud grow our audience?
             </Title>
-            <Title level={5}>It's proven that when we ask others for input, we get to:</Title>
+            <Title level={5} className={isMobile && 'mt-0'}>
+              It's proven that when we ask others for input, we get to:
+            </Title>
             <List
               size="small"
-              className="mb-4"
+              className={isMobile ? 'mb-0' : 'mb-4'}
               dataSource={[
                 '- Make them feel part of us',
                 '- Give them what they want.',
@@ -84,10 +87,14 @@ export default function GuestAcceptance() {
                 '- We grow our reach & impact',
                 '- We do business better!',
               ]}
-              renderItem={(item) => <List.Item className="border-0">{item}</List.Item>}
+              renderItem={(item) => (
+                <List.Item className={`border-0 ${isMobile && 'p-0 pb-1 fw-500'}`}>
+                  {item}
+                </List.Item>
+              )}
             />
 
-            <Paragraph>
+            <Paragraph className={isMobile && 'm-0'}>
               Upplaud captures voter referrals, email addresses & offers rewards to voters; while
               pulling interest from multiple sources: Co-presenters' Facebook, LinkedIn, email,
               presentations, etc.
@@ -95,7 +102,7 @@ export default function GuestAcceptance() {
           </div>
         </Col>
 
-        <Col span={19} className="p-4">
+        <Col span={isMobile ? 24 : 19} className={isMobile ? 'p-2' : 'p-4'}>
           {poll && guest && <ConnectSocialsInfo poll={poll} guest={guest} />}
         </Col>
       </Row>
@@ -107,7 +114,7 @@ export default function GuestAcceptance() {
         open={!passwordValidated}
         styles={{ mask: { backgroundColor: '#fdeffff0' } }}
       >
-        <div className="p-2">
+        <div className={isDesktop && 'p-2'}>
           <Title level={3} className="mt-0">
             Password Required!
           </Title>
@@ -130,7 +137,7 @@ export default function GuestAcceptance() {
               <Input.Password placeholder="Enter your password" />
             </Form.Item>
 
-            <Button type="primary" htmlType="submit">
+            <Button block={isMobile} type="primary" htmlType="submit">
               Submit
             </Button>
           </Form>
@@ -169,20 +176,20 @@ function ConnectSocialsInfo({ poll, guest }) {
 
   return (
     <div className="guest-acceptance-content">
-      <Title level={2} className="color-6b0d88 fw-600 m-0 mb-2">
+      <Title level={isMobile ? 3 : 2} className="color-6b0d88 fw-600 m-0 mb-2">
         Hi {guest?.firstName}, I'm looking forward to doing {poll?.presentationName || 'an event'}{' '}
         with you!
       </Title>
 
-      <Title level={3} className="m-0 mb-2">
+      <Title level={isMobile ? 4 : 3} className="m-0 mb-2">
         Let's grow the best audience for us…
       </Title>
 
-      <Title level={3} className="m-0 mb-2">
+      <Title level={isMobile ? 4 : 3} className="m-0 mb-2">
         By inviting our connections to vote & share our topics:
       </Title>
 
-      <Card>
+      <Card bordered={isDesktop} styles={{ body: { padding: isMobile ? 12 : 24 } }}>
         <TitleText
           index={1}
           className="color-2196F3"
@@ -199,13 +206,13 @@ function ConnectSocialsInfo({ poll, guest }) {
 
         <TitleText index={2} type="secondary" title="Optional: Reward for voting..." />
 
-        <div className="flex-item gap-1 mb-4">
+        <div className={`flex-item gap-1 mb-4 ${isMobile && 'flex-column align-baseline'}`}>
           <Text className="minw-fit-content">Website address of your gift offer:</Text>
 
           <Form
             layout="inline"
             onFinish={onGuestOfferSave}
-            className="flex-item gap-1 flex-nowrap"
+            className={`flex-item gap-1 flex-nowrap ${isMobile ? 'flex-column w-100' : ''}`}
             initialValues={{ guestOfferUrl: poll?.guestOfferUrl }}
           >
             <Form.Item
@@ -216,7 +223,7 @@ function ConnectSocialsInfo({ poll, guest }) {
               <Input type="url" placeholder="Enter your offer url" />
             </Form.Item>
             <Form.Item noStyle>
-              <Button type="primary" htmlType="submit" loading={loading2}>
+              <Button block={isMobile} type="primary" htmlType="submit" loading={loading2}>
                 Save
               </Button>
             </Form.Item>
@@ -256,7 +263,13 @@ function ConnectSocialsInfo({ poll, guest }) {
         >
           <SocialPostingItem />
 
-          <Button loading={loading} type="primary" htmlType="submit" className="mt-2">
+          <Button
+            block={isMobile}
+            loading={loading}
+            type="primary"
+            htmlType="submit"
+            className="mt-2"
+          >
             SAVE
           </Button>
         </Form>
@@ -281,10 +294,11 @@ function ConnectSocialsInfo({ poll, guest }) {
 
 function TitleText({ title = '', index = 1, type = '', className = '', avatarStyles = {} }) {
   return (
-    <Title type={type} level={4} className={`flex-item gap-1 ${className}`}>
-      <Avatar size="small" style={avatarStyles}>
+    <Title type={type} level={isMobile ? 5 : 4} className={`flex-item gap-1 ${className}`}>
+      <Avatar size="small" style={{ ...avatarStyles, minWidth: 27 }}>
         {index}
       </Avatar>
+
       {title}
     </Title>
   );

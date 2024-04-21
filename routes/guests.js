@@ -649,13 +649,28 @@ router.post("/vote/:pollId", async (req, res) => {
   }
 });
 
-// @route PUT api/guests/poll/:pollId/info
+// @route PUT api/guests/:pollId/info
 // @desc Update Poll Info
 // @access Public
 router.put("/:pollId/info", async (req, res) => {
   try {
     await Guest.findByIdAndUpdate(req.params.pollId, req.body);
     res.json({ msg: "Poll Info updated successfully." });
+  } catch (err) {
+    // throw err;
+    console.error({ msg: err.message });
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// @route POST api/guests/:pollId/resend-invite-email
+// @desc Resends email invite to the guest
+// @access Public
+router.post("/:pollId/resend-invite-email", async (req, res) => {
+  try {
+    const poll = await getPoll(req.params.pollId);
+    await sendEmailToGuest(poll);
+    res.json({ msg: "Invitation email re-sent successfully." });
   } catch (err) {
     // throw err;
     console.error({ msg: err.message });

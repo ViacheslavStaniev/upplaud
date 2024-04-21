@@ -1,4 +1,5 @@
 import { Button, Typography } from 'antd';
+import { isMobile } from 'react-device-detect';
 import { Link, useNavigate } from 'react-router-dom';
 import { PATH_DASHBOARD } from '../../../routes/paths';
 import { SOCIAL_TITLES } from '../../../utils/types';
@@ -21,8 +22,10 @@ export default function AutomationCongrats({ guest, showActionBtns = false, onGo
   }, []);
 
   return (
-    <div className="mt-2 bg-F7F3F9 p-3 br-5px">
-      <Title level={3}>👏 Congrats, your new Upplaud is ready to pull in new interest!</Title>
+    <div className={`mt-2 bg-F7F3F9 br-5px ${isMobile ? 'p-2' : 'p-3'}`}>
+      <Title level={isMobile ? 4 : 3}>
+        👏 Congrats, your new Upplaud is ready to pull in new interest!
+      </Title>
       <Title level={5}>
         Voters will be directed to:{' '}
         <Link target="_blank" to={`/vote/${guest?._id}`}>
@@ -50,27 +53,37 @@ export default function AutomationCongrats({ guest, showActionBtns = false, onGo
           Guest Invitation Page
         </Link>
       </Title>
-      <Title level={5} className="mt-0">
+      <Title level={5} className={`mt-0 ${isMobile && 'mb-0'}`}>
         Their private invite password is:{' '}
-        <CopyText text={guest?.password} className="d-inline-block w-125px ml-1" />
+        <CopyText
+          text={guest?.password}
+          className={`d-inline-block ${isMobile ? 'w-100' : 'w-125px ml-1'}`}
+        />
       </Title>
 
-      <Title level={4}>
+      <Title level={isMobile ? 5 : 4} className={isMobile && 'mt-2'}>
         We'll start posting{' '}
         {startHostAutomation ? 'when your guest connects their social media.' : 'later today!'}
       </Title>
 
       {showActionBtns && (
         <>
-          <Button type="default" size="large" onClick={onGoBack} icon={<ArrowLeftOutlined />}>
+          <Button
+            size="large"
+            type="default"
+            block={isMobile}
+            onClick={onGoBack}
+            icon={<ArrowLeftOutlined />}
+          >
             Go back to make any changes.
           </Button>
 
           <Button
-            type="primary"
             size="large"
-            className="d-block mt-2"
+            type="primary"
+            block={isMobile}
             icon={<CheckOutlined />}
+            className="d-block mt-2 text-wrap"
             onClick={() => navigate(PATH_DASHBOARD.dashboard.automations)}
           >
             CONFIRM YOUR NEW UPPLAUD & SEE YOUR OTHER AUTOMATIONS

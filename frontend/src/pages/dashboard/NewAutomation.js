@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import { useState, useEffect } from 'react';
+import { isMobile } from 'react-device-detect';
 import { getFiles } from '../../reducers/fileSlice';
 import { useSelector, useDispatch } from 'react-redux';
 import { useAuthContext } from '../../auth/AuthProvider';
@@ -295,7 +296,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
       title: 'Guest invites',
       content: (
         <Row gutter={[24]}>
-          <Col span={18}>
+          <Col span={isMobile ? 24 : 18}>
             <Title level={4} className="mt-0">
               Invite Email
             </Title>
@@ -316,8 +317,8 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
               formItemParams={{ className: 'm-0', wrapperCol: 24 }}
             />
           </Col>
-          <Col span={6}>
-            <Title level={5} className="mt-0">
+          <Col span={isMobile ? 24 : 6}>
+            <Title level={5} className={isMobile ? 'mt-2' : 'mt-0'}>
               Short Codes
             </Title>
 
@@ -345,38 +346,49 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
       content: (
         <>
           <Form.Item
-            className="w-50 mt-4"
             name="recordingDate"
             label="Automation End Date"
             rules={[{ required: true }]}
+            className={isMobile ? 'w-100' : 'w-50 mt-4'}
           >
             <DatePicker
-              className="w-75 ml-0"
+              className={isMobile ? 'w-100' : 'w-75 ml-0'}
               disabledDate={(d) =>
                 d && (d < dayjs().subtract(1, 'day') || d > dayjs().add(1, 'years'))
               }
             />
           </Form.Item>
 
-          <div className="flex-item">
+          <div className="flex-item position-relative">
             <Form.Item
               className="m-0"
+              labelCol={{ span: 20 }}
               valuePropName="checked"
               label="POSTING STARTS NOW"
               name="startHostAutomation"
-              labelCol={{ span: 20 }}
             >
               <Switch disabled={isSoloSession} />
             </Form.Item>
-            <Text type="secondary" className="ml-1">
+            <Text
+              type="secondary"
+              className="ml-1"
+              style={{ ...(isMobile && { left: 50, bottom: 10, position: 'absolute' }) }}
+            >
               Start when they starts
             </Text>
           </div>
 
-          <Space size={20} className="mt-4">
-            <Button onClick={() => setCurrentStep((c) => c - 1)}>Back</Button>
+          <Space
+            className="mt-4 w-100"
+            size={isMobile ? 12 : 20}
+            direction={isMobile ? 'vertical' : 'horizontal'}
+          >
+            <Button block={isMobile} onClick={() => setCurrentStep((c) => c - 1)}>
+              Back
+            </Button>
 
             <Button
+              block={isMobile}
               loading={isLoading && !isPublishing}
               onClick={() => onFormSubmit(POLL_STATUS.DRAFT)}
             >
@@ -384,6 +396,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
             </Button>
             <Button
               type="primary"
+              block={isMobile}
               loading={isLoading && isPublishing}
               onClick={() => onFormSubmit(POLL_STATUS.PUBLISHED)}
             >
@@ -400,7 +413,9 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
       {!isGuestAcceptance && <AppTitle title={`${isNew ? 'New' : 'Update'} Automation`} />}
 
       <div className="add-guest">
-        <Title className="m-0">NEW UPPLAUD AUTOMATION</Title>
+        <Title level={isMobile ? 3 : 1} className="m-0">
+          NEW UPPLAUD AUTOMATION
+        </Title>
 
         {!isPublished && (
           <Title level={5} className="fw-400" type="secondary">
@@ -454,6 +469,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
             <div className="flex-item gap-1 flex-center">
               {currentStep < stepItems.length - 1 && (
                 <Button
+                  block={isMobile}
                   type="primary"
                   onClick={() => {
                     // form
@@ -468,7 +484,9 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
               )}
 
               {currentStep > 1 && (
-                <Button onClick={() => setCurrentStep((c) => c - 1)}>Back</Button>
+                <Button block={isMobile} onClick={() => setCurrentStep((c) => c - 1)}>
+                  Back
+                </Button>
               )}
             </div>
           )}

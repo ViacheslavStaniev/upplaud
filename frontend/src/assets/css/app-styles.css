@@ -10,6 +10,9 @@
 .p-50px {
   padding: 50px !important;
 }
+.p-0 {
+  padding: 0 !important;
+}
 .p-1 {
   padding: 0.5rem !important;
 }
@@ -39,6 +42,9 @@
 }
 .pr-2 {
   padding-right: 1rem !important;
+}
+.pb-1 {
+  padding-bottom: 0.5rem !important;
 }
 .m-0 {
   margin: 0 !important;
@@ -147,6 +153,9 @@
 .maxw-200px {
   max-width: 200px !important;
 }
+.w-80px {
+  width: 80px !important;
+}
 .w-125px {
   width: 125px !important;
 }
@@ -176,6 +185,9 @@
 }
 .h-100vh {
   height: 100vh;
+}
+.max-h-48px {
+  max-height: 48px !important;
 }
 .maxh-125px {
   max-height: 125px !important;
@@ -230,6 +242,9 @@
 }
 .text-underline {
   text-decoration: underline;
+}
+.text-wrap {
+  white-space: normal !important;
 }
 .bg-white {
   background-color: white !important;
@@ -350,6 +365,9 @@
 }
 .capitalize {
   text-transform: capitalize !important;
+}
+.position-relative {
+  position: relative !important;
 }
 .position-absolute {
   position: absolute !important;
@@ -515,4 +533,7 @@
 
 .filter-shadow-1 {
   filter: drop-shadow(0px 14px 20px rgba(0, 0, 0, 0.05));
+}
+.full-width-cols .ant-form-item.flex-1 {
+  width: 100% !important;
 }

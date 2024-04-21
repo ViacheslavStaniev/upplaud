@@ -3,7 +3,7 @@ import { PATH_DASHBOARD } from '../routes/paths';
 import { useLocation, useNavigate } from 'react-router-dom';
 import CustomIcon from '../components/CustomIcon';
 
-export default function SidebarNavMenu() {
+export default function SidebarNavMenu({ onMenuClick = () => {} }) {
   const iconSize = 20;
 
   const navigate = useNavigate();
@@ -59,7 +59,10 @@ export default function SidebarNavMenu() {
       items={items}
       selectedKeys={[`/${path}`]}
       defaultOpenKeys={['manage']}
-      onClick={({ key }) => navigate(key)}
+      onClick={({ key }) => {
+        navigate(key);
+        onMenuClick();
+      }}
     />
   );
 }

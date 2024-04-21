@@ -2,7 +2,7 @@
   top: 0;
   height: auto;
   position: sticky;
-  line-height: 90px;
+  /* line-height: 90px; */
   background: white;
   padding-inline: 20px;
   /* border-bottom: 1px solid rgb(0 0 0 / 10%); */
@@ -182,4 +182,7 @@ span.ant-tag {
 .ant-progress.step-margin .ant-progress-steps-item {
   flex: 1;
   margin-inline-end: 0;
+}
+.ant-list .ant-list-item .ant-list-item-meta .ant-list-item-meta-title {
+  word-break: break-all;
 }

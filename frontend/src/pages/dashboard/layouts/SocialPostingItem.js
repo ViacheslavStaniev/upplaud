@@ -1,4 +1,5 @@
 import Accordian from '../../../components/Accordian';
+import { isMobile } from 'react-device-detect';
 import { getSocialLabel } from '../../../utils/common';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Button, Checkbox, Select, Form, Alert, Tooltip } from 'antd';
@@ -35,11 +36,14 @@ export default function SocialPostingItem() {
           {hasSocials &&
             socialItems.map(
               ({ _id, type, subType, subTypeName = '', isActive, frequency, isConnected }) => (
-                <div key={_id} className="flex-item gap-1 flex-auto">
+                <div
+                  key={_id}
+                  className={`flex-item gap-1 flex-auto ${isMobile && 'flex-column w-100'}`}
+                >
                   <Checkbox
                     checked={isActive}
-                    className="uppercase"
                     disabled={!isConnected}
+                    className={`uppercase ${isMobile && 'w-100'}`}
                     onChange={(e) => onChangeSet(_id, 'isActive', e.target.checked)}
                   >
                     {getSocialLabel(type, subType, subTypeName)}
@@ -52,6 +56,7 @@ export default function SocialPostingItem() {
                     disabled={!isConnected}
                     options={postingOptions}
                     style={{ minWidth: 200 }}
+                    className={isMobile && 'w-100'}
                     onChange={(value) => onChangeSet(_id, 'frequency', value)}
                   />
 
@@ -66,6 +71,7 @@ export default function SocialPostingItem() {
                         type="text"
                         size="small"
                         shape="circle"
+                        block={isMobile}
                         icon={<InfoCircleOutlined />}
                       >
                         Account Disconnected{' '}

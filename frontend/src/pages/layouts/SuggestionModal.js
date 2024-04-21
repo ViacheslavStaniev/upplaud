@@ -23,12 +23,13 @@ export default function SuggestionModal({ open, onCancel }) {
     <Modal centered open={open} footer={false} title="Suggestions" onCancel={onCancel}>
       <SimpleBar style={{ maxHeight: 'calc(100vh - 200px)', paddingRight: 10 }}>
         <List
+          size="small"
           header={false}
           footer={false}
           bordered={false}
           dataSource={suggestions}
           renderItem={(item, index) => (
-            <List.Item>
+            <List.Item className="pl-0 pr-0">
               {index + 1}. <Typography.Text copyable>{item}</Typography.Text>
             </List.Item>
           )}

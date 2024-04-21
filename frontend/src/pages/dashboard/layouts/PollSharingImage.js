@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { isMobile } from 'react-device-detect';
 import { FILE_TYPE } from '../../../utils/types';
 import { getFullS3Url } from '../../../config-global';
 import { useDispatch, useSelector } from 'react-redux';
@@ -55,11 +56,11 @@ export default function PollSharingImage() {
 
   const TextColorFormItem = ({ label, title, formType }) => {
     return (
-      <div className="flex-item gap-2 mb-2">
+      <div className={`flex-item gap-2 mb-2 ${isMobile && 'flex-column full-width-cols'}`}>
         <Form.Item
           label={label}
-          className="w-40 m-0"
           name={getFormName(`${formType}Text`)}
+          className={isMobile ? 'w-100' : 'w-40 m-0'}
           rules={[{ max: 45, message: 'Maximum 45 character are allowed.' }]}
         >
           <Input
@@ -174,8 +175,12 @@ export default function PollSharingImage() {
       label: 'Customize Automation Sharing Image',
       children: (
         <>
-          <div className="flex-item gap-2 mb-2">
-            <Form.Item label="LOGO IMAGE FROM" name={getFormName('logo')} className="w-40 m-0">
+          <div className={`flex-item gap-2 mb-2 ${isMobile && 'flex-column'}`}>
+            <Form.Item
+              label="LOGO IMAGE FROM"
+              name={getFormName('logo')}
+              className={`m-0 ${isMobile ? 'w-100' : 'w-40'}`}
+            >
               <Select
                 loading={isLoading}
                 disabled={isLoading}
@@ -192,6 +197,7 @@ export default function PollSharingImage() {
             </Form.Item>
             <Button
               type="link"
+              block={isMobile}
               icon={<PlusOutlined />}
               onClick={() => setShowAddManageImages(true)}
             >
@@ -204,8 +210,14 @@ export default function PollSharingImage() {
 
           <PollAudioRecord name={getFormName('audio')} />
 
-          <div className="flex-item gap-2 mt-4">
-            <Button danger type="primary" loading={isGenerating} onClick={onPollImageGenerateClick}>
+          <div className={`flex-item gap-2 mt-4 ${isMobile && 'flex-column'}`}>
+            <Button
+              danger
+              type="primary"
+              block={isMobile}
+              loading={isGenerating}
+              onClick={onPollImageGenerateClick}
+            >
               Generate Video Invitation Post
             </Button>
             {/* <CustomUpload
@@ -218,6 +230,7 @@ export default function PollSharingImage() {
 
             <Button
               type="default"
+              block={isMobile}
               disabled={!socialShareFileSrc}
               onClick={() => setShowPollImagePreview(true)}
             >
@@ -234,15 +247,15 @@ export default function PollSharingImage() {
             /> */}
             <Modal
               centered
-              width={'50%'}
               footer={false}
               open={showPollImagePreview}
+              width={isMobile ? '100%' : '50%'}
               title="Preview Video Invitation Post"
               onCancel={() => setShowPollImagePreview(false)}
             >
               <video
-                src={getFullS3Url(socialShareFileSrc)}
                 controls
+                src={getFullS3Url(socialShareFileSrc)}
                 style={{ width: '100%', height: 'auto' }}
               />
             </Modal>
@@ -305,6 +318,7 @@ export default function PollSharingImage() {
 
         <Simplebar style={{ maxHeight: 420, paddingRight: 10 }}>
           <List
+            size="small"
             footer={false}
             bordered={false}
             loading={isLoading}
@@ -326,6 +340,7 @@ export default function PollSharingImage() {
                     </Button>
                   </Popconfirm>,
                 ]}
+                className="pl-0 pr-0"
               >
                 <List.Item.Meta
                   title={name}

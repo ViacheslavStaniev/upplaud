@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Modal, Typography } from 'antd';
+import { isMobile } from 'react-device-detect';
 import { getFullS3Url } from '../../../config-global';
 
 export default function PreviewAutomationVideo({
@@ -17,9 +18,9 @@ export default function PreviewAutomationVideo({
 
       <Modal
         centered
-        width={'50%'}
         footer={false}
         open={openVideoPreview}
+        width={isMobile ? '100%' : '50%'}
         title="Preview Video Invitation Post"
         onCancel={() => setOpenVideoPreview(false)}
       >

@@ -1,6 +1,7 @@
 import axios from '../../utils/axios';
 import CustomIcon from '../../components/CustomIcon';
 import { useState, useEffect } from 'react';
+import { isMobile } from 'react-device-detect';
 import { APP_BASEURL } from '../../config-global';
 import { SOCIAL_TYPE, SOCIAL_TITLES } from '../../utils/types';
 import {
@@ -251,7 +252,11 @@ export default function SocialMediaConnect({
     <div className={`social-media ${className}`}>
       {showTitle && <Title level={3}>Connect with social media</Title>}
 
-      <Space size={16}>
+      <Space
+        size={16}
+        direction={isMobile ? 'vertical' : 'horizontal'}
+        style={{ width: `calc(100% - ${isMobile ? '1rem' : '0px'})` }}
+      >
         {socialsBtns.map(({ key, title, items, disabled, isConnected }) => (
           <Dropdown
             arrow
@@ -267,11 +272,15 @@ export default function SocialMediaConnect({
               } else setOpenDropdown(open ? key : null);
             }}
           >
-            <Badge count={getConnectIcon(isConnected, btnSize === 'large' ? 32 : 26)}>
+            <Badge
+              className={isMobile && 'w-100'}
+              count={getConnectIcon(isConnected, btnSize === 'large' ? 32 : 26)}
+            >
               <Button
                 type={key}
-                size={btnSize}
                 shape="round"
+                size={btnSize}
+                block={isMobile}
                 loading={loading}
                 disabled={disabled}
                 href={getSocialConnectUrl(key)}
