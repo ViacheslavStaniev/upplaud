@@ -5,7 +5,7 @@ import { useAuthContext } from '../../auth/AuthProvider';
 import { isMobile, isDesktop } from 'react-device-detect';
 import { Form, Input, Button, Divider, Typography, Space } from 'antd';
 
-const { Text, Title, Paragraph } = Typography;
+const { Link, Title, Paragraph } = Typography;
 
 export default function AccountAdmin() {
   const [form] = Form.useForm();
@@ -91,12 +91,13 @@ export default function AccountAdmin() {
 
             {userName && (
               <Paragraph className="m-0">
-                YOUR {window.location.hostname.toUpperCase()} SHOW URL is{' '}
-                <Text
+                Your Upplaud automations url is{' '}
+                <Link
                   strong
                   copyable
-                  className="text-underline"
-                >{`${window.location.origin}/show/${userName}`}</Text>
+                  target="_blank"
+                  href={`/user-automations/${userName}`}
+                >{`${window.location.origin}/user-automations/${userName}`}</Link>
               </Paragraph>
             )}
           </Space>

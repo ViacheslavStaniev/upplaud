@@ -264,7 +264,7 @@ async function register(firstName, lastName, email, password, timezone = "", typ
   try {
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(password, salt);
-    user.userName = createUsername({ firstName, lastName });
+    user.userName = await createUsername({ firstName, lastName });
     await user.save(options);
 
     await session.commitTransaction();

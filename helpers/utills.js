@@ -3,6 +3,7 @@ const path = require("path");
 const https = require("https");
 const axios = require("axios");
 const jwt = require("jsonwebtoken");
+const User = require("../models/User");
 const { exec } = require("child_process");
 const { AuthClient, RestliClient } = require("linkedin-api-client");
 
@@ -18,14 +19,23 @@ const generateAuthToken = (user, expiresIn = 7 * 24 * 60 * 60) => {
 
 const getAuthResponse = async (user) => ({ accessToken: await generateAuthToken(user), user });
 
-const createUsername = ({ firstName = "", lastName = "" }) => {
-  const cleanString = (str) => str.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+const createUsername = async ({ firstName = "", lastName = "" }) => {
+  let username = firstName.trim().charAt(0);
+  if (lastName) username += lastName.trim().charAt(0);
+  else username += firstName.trim().charAt(1);
 
-  let username = "";
-  if (firstName) username += cleanString(firstName);
-  if (lastName) username += "-" + cleanString(lastName);
+  // Check if username already exists
+  const user = await User.findOne({
+    userName: { $regex: new RegExp(`^${username}`, "i") },
+  });
 
-  return `${username}-${randomString(8)}`;
+  // If username already exists, append count to the username
+  if (user) {
+    const count = await User.countDocuments({ userName: { $regex: new RegExp(`^${username}`, "i") } });
+    username += count + 1;
+  } else username += 1;
+
+  return username.toLowerCase();
 };
 
 // Set User Session

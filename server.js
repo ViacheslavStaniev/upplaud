@@ -65,7 +65,7 @@ app.get("/", (req, res) => res.send("API running"));
 // Define Routes
 app.use("/poll", require("./routes/poll"));
 app.use("/api/auth", require("./routes/auth"));
-app.use("/api/show", require("./routes/show"));
+// app.use("/api/show", require("./routes/show"));
 app.use("/api/files", require("./routes/files"));
 app.use("/api/users", require("./routes/users"));
 app.use("/api/guests", require("./routes/guests"));

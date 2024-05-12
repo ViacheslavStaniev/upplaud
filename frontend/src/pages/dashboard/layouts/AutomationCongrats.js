@@ -28,7 +28,7 @@ export default function AutomationCongrats({ guest, showActionBtns = false, onGo
       </Title>
       <Title level={5}>
         Voters will be directed to:{' '}
-        <Link target="_blank" to={`/vote/${guest?._id}`}>
+        <Link target="_blank" to={`/vote/${guest?.uniqueId}/${guest?.guest?.userName}`}>
           Voting Page
         </Link>
       </Title>
@@ -49,7 +49,7 @@ export default function AutomationCongrats({ guest, showActionBtns = false, onGo
 
       <Title level={5} className="mb-1">
         Your guest will be invited to connect here:{' '}
-        <Link target="_blank" to={`/guest-acceptance/${guest?._id}`}>
+        <Link target="_blank" to={`/guest-acceptance/${guest?.uniqueId}/${guest?.guest?.userName}`}>
           Guest Invitation Page
         </Link>
       </Title>

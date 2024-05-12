@@ -104,11 +104,13 @@ export default function Router() {
         { path: '500', element: <Page500 /> },
         { path: '404', element: <Page404 /> },
         { path: '403', element: <Page403 /> },
-        { path: 'vote/:guestId', element: <VotingPage /> },
-        { path: 'vote/:pollUniqueId/:guestUserName', element: <UserAutomations /> },
+        { path: 'vote/:pollUniqueId', element: <VotingPage /> },
+        { path: 'vote/:pollUniqueId/:guestUserName', element: <VotingPage /> },
+        { path: 'user-automations/:userName', element: <UserAutomations /> },
       ],
     },
-    { path: 'guest-acceptance/:guestId', element: <GuestAcceptance /> },
+    { path: 'guest-acceptance/:pollUniqueId', element: <GuestAcceptance /> },
+    { path: 'guest-acceptance/:pollUniqueId/:guestUserName', element: <GuestAcceptance /> },
     { path: '*', element: <Navigate to="/404" replace /> },
   ]);
 }

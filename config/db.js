@@ -1,10 +1,9 @@
 const mongoose = require("mongoose");
 
-// const { MONGO_HOST, MONGO_DATABASE, MONGO_USERNAME, MONGO_PASSWORD, MONGO_CONNECTION_PARAMS, MONGO_CONNECTION_PREFIX } = process.env;
+const { MONGO_HOST, MONGO_DATABASE, MONGO_USERNAME, MONGO_PASSWORD, MONGO_CONNECTION_PARAMS, MONGO_CONNECTION_PREFIX } = process.env;
 
-// const dbUri = `${MONGO_CONNECTION_PREFIX}://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}/${MONGO_DATABASE}?${MONGO_CONNECTION_PARAMS}`;
-
-const uri = "mongodb+srv://tcmhack:tcmpriya@tcmhack.olsdl.mongodb.net/podasq?retryWrites=true&w=majority";
+// Connection URI
+const dbUri = `${MONGO_CONNECTION_PREFIX}://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}/${MONGO_DATABASE}?${MONGO_CONNECTION_PARAMS}`;
 
 const connectDB = async (max_attempts = 5) => {
   const attempt = async () => {
@@ -14,7 +13,7 @@ const connectDB = async (max_attempts = 5) => {
     }
 
     try {
-      await mongoose.connect(uri, {
+      await mongoose.connect(dbUri, {
         useNewUrlParser: true, // current URL string parser is deprecated
         useFindAndModify: false, //`findOneAndUpdate()` and `findOneAndDelete()` without the `useFindAndModify` option set to false are deprecated.
         useUnifiedTopology: true,

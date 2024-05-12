@@ -8,7 +8,7 @@ import { getFullPath } from '../../routes/paths';
 import { isMobile, isDesktop } from 'react-device-detect';
 import { useParams, Navigate, Link } from 'react-router-dom';
 import { getDateString, getSocialsItems } from '../../utils/common';
-import { getPoll, getSocials, saveSocials, updatePoll } from '../../reducers/guestsSlice';
+import { getSocials, saveSocials, updatePoll, pollActions } from '../../reducers/guestsSlice';
 import {
   App,
   Row,
@@ -27,28 +27,32 @@ import {
 const { Text, Title, Paragraph } = Typography;
 
 export default function GuestAcceptance() {
-  const { guestId } = useParams();
+  const { pollUniqueId } = useParams();
 
   const [state, setState] = useState({
     poll: null,
     errorMsg: '',
-    loading: false,
+    loading: true,
     validatedPolls: {},
     passwordValidated: false,
   });
   const { poll, errorMsg, loading, validatedPolls, passwordValidated } = state;
+
+  console.log('poll', poll);
+  const guestId = poll?._id;
   const guest = poll?.guest || {};
 
   const updateState = (data) => setState((d) => ({ ...d, ...data }));
 
   useEffect(() => {
-    if (guestId) {
+    if (pollUniqueId) {
       const validatedPolls = JSON.parse(window.localStorage.getItem('validatedPolls')) || {};
-      const passwordValidated = validatedPolls[guestId] || false;
+      const passwordValidated = validatedPolls[pollUniqueId] || false;
 
       // Fetch Poll
       updateState({ loading: true, passwordValidated, validatedPolls });
-      getPoll(guestId)
+      pollActions
+        .getPollByUniqueId(pollUniqueId)
         .then((poll) => updateState({ poll }))
         .catch(console.error)
         .finally(() => updateState({ loading: false }));
@@ -57,7 +61,7 @@ export default function GuestAcceptance() {
     return () => {
       updateState({ poll: null, loading: false });
     };
-  }, [guestId]);
+  }, [pollUniqueId]);
 
   if (loading) return <LoadingScreen />;
   if (!guestId) return <Navigate to="/404" />;
@@ -127,7 +131,7 @@ export default function GuestAcceptance() {
             initialValues={{ password: '' }}
             onFinish={({ password = '' }) => {
               if (password?.trim() === poll?.password) {
-                const newValidatedPolls = { ...validatedPolls, [guestId]: true };
+                const newValidatedPolls = { ...validatedPolls, [pollUniqueId]: true };
                 window.localStorage.setItem('validatedPolls', JSON.stringify(newValidatedPolls));
                 updateState({ passwordValidated: true, newValidatedPolls });
               } else updateState({ errorMsg: 'Invalid password!' });

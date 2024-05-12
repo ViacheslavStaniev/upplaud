@@ -11,13 +11,14 @@ const { FILE_TYPE } = require("../models/UserFile");
 const { POLL_STATUS, GUEST_TYPE } = require("../models/Guest");
 const { SOCIAL_TYPE, SOCIAL_SUB_TYPE } = require("../models/SocialAccount");
 const { getS3Path, uploadImage, uploadFile } = require("../helpers/s3Helper");
-const { createOrUpdateGuestUser, getUserInfo, updateUserInfo } = require("./users");
+const { createOrUpdateGuestUser, getUserInfo, getUserByUserName, updateUserInfo } = require("./users");
 const {
   randomString,
   generateImage,
   generateVideo,
   replaceConstants,
   getFrontendUrl,
+  createUsername,
   getSocialAutomationDetails,
 } = require("../helpers/utills");
 
@@ -44,6 +45,24 @@ router.get("/", verifyAuth, async (req, res) => {
     }));
 
     res.json(guestListWithVotes);
+  } catch (err) {
+    // throw err;
+    console.error({ msg: err.message });
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// @route   GET api/guests/users/:userName
+// @desc    Fetchs the list of guests for the current logged-in user.
+// @access  Public
+router.get("/users/:userName", async (req, res) => {
+  try {
+    const user = await getUserByUserName(req.params.userName);
+    const automations = await Guest.find({ user: user?._id, status: POLL_STATUS.PUBLISHED })
+      .populate("socials")
+      .populate({ path: "guest", populate: "socialAccounts" });
+
+    res.json({ automations, user });
   } catch (err) {
     // throw err;
     console.error({ msg: err.message });
@@ -217,7 +236,15 @@ router.post("/", verifyAuth, async (req, res) => {
       }
 
       pollInfo.guest = guestType === GUEST_TYPE.GUEST_SPEAKER ? userId : newUser?._id;
-    } else pollInfo.guest = userId; // if guestType is SOLO_SESSION, then guest will be himself/herself
+
+      // UniqueId for Guest Speaker
+      pollInfo.uniqueId = guestType === GUEST_TYPE.GUEST_SPEAKER ? randomString(8) : await createUsername(newUser);
+    } else {
+      pollInfo.guest = userId; // if guestType is SOLO_SESSION, then guest will be himself/herself
+
+      // UniqueId for Solo Session
+      pollInfo.uniqueId = randomString(8);
+    }
 
     // Create new Poll
     const poll = new Guest(pollInfo);
@@ -626,6 +653,23 @@ router.get("/vote/:pollId", async (req, res) => {
   }
 });
 
+// @route   GET api/guests/vote-info/pollUniqueId
+// @desc    gets guest details by uniqueId
+// @access  Public
+router.get("/vote-info/:pollUniqueId", async (req, res) => {
+  try {
+    const poll = await Guest.findOne({ uniqueId: req.params.pollUniqueId })
+      .populate("pollImageInfo")
+      .populate({ path: "guest", populate: "socialAccounts" })
+      .populate({ path: "user", select: "firstName lastName" });
+    res.json(poll);
+  } catch (err) {
+    // throw err;
+    console.error({ msg: err.message });
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 // @route   POST api/guests/vote/pollId
 // @desc    save vote details
 // @access  Public
@@ -726,7 +770,7 @@ async function sendEmailToGuest(poll) {
 
       // Add Password to emailBody
       if (poll?.password) {
-        const guestLink = getFrontendUrl(`guest-acceptance/${poll._id}`);
+        const guestLink = getFrontendUrl(`guest-acceptance/${poll.uniqueId}/${guestInfo?.userName}`);
         emailBody += `<br><br>Your Upplaud Password: ${poll.password}<br/> <strong><a href="${guestLink}">CLICK HERE</a> TO GROW OUR AUDIENCE (<a href="${guestLink}">${guestLink}</a>)</strong>`;
       }
 

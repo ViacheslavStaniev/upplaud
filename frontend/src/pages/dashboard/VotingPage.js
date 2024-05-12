@@ -8,7 +8,7 @@ import { POLL_STATUS } from '../../utils/types';
 import { getFullS3Url } from '../../config-global';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useParams, Navigate } from 'react-router-dom';
-import { getPoll, saveVote } from '../../reducers/guestsSlice';
+import { saveVote, pollActions } from '../../reducers/guestsSlice';
 import { Card, Spin, Flex, Form, Image, Modal, Input, Button, Avatar, Typography } from 'antd';
 
 const { Text, Link, Title, Paragraph } = Typography;
@@ -52,7 +52,7 @@ const finalResultObj = {
 };
 
 export default function VotingPage() {
-  const { guestId } = useParams();
+  const { pollUniqueId } = useParams();
 
   const [state, setState] = useState({
     currentQuestion: 1,
@@ -81,9 +81,9 @@ export default function VotingPage() {
 
   const questionnaireAnswers = finalResult?.questionnaireAnswers || [];
   const preAnswers = questionnaireAnswers[currentQuestion - 1];
-  // console.log('finalResultObj', finalResult, preAnswers, thirdStepAnswers);
 
   const { guest, error, isLoading } = poll;
+  const guestId = guest?._id;
 
   useEffect(() => {
     const updateLState = (ns) => setState((s) => ({ ...s, poll: { ...s.poll, ...ns } }));
@@ -91,10 +91,11 @@ export default function VotingPage() {
     // Start Loading
     updateLState({ isLoading: true });
 
-    getPoll(guestId)
+    pollActions
+      .getPollByUniqueId(pollUniqueId)
       .then((guest) => updateLState({ guest, isLoading: false }))
       .catch((error) => updateLState({ error, isLoading: false }));
-  }, [guestId]);
+  }, [pollUniqueId]);
 
   if (error || (guest && guest?.status === POLL_STATUS.DRAFT)) return <Navigate to="/404" />;
 

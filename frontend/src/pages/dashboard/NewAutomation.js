@@ -130,6 +130,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
   );
 
   const {
+    _id = null,
     audio = null,
     socials = [],
     guest: guestUser,
@@ -150,7 +151,6 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
       body: `<blockquote>Hi [GUEST_FIRSTNAME], it's [USER_FULLNAME]. (To reach me, please reply all.) I use Upplaud to grow my audience; you can use it at no cost to reach more people too:</blockquote><blockquote>Can we post on our LinkedIn &amp; Facebook about [PODCAST / PRESENTATION NAME] before we do it? Upplaud makes it easy &amp; engaging. (See your private link &amp; password at the end.)</blockquote><blockquote>Here's how Upplaud grows our audience:</blockquote><blockquote>Instead of guessing what others want to know from both of us... Let's ask them! I chose 2 possible topics for our connections to vote on. They can even suggest their own topics privately.</blockquote><blockquote>I've already setup everything, including voting invitation posts for our Facebook &amp; LinkedIn. (It doesn't matter how active you are: Influencers on social media love engaging like this, and will share you with more people!)</blockquote><blockquote>We can also share our Upplaud voting page through email &amp; elsewhere. All you need to do is click the Grow Audience link below. It only takes a few seconds to connect your LinkedIn and/or Facebook to Upplaud. (I've connected mine already.)</blockquote><blockquote>Thanks for doing this now (and not procrastinating!) Every day counts to grow our audience: More time for more votes, more shares &amp; more results.</blockquote><blockquote>The link to click is below my name (be sure to reference your Private Password, to securely connect your social media). I'm excited to grow together.</blockquote><blockquote><br></blockquote><blockquote>Thanks again, see you soon. - [USER_FIRSTNAME]</blockquote><p><br></p>`,
     },
   } = guest || {};
-  console.log('guest', guest);
 
   // Default Socials Items
   const defaultSocials = getSocialsItems(user?.socialAccounts || []);
@@ -214,10 +214,10 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
         values.status = status;
         values.recordingDate = dayjs(values?.recordingDate).format();
 
-        if (isNew) {
+        if (isNew && !_id) {
           dispatch(addGuest(values));
         } else {
-          dispatch(updateGuest(id, values));
+          dispatch(updateGuest(id || _id, values));
         }
       })
       .catch(console.log);

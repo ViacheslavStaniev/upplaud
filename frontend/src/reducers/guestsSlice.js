@@ -186,6 +186,19 @@ export const deleteManyGuests = (ids) => async (dispatch) => {
   }
 };
 
+const axiosRequest = (method = 'get', url, data = null) => {
+  return new Promise((resolve, reject) => {
+    axios[method](url, data)
+      .then(({ data }) => resolve(data))
+      .catch((error) => reject(error));
+  });
+};
+
+export const pollActions = {
+  getAutomationsByUserName: (userName) => axiosRequest('get', `guests/users/${userName}`),
+  getPollByUniqueId: (pollUniqueId) => axiosRequest('get', `guests/vote-info/${pollUniqueId}`),
+};
+
 // Get Poll for vote
 export const getPoll = (pollId) => {
   return new Promise((resolve, reject) => {
