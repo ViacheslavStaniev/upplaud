@@ -17,6 +17,7 @@ const router = express.Router();
 router.get("/me", verifyAuth, async (req, res) => {
   try {
     let user = await getUserInfo(req.userId);
+    if (!user) return res.status(400).json({ errors: [{ msg: "User not found" }] });
 
     res.json(user);
   } catch (err) {

@@ -52,7 +52,7 @@ const finalResultObj = {
 };
 
 export default function VotingPage() {
-  const { pollUniqueId } = useParams();
+  const { userName, pollUniqueId } = useParams();
 
   const [state, setState] = useState({
     currentQuestion: 1,
@@ -92,10 +92,10 @@ export default function VotingPage() {
     updateLState({ isLoading: true });
 
     pollActions
-      .getPollByUniqueId(pollUniqueId)
+      .getPollByUniqueId(userName, pollUniqueId)
       .then((guest) => updateLState({ guest, isLoading: false }))
       .catch((error) => updateLState({ error, isLoading: false }));
-  }, [pollUniqueId]);
+  }, [userName, pollUniqueId]);
 
   if (error || (guest && guest?.status === POLL_STATUS.DRAFT)) return <Navigate to="/404" />;
 

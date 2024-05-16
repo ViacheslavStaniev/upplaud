@@ -196,7 +196,8 @@ const axiosRequest = (method = 'get', url, data = null) => {
 
 export const pollActions = {
   getAutomationsByUserName: (userName) => axiosRequest('get', `guests/users/${userName}`),
-  getPollByUniqueId: (pollUniqueId) => axiosRequest('get', `guests/vote-info/${pollUniqueId}`),
+  getPollByUniqueId: (userName, pollUniqueId) =>
+    axiosRequest('get', `guests/vote-info/${userName}/${pollUniqueId}`),
 };
 
 // Get Poll for vote

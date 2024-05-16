@@ -16,9 +16,8 @@ const {
   randomString,
   generateImage,
   generateVideo,
-  replaceConstants,
   getFrontendUrl,
-  createUsername,
+  replaceConstants,
   getSocialAutomationDetails,
 } = require("../helpers/utills");
 
@@ -53,7 +52,7 @@ router.get("/", verifyAuth, async (req, res) => {
 });
 
 // @route   GET api/guests/users/:userName
-// @desc    Fetchs the list of guests for the current logged-in user.
+// @desc    Fetchs all active automations of the user.
 // @access  Public
 router.get("/users/:userName", async (req, res) => {
   try {
@@ -238,7 +237,7 @@ router.post("/", verifyAuth, async (req, res) => {
       pollInfo.guest = guestType === GUEST_TYPE.GUEST_SPEAKER ? userId : newUser?._id;
 
       // UniqueId for Guest Speaker
-      pollInfo.uniqueId = guestType === GUEST_TYPE.GUEST_SPEAKER ? randomString(8) : await createUsername(newUser);
+      pollInfo.uniqueId = guestType === GUEST_TYPE.GUEST_SPEAKER ? randomString(8) : newUser?.userName;
     } else {
       pollInfo.guest = userId; // if guestType is SOLO_SESSION, then guest will be himself/herself
 
@@ -653,11 +652,14 @@ router.get("/vote/:pollId", async (req, res) => {
   }
 });
 
-// @route   GET api/guests/vote-info/pollUniqueId
+// @route   GET api/guests/vote-info/:userName/:pollUniqueId
 // @desc    gets guest details by uniqueId
 // @access  Public
-router.get("/vote-info/:pollUniqueId", async (req, res) => {
+router.get("/vote-info/:userName/:pollUniqueId", async (req, res) => {
   try {
+    const user = await getUserByUserName(req.params.userName);
+    if (!user) return res.status(404).send("User not found.");
+
     const poll = await Guest.findOne({ uniqueId: req.params.pollUniqueId })
       .populate("pollImageInfo")
       .populate({ path: "guest", populate: "socialAccounts" })
@@ -748,8 +750,8 @@ async function sendEmailToGuest(poll) {
 
   // Send Email in case of Publish
   if (status === POLL_STATUS.PUBLISHED && emailTemplate && guestType !== GUEST_TYPE.SOLO_SESSION) {
-    const guestInfo = await getUserInfo(guest);
     const userInfo = await getUserInfo(user);
+    const guestInfo = await getUserInfo(guest);
 
     const userFullname = `${userInfo?.firstName} ${userInfo?.lastName}`;
 
@@ -770,7 +772,7 @@ async function sendEmailToGuest(poll) {
 
       // Add Password to emailBody
       if (poll?.password) {
-        const guestLink = getFrontendUrl(`guest-acceptance/${poll.uniqueId}/${guestInfo?.userName}`);
+        const guestLink = getFrontendUrl(`guest-acceptance/${userInfo?.userName}/${poll?.uniqueId}`);
         emailBody += `<br><br>Your Upplaud Password: ${poll.password}<br/> <strong><a href="${guestLink}">CLICK HERE</a> TO GROW OUR AUDIENCE (<a href="${guestLink}">${guestLink}</a>)</strong>`;
       }
 

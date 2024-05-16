@@ -27,7 +27,7 @@ import {
 const { Text, Title, Paragraph } = Typography;
 
 export default function GuestAcceptance() {
-  const { pollUniqueId } = useParams();
+  const { userName, pollUniqueId } = useParams();
 
   const [state, setState] = useState({
     poll: null,
@@ -38,7 +38,6 @@ export default function GuestAcceptance() {
   });
   const { poll, errorMsg, loading, validatedPolls, passwordValidated } = state;
 
-  console.log('poll', poll);
   const guestId = poll?._id;
   const guest = poll?.guest || {};
 
@@ -52,7 +51,7 @@ export default function GuestAcceptance() {
       // Fetch Poll
       updateState({ loading: true, passwordValidated, validatedPolls });
       pollActions
-        .getPollByUniqueId(pollUniqueId)
+        .getPollByUniqueId(userName, pollUniqueId)
         .then((poll) => updateState({ poll }))
         .catch(console.error)
         .finally(() => updateState({ loading: false }));
@@ -61,7 +60,7 @@ export default function GuestAcceptance() {
     return () => {
       updateState({ poll: null, loading: false });
     };
-  }, [pollUniqueId]);
+  }, [userName, pollUniqueId]);
 
   if (loading) return <LoadingScreen />;
   if (!guestId) return <Navigate to="/404" />;

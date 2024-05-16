@@ -3,6 +3,7 @@ import { isMobile } from 'react-device-detect';
 import { Link, useNavigate } from 'react-router-dom';
 import { PATH_DASHBOARD } from '../../../routes/paths';
 import { SOCIAL_TITLES } from '../../../utils/types';
+import { useAuthContext } from '../../../auth/AuthProvider';
 import { ArrowLeftOutlined, CheckOutlined } from '@ant-design/icons';
 import CopyText from '../../../components/CopyText';
 import PreviewAutomationVideo from './PreviewAutomationVideo';
@@ -11,6 +12,7 @@ const { Title } = Typography;
 
 export default function AutomationCongrats({ guest, showActionBtns = false, onGoBack = () => {} }) {
   const navigate = useNavigate();
+  const { user } = useAuthContext();
   const startHostAutomation = guest?.startHostAutomation || false;
 
   const connectedSocials = (guest?.socials || []).reduce((acc, item) => {
@@ -28,7 +30,7 @@ export default function AutomationCongrats({ guest, showActionBtns = false, onGo
       </Title>
       <Title level={5}>
         Voters will be directed to:{' '}
-        <Link target="_blank" to={`/vote/${guest?.uniqueId}/${guest?.guest?.userName}`}>
+        <Link target="_blank" to={`/vote/${user?.userName}/${guest?.uniqueId}`}>
           Voting Page
         </Link>
       </Title>
@@ -49,7 +51,7 @@ export default function AutomationCongrats({ guest, showActionBtns = false, onGo
 
       <Title level={5} className="mb-1">
         Your guest will be invited to connect here:{' '}
-        <Link target="_blank" to={`/guest-acceptance/${guest?.uniqueId}/${guest?.guest?.userName}`}>
+        <Link target="_blank" to={`/guest-acceptance/${user?.userName}/${guest?.uniqueId}`}>
           Guest Invitation Page
         </Link>
       </Title>
