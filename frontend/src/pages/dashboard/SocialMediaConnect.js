@@ -47,6 +47,7 @@ export default function SocialMediaConnect({
   }, []);
 
   const urlParams = new URLSearchParams(window.location.search);
+  const error = urlParams.get('error') || '';
   const isConnected = urlParams.get('isConnected') || '0';
 
   useEffect(() => {
@@ -56,7 +57,9 @@ export default function SocialMediaConnect({
         description: 'You have successfully connected your social media account.',
       });
     }
-  }, [isConnected]);
+
+    if (error) notification.error({ message: 'Error', description: error });
+  }, [error, isConnected]);
 
   // isSocialConnected
   const isSocialConnected = (type) => getItem(type)?.isConnected || false;
@@ -287,7 +290,7 @@ export default function SocialMediaConnect({
                 icon={<CustomIcon name={key} />}
                 className={isConnected ? 'pointer-none' : ''}
               >
-                {isConnected ? 'Connected' : 'Connect'} with {title}
+                {isConnected ? 'Connected' : 'Continue'} with {title}
               </Button>
             </Badge>
           </Dropdown>

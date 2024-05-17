@@ -31,7 +31,12 @@ const AuthOptions = { failureRedirect: "/auth/connect/error", failureFlash: fals
 const getAuthCallbackURL = (urlFor) => getBaseDomain(`auth/connect/${urlFor}-callback`);
 
 const responseBackToWebapp = async (req, res) => {
-  res.redirect(`${req?.authInfo?.returnUrl || REACT_APP_URL}?isConnected=1`);
+  const redirectUrl = req?.authInfo?.returnUrl || REACT_APP_URL;
+  if (req?.query?.error) {
+    return res.redirect(`${redirectUrl}?error=${req?.query?.error_description}`);
+  }
+
+  return res.redirect(`${redirectUrl}?isConnected=1`);
 };
 
 const attachUserToReq = async (req, res, next) => {
@@ -245,6 +250,12 @@ const setLinkedinStrategy = async (req, res, next) => {
   next();
 };
 
+// checkErrors
+const checkErrors = (req, res, next) => {
+  if (req?.query?.error) responseBackToWebapp(req, res);
+  else next();
+};
+
 // @route   GET auth/connect/error
 // @desc    Auth error
 // @access  Public
@@ -258,7 +269,7 @@ router.get("/facebook/:username", attachUserToReq, setFacebookStrategy, passport
 // @route   GET auth/connect/facebook-callback
 // @desc    Handle response from facebook
 // @access  Public
-router.get("/facebook-callback", passport.authenticate("facebook", AuthOptions), responseBackToWebapp);
+router.get("/facebook-callback", checkErrors, passport.authenticate("facebook", AuthOptions), responseBackToWebapp);
 
 // @route   GET auth/connect/linkedin
 // @desc    Connect user with linkedin account
@@ -268,7 +279,7 @@ router.get("/linkedin/:username", attachUserToReq, setLinkedinStrategy, passport
 // @route   GET auth/connect/linkedin-callback
 // @desc    Handle response from linkedin
 // @access  Public
-router.get("/linkedin-callback", passport.authenticate("linkedin", AuthOptions), responseBackToWebapp);
+router.get("/linkedin-callback", checkErrors, passport.authenticate("linkedin", AuthOptions), responseBackToWebapp);
 
 // @route GET auth/connect/init-auto-posting
 // @desc Initiate Social (Facebook/LinkedIn) Posting
