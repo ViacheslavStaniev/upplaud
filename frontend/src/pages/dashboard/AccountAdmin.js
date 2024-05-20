@@ -96,8 +96,8 @@ export default function AccountAdmin() {
                   strong
                   copyable
                   target="_blank"
-                  href={`/user-automations/${userName}`}
-                >{`${window.location.origin}/user-automations/${userName}`}</Link>
+                  href={`/vote/${userName}`}
+                >{`${window.location.origin}/vote/${userName}`}</Link>
               </Paragraph>
             )}
           </Space>

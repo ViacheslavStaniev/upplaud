@@ -32,8 +32,8 @@ const getAuthCallbackURL = (urlFor) => getBaseDomain(`auth/connect/${urlFor}-cal
 
 const responseBackToWebapp = async (req, res) => {
   const redirectUrl = req?.authInfo?.returnUrl || REACT_APP_URL;
-  if (req?.query?.error) {
-    return res.redirect(`${redirectUrl}?error=${req?.query?.error_description}`);
+  if (req?.query?.error || req?.query?.error_message) {
+    return res.redirect(`${redirectUrl}?error=${req?.query?.error_description || req?.query?.error_message}`);
   }
 
   return res.redirect(`${redirectUrl}?isConnected=1`);
@@ -252,7 +252,7 @@ const setLinkedinStrategy = async (req, res, next) => {
 
 // checkErrors
 const checkErrors = (req, res, next) => {
-  if (req?.query?.error) responseBackToWebapp(req, res);
+  if (req?.query?.error || req?.query?.error_message) responseBackToWebapp(req, res);
   else next();
 };
 

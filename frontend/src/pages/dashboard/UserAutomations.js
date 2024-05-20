@@ -40,7 +40,7 @@ export default function UserAutomations() {
         </Title>
 
         <Flex gap={28} wrap="wrap">
-          {automations.map(({ _id, guest, uniqueId, socialShareFileSrc, presentationName }, i) => (
+          {automations.map(({ _id, uniqueId, socialShareFileSrc, presentationName }, i) => (
             <Card
               key={_id}
               hoverable
@@ -53,7 +53,7 @@ export default function UserAutomations() {
                   type="link"
                   target="_blank"
                   icon={<LinkOutlined />}
-                  href={`/vote/${uniqueId}/${guest?.userName}`}
+                  href={`/vote/${user?.userName}/${uniqueId}`}
                 >
                   Voting Page
                 </Button>,
@@ -62,7 +62,7 @@ export default function UserAutomations() {
                   type="link"
                   target="_blank"
                   icon={<LinkOutlined />}
-                  href={`/guest-acceptance/${uniqueId}/${guest?.userName}`}
+                  href={`/guest-acceptance/${user?.userName}/${uniqueId}`}
                 >
                   Guest Acceptance
                 </Button>,
