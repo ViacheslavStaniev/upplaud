@@ -333,10 +333,10 @@ router.get("/init-auto-posting", async (req, res) => {
           posting.nextPostDate = new Date(currentTime.getTime() + posting.daysFrequency * 24 * 60 * 60 * 1000);
           await posting.save();
 
-          postingResults.push({ type, error: false, msg: "Posted on Facebook", posting });
+          postingResults.push({ type, error: false, msg: "Posted on Facebook" });
         } catch (error) {
           console.log(error);
-          postingResults.push({ type, error: true, msg: error?.message || "Error posting on Facebook", posting });
+          postingResults.push({ type, error: true, msg: error?.message || "Error posting on Facebook" });
         }
       } else if (type === SOCIAL_TYPE.LINKEDIN) {
         try {
@@ -360,11 +360,11 @@ router.get("/init-auto-posting", async (req, res) => {
           posting.nextPostDate = new Date(currentTime.getTime() + posting.daysFrequency * 24 * 60 * 60 * 1000);
           await posting.save();
 
-          postingResults.push({ type, error: false, msg: "Posted on Linkedin", posting });
+          postingResults.push({ type, error: false, msg: "Posted on Linkedin" });
         } catch (error) {
           // await saveUserAccessTokens(user, { type, subType, isConnected: false, expiresInSeconds: 0 });
           console.log(error);
-          postingResults.push({ type, error: true, msg: error?.message || "Error posting on Linkedin", posting });
+          postingResults.push({ type, error: true, msg: error?.message || "Error posting on Linkedin" });
         }
       }
     }
