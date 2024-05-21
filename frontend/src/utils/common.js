@@ -1,7 +1,6 @@
 import * as ExcelJS from 'exceljs';
-import { GUEST_TYPE, SOCIAL_TITLES, SOCIAL_TYPE, SOCIAL_SUB_TYPE } from './types';
+import { GUEST_TYPE, SOCIAL_TITLES, SOCIAL_SUB_TYPE } from './types';
 
-const { FACEBOOK } = SOCIAL_TYPE;
 const { HOST_GUEST, SOLO_SESSION } = GUEST_TYPE;
 const { PROFILE, PAGE, GROUP } = SOCIAL_SUB_TYPE;
 
@@ -34,22 +33,19 @@ export const getSocialTitle = (type) => SOCIAL_TITLES[type];
 export const getSocialLabel = (type, subType, subTypeName = '') => {
   const title = getSocialTitle(type);
 
-  if (subType === PROFILE) {
-    return `YOUR ${title} PROFILE`;
-  } else if (subType === PAGE) {
-    return `YOUR ${title} PAGE: ${subTypeName}`;
-  } else if (subType === GROUP) {
-    return `YOUR ${title} GROUP: ${subTypeName}`;
-  }
+  if (subType === PROFILE) return `YOUR ${title} PROFILE`;
+  if (subType === PAGE) return `YOUR ${title} PAGE: ${subTypeName}`;
+  if (subType === GROUP) return `YOUR ${title} GROUP: ${subTypeName}`;
 
   return '';
 };
 
 export const getSocialsItems = (socialAccounts = []) => {
+  console.log('socialAccounts', socialAccounts);
   return socialAccounts.reduce((items, item) => {
     if (!item?.isConnected) return items;
 
-    const { type, socialId, page, group } = item;
+    const { type, socialId, page } = item;
 
     const getSocialItem = (subType, subTypeId, subTypeName = '', frequency = 4) => {
       return {
@@ -67,15 +63,11 @@ export const getSocialsItems = (socialAccounts = []) => {
     const getSubTypeName = (item) =>
       item?.accounts.find(({ id }) => id === item?.socialId)?.name || '';
 
-    const newItems = [
+    return [
       ...items,
       getSocialItem(PROFILE, socialId),
       getSocialItem(PAGE, page?.socialId, getSubTypeName(page)),
     ];
-
-    return type === FACEBOOK
-      ? [...newItems, getSocialItem(GROUP, group?.socialId, getSubTypeName(page))]
-      : newItems;
   }, []);
 };
 

@@ -144,7 +144,7 @@ export default function SocialMediaConnect({
     const item = getItem(type) || {};
     const title = SOCIAL_TITLES[type];
     const key = type === FACEBOOK ? 'facebook' : 'linkedin';
-    const { isConnected = false, page = {}, group = {} } = item;
+    const { isConnected = false, page = {} } = item;
 
     const LinkItem = ({ subTitle, item }) => {
       const { socialId = '', accounts = [], askToChoose = false } = item || {};
@@ -177,9 +177,7 @@ export default function SocialMediaConnect({
     };
 
     const { accounts: pages = [], socialId: pageId = '' } = page;
-    const { accounts: groups = [], socialId: groupId = '' } = group;
     const pagesChilds = pages?.length > 1 ? getSubItems(pages, 'page', pageId) : null;
-    const groupChilds = groups?.length > 1 ? getSubItems(groups, 'group', groupId) : null;
 
     const items = [
       {
@@ -195,14 +193,6 @@ export default function SocialMediaConnect({
         className: pagesChilds ? '' : 'pointer-none',
         label: <LinkItem subTitle="Page" item={page} />,
         icon: getConnectIcon(isConnected && pageId && page?.askToChoose === false),
-      },
-      {
-        key: 'group',
-        children: groupChilds,
-        disabled: group?.accounts?.length === 0,
-        className: groupChilds ? '' : 'pointer-none',
-        label: <LinkItem subTitle="Group" item={group} />,
-        icon: getConnectIcon(isConnected && groupId && group?.askToChoose === false),
       },
     ];
 

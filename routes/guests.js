@@ -9,7 +9,7 @@ const { USER_TYPE } = require("../models/User");
 const { sendEmail } = require("../helpers/email");
 const { FILE_TYPE } = require("../models/UserFile");
 const { POLL_STATUS, GUEST_TYPE } = require("../models/Guest");
-const { SOCIAL_TYPE, SOCIAL_SUB_TYPE } = require("../models/SocialAccount");
+const { SOCIAL_SUB_TYPE } = require("../models/SocialAccount");
 const { getS3Path, uploadImage, uploadFile } = require("../helpers/s3Helper");
 const { createOrUpdateGuestUser, getUserInfo, getUserByUserName, updateUserInfo } = require("./users");
 const {
@@ -23,8 +23,7 @@ const {
 
 const router = express.Router();
 
-const { FACEBOOK } = SOCIAL_TYPE;
-const { PROFILE, PAGE, GROUP } = SOCIAL_SUB_TYPE;
+const { PROFILE, PAGE } = SOCIAL_SUB_TYPE;
 
 // @route   GET api/guests
 // @desc    Fetchs the list of guests for the current logged-in user.
@@ -144,15 +143,6 @@ router.get("/:pollId", verifyAuth, async (req, res) => {
       if (pageItem) {
         if (pageItem?.isNew) poll.socials.push(pageItem.socialItem);
         else poll.socials.map((item) => (item._id === pageItem.socialItem._id ? pageItem.socialItem : item));
-      }
-
-      // Update Group
-      if (type === FACEBOOK) {
-        const groupItem = await updatePageGroup(group, GROUP);
-        if (groupItem) {
-          if (groupItem?.isNew) poll.socials.push(groupItem.socialItem);
-          else poll.socials.map((item) => (item._id === groupItem.socialItem._id ? groupItem.socialItem : item));
-        }
       }
     }
 

@@ -44,10 +44,10 @@ const SocialAccountSchema = new Schema(
       type: Object,
       default: subDefaultObj,
     },
-    group: {
-      type: Object,
-      default: subDefaultObj,
-    },
+    // group: {
+    //   type: Object,
+    //   default: subDefaultObj,
+    // },
     publicUrl: {
       type: String,
       default: "",
