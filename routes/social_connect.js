@@ -369,7 +369,7 @@ router.get("/init-auto-posting", async (req, res) => {
       }
     }
 
-    res.status(200).json({ postingResults, error: false, msg: "Posting completed successfully." });
+    res.status(200).json({ activePostings, postingResults, error: false, msg: "Posting completed successfully." });
   } catch (error) {
     // console.log(error);
     res.status(500).json({ error: true, msg: error?.response?.data?.error_description || error?.message });
