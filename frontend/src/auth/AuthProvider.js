@@ -50,7 +50,7 @@ export function AuthProvider({ children }) {
 
         dispatch(saveUser({ user: data, isLoading: false }));
       } catch (error) {
-        dispatch(updateState({ isLoading: false, errors: error?.errors }));
+        dispatch(updateState({ isLoading: false, errors: error?.message?.errors || [] }));
       }
     },
     [dispatch]

@@ -58,6 +58,19 @@ export default function DashboardLayout() {
               <Logo rootClassName="p-2 sidebar-navlogo" />
             </Link>
             <SidebarNavMenu />
+
+            <div
+              className="flex-item flex-center p-2 w-100"
+              style={{
+                left: 0,
+                bottom: 0,
+                position: 'absolute',
+                borderTop: '1px solid #652279',
+              }}
+            >
+              <Link to="/privacy-policy">Privacy Policy</Link>
+              <Link to="/terms-of-use">Terms of Use</Link>
+            </div>
           </Sider>
         )}
 

@@ -55,6 +55,9 @@
 .ml-10px {
   margin-left: 10px !important;
 }
+.mb-0 {
+  margin-bottom: 0 !important;
+}
 .mb-1 {
   margin-bottom: 0.5rem !important;
 }

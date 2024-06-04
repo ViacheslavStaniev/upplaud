@@ -1,8 +1,9 @@
 import Logo from '../components/Logo';
-import { Layout } from 'antd';
+import { Layout, Typography } from 'antd';
 import { Link, Outlet } from 'react-router-dom';
 
-const { Header, Content } = Layout;
+const { Text } = Typography;
+const { Header, Content, Footer } = Layout;
 
 export default function CompactLayout() {
   return (
@@ -13,9 +14,17 @@ export default function CompactLayout() {
         </Link>
       </Header>
 
-      <Content className="h-100 bg-white">
+      <Content className="h-100 bg-white" style={{ paddingBottom: 50 }}>
         <Outlet />
       </Content>
+
+      <Footer className="bg-white flex-item gap-2 space-between p-2">
+        <Text type="secondary">© {new Date().getFullYear()} Upplaud. All rights reserved.</Text>
+        <div className="flex-item gap-2">
+          <Link to="/privacy-policy">Privacy Policy</Link>
+          <Link to="/terms-of-use">Terms of Use</Link>
+        </div>
+      </Footer>
     </Layout>
   );
 }

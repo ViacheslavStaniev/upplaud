@@ -12,8 +12,8 @@ import {
   Page404,
   Page500,
   // // Main
-  // HomePage,
-  // FaqsPage,
+  TermsOfUse,
+  PrivacyPolicy,
   // AboutPage,
   // ContactPage,
   // Auth
@@ -104,6 +104,8 @@ export default function Router() {
         { path: '500', element: <Page500 /> },
         { path: '404', element: <Page404 /> },
         { path: '403', element: <Page403 /> },
+        { path: 'terms-of-use', element: <TermsOfUse /> },
+        { path: 'privacy-policy', element: <PrivacyPolicy /> },
         { path: 'vote/:userName', element: <UserAutomations /> },
         { path: 'vote/:userName/:pollUniqueId', element: <VotingPage /> },
       ],

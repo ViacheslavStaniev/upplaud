@@ -160,6 +160,11 @@ span.ant-tag {
   color: #424242;
   font-weight: bold;
 }
+.ant-dropdown .ant-dropdown-menu,
+.ant-dropdown-menu-submenu .ant-dropdown-menu {
+  overflow: auto;
+  max-height: 342px;
+}
 
 /* Countdown */
 .ant-statistic.wait-countdown .ant-statistic-title {
