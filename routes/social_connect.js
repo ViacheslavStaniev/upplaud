@@ -107,8 +107,8 @@ const setFacebookStrategy = async (req, res, next) => {
         clientID: FACEBOOK_APP_ID,
         clientSecret: FACEBOOK_APP_SECRET,
         callbackURL: getAuthCallbackURL("facebook"),
-        profileFields: ["id", "emails", "gender", "name", "displayName", "profileUrl"],
-        scope: ["email", "public_profile", "pages_manage_posts", "pages_read_engagement", "publish_video"],
+        profileFields: ["id", "gender", "name", "displayName", "profileUrl"],
+        scope: ["public_profile", "publish_video"],
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
@@ -124,6 +124,7 @@ const setFacebookStrategy = async (req, res, next) => {
                 const {
                   data: { data },
                 } = await authClient.get(`/me/${type === "page" ? "accounts" : "groups"}?admin_only=1&access_token=${accessToken}`);
+                console.log("data", data);
                 return { socialId: data.length > 1 ? "" : data[0]?.id, accounts: data, askToChoose: data.length > 1 };
               })
             );
@@ -138,6 +139,7 @@ const setFacebookStrategy = async (req, res, next) => {
               isConnected: true,
               publicUrl: profileUrl,
             };
+            console.log("updateInfo", updateInfo);
 
             const updatedUser = await saveUserAccessTokens(user, updateInfo);
 
@@ -369,7 +371,7 @@ router.get("/init-auto-posting", async (req, res) => {
       }
     }
 
-    res.status(200).json({ activePostings, postingResults, error: false, msg: "Posting completed successfully." });
+    res.status(200).json({ postingResults, error: false, msg: "Posting completed successfully." });
   } catch (error) {
     // console.log(error);
     res.status(500).json({ error: true, msg: error?.response?.data?.error_description || error?.message });
