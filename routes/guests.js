@@ -398,7 +398,6 @@ router.put("/:pollId", verifyAuth, async (req, res) => {
               isActive,
               nextPostDate,
               daysFrequency,
-              frequencyPosted: 1,
               frequencyToBePosted,
             });
           else {
