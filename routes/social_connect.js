@@ -108,7 +108,7 @@ const setFacebookStrategy = async (req, res, next) => {
         clientSecret: FACEBOOK_APP_SECRET,
         callbackURL: getAuthCallbackURL("facebook"),
         profileFields: ["id", "gender", "name", "displayName", "profileUrl"],
-        scope: ["public_profile", "publish_video"],
+        scope: ["public_profile", "publish_video", "user_videos", "pages_show_list", "pages_manage_posts"],
         // scope: ["email", "public_profile", "pages_manage_posts", "pages_read_engagement", "publish_video"],
       },
       async (accessToken, refreshToken, profile, done) => {
@@ -125,7 +125,7 @@ const setFacebookStrategy = async (req, res, next) => {
                 const {
                   data: { data },
                 } = await authClient.get(`/me/${type === "page" ? "accounts" : "groups"}?admin_only=1&access_token=${accessToken}`);
-                console.log("data", data);
+                console.log("pages", data);
                 return { socialId: data.length > 1 ? "" : data[0]?.id, accounts: data, askToChoose: data.length > 1 };
               })
             );
@@ -293,7 +293,7 @@ router.get("/init-auto-posting", async (req, res) => {
     const currentTime = new Date();
     const next10Minutes = new Date(currentTime.getTime() + 10 * 60000);
     const activePostings = await SocialPosting.find({ isActive: true, nextPostDate: { $gte: currentTime, $lte: next10Minutes } })
-      .populate({ path: "poll", populate: { path: "pollImageInfo" } })
+      .populate({ path: "poll", populate: { path: "user guest pollImageInfo" } })
       .populate({ path: "user", populate: { path: "socialAccounts" } });
     if (activePostings.length === 0) return res.status(200).json({ error: false, msg: "No active posting found." });
 
@@ -468,7 +468,7 @@ async function initFacebookPosting(id, postInfo, access_token, subType = PROFILE
         // Post on Page/Group
         await authClient.post(`/${id}/videos`, { title, description, access_token, file_url: url, published: true });
 
-        resolve({ error: false, msg: "Posted on Facebook" });
+        resolve({ error: false, msg: `Posted on Facebook ${subType}` });
       } else {
         // Live Stream on Facebook
         const { data } = await authClient.post(`/${id}/live_videos`, {
@@ -494,9 +494,10 @@ async function initFacebookPosting(id, postInfo, access_token, subType = PROFILE
 }
 
 // Get Social Share Text
-function getSocialShareText(poll, user) {
-  const { footer, header } = poll?.pollImageInfo || {};
-  const voteLink = getFrontendUrl(`vote/${poll?._id}`);
+function getSocialShareText(poll) {
+  const { user, uniqueId = "", pollImageInfo = {} } = poll || {};
+  const { footer, header } = pollImageInfo;
+  const voteLink = getFrontendUrl(`vote/${user?.userName}/${uniqueId}`);
 
   return `VOTE NOW: ${voteLink} \n\n${footer?.text || ""} \n${header?.text || ""}`;
 }
