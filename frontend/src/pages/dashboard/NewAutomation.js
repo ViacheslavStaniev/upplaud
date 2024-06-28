@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import { useState, useEffect } from 'react';
 import { isMobile } from 'react-device-detect';
 import { getFiles } from '../../reducers/fileSlice';
@@ -28,6 +29,8 @@ import HeadshotImage from '../layouts/HeadshotImage';
 import PollSharingImage from './layouts/PollSharingImage';
 import SocialPostingItem from './layouts/SocialPostingItem';
 import AutomationCongrats from './layouts/AutomationCongrats';
+
+dayjs.extend(utc);
 
 const { Text, Title, Paragraph } = Typography;
 const { HOST_GUEST, SOLO_SESSION } = GUEST_TYPE;
@@ -204,7 +207,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
     guest: getGuesUsertObj(guestUser),
     socials: socials.length > 0 ? socials : defaultSocials,
     pollSharingImage: getPostSharingImageInfo(pollImageInfo),
-    recordingDate: recordingDate ? dayjs(recordingDate, 'YYYY/MM/DD') : null,
+    recordingDate: recordingDate ? dayjs.utc(recordingDate).local() : null,
   };
 
   const onFormSubmit = (status) => {
