@@ -282,7 +282,7 @@ function getSocialAutomationDetails(recordingDate = null, frequency = 0) {
   const daysFrequency = Math.round(numberOfDays / frequencyToBePosted);
 
   // find next post date by adding daysfrequency to current date
-  const nextPostDate = new Date(new Date().getTime() + 12 * 60000); // 12 minutes from now
+  const nextPostDate = new Date(new Date().getTime() + 5 * 60000); // 5 minutes from now
   nextPostDate.setDate(nextPostDate.getDate() + daysFrequency);
 
   return { daysFrequency, frequencyToBePosted, nextPostDate };
