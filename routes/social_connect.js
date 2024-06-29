@@ -291,7 +291,7 @@ router.get("/init-auto-posting", async (req, res) => {
     // Fetch Active Postings whose nextPostDate is between now and 10 minutes
     const currentTime = new Date();
     const next10Minutes = new Date(currentTime.getTime() + 5 * 60000);
-    const activePostings = await SocialPosting.find({ isActive: true, nextPostDate: { $gte: currentTime, $lte: next10Minutes } })
+    const activePostings = await SocialPosting.find({ isActive: true, nextPostDate: { $lte: next10Minutes } })
       .populate({ path: "poll", populate: { path: "user guest pollImageInfo" } })
       .populate({ path: "user", populate: { path: "socialAccounts" } });
     if (activePostings.length === 0) return res.status(200).json({ error: false, msg: "No active posting found." });
