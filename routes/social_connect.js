@@ -108,8 +108,7 @@ const setFacebookStrategy = async (req, res, next) => {
         clientSecret: FACEBOOK_APP_SECRET,
         callbackURL: getAuthCallbackURL("facebook"),
         profileFields: ["id", "gender", "name", "displayName", "profileUrl"],
-        scope: ["public_profile", "publish_video", "pages_show_list", "pages_manage_posts"],
-        // scope: ["email", "public_profile", "pages_manage_posts", "pages_read_engagement", "publish_video"],
+        scope: ["public_profile", "publish_video", "pages_read_engagement", "pages_manage_posts"], // pages_show_list
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
