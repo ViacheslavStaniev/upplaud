@@ -108,7 +108,7 @@ const setFacebookStrategy = async (req, res, next) => {
         clientSecret: FACEBOOK_APP_SECRET,
         callbackURL: getAuthCallbackURL("facebook"),
         profileFields: ["id", "gender", "name", "displayName", "profileUrl"],
-        scope: ["public_profile", "publish_video", "pages_read_engagement", "pages_manage_posts"], // pages_show_list
+        scope: ["public_profile", "publish_video", "pages_show_list", "pages_manage_posts"],
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
@@ -138,7 +138,6 @@ const setFacebookStrategy = async (req, res, next) => {
               isConnected: true,
               publicUrl: profileUrl,
             };
-            console.log("updateInfo", updateInfo);
 
             const updatedUser = await saveUserAccessTokens(user, updateInfo);
 
@@ -448,13 +447,6 @@ async function initLinkedInPosting(id, postInfo, refreshToken, subType = PROFILE
 async function initFacebookPosting(id, postInfo, access_token, subType = PROFILE) {
   console.log("Posting on Facebook", subType, id);
   return new Promise(async (resolve, reject) => {
-    // Get refresh token
-    // const res = await authClient.get(
-    //   `/oauth/access_token?grant_type=fb_exchange_token&client_id=${FACEBOOK_APP_ID}&client_secret=${FACEBOOK_APP_SECRET}&fb_exchange_token=${accessToken}`
-    // );
-    // const { access_token } = res.data;
-    // console.log("access_token", access_token);
-
     try {
       const authClient = getFBAuthClient();
 
@@ -486,6 +478,8 @@ async function initFacebookPosting(id, postInfo, access_token, subType = PROFILE
         resolve(result);
       }
     } catch (error) {
+      console.log(error);
+      console.log(error?.response?.data);
       reject({ error: true, msg: error?.response?.data?.error?.message || error?.message });
     }
   });
