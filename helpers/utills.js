@@ -266,7 +266,7 @@ const replaceConstants = (text, constants) => {
 };
 
 // Get daysFrequency/nextPostDate & frequencyToBePosted
-function getSocialAutomationDetails(recordingDate = null, frequency = 0) {
+function getSocialAutomationDetails(recordingDate = null, frequency = 0, startPostingNow = false) {
   const obj = { daysFrequency: 1, frequencyToBePosted: 0, nextPostDate: new Date() };
 
   if (!recordingDate) return obj;
@@ -283,7 +283,7 @@ function getSocialAutomationDetails(recordingDate = null, frequency = 0) {
 
   // find next post date by adding daysfrequency to current date
   const nextPostDate = new Date(new Date().getTime() + 5 * 60000); // 5 minutes from now
-  nextPostDate.setDate(nextPostDate.getDate() + daysFrequency);
+  nextPostDate.setDate(nextPostDate.getDate() + (startPostingNow ? 0 : daysFrequency));
 
   return { daysFrequency, frequencyToBePosted, nextPostDate };
 }

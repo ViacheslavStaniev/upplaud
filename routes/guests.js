@@ -254,7 +254,11 @@ router.post("/", verifyAuth, async (req, res) => {
       const socialAccounts = socials.map(
         ({ type, subType, subTypeName, subTypeId, frequency, isActive = false, isConnected = false }) => {
           // update posting details
-          const { nextPostDate, daysFrequency, frequencyToBePosted } = getSocialAutomationDetails(pollInfo?.recordingDate, frequency);
+          const { nextPostDate, daysFrequency, frequencyToBePosted } = getSocialAutomationDetails(
+            pollInfo?.recordingDate,
+            frequency,
+            true
+          );
           return {
             poll: poll._id,
             user: req.userId,
@@ -387,7 +391,11 @@ router.put("/:pollId", verifyAuth, async (req, res) => {
       const socialsIds = socials.map(
         async ({ type, subType, subTypeName, subTypeId, frequency, isActive = false, isConnected = false }) => {
           // update posting details
-          const { nextPostDate, daysFrequency, frequencyToBePosted } = getSocialAutomationDetails(pollInfo?.recordingDate, frequency);
+          const { nextPostDate, daysFrequency, frequencyToBePosted } = getSocialAutomationDetails(
+            pollInfo?.recordingDate,
+            frequency,
+            true
+          );
 
           let socialAccount = await SocialPosting.findOne({ poll: pollId, type, subType });
           if (socialAccount)

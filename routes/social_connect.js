@@ -478,7 +478,6 @@ async function initFacebookPosting(id, postInfo, access_token, subType = PROFILE
         resolve(result);
       }
     } catch (error) {
-      console.log(error);
       console.log(error?.response?.data);
       reject({ error: true, msg: error?.response?.data?.error?.message || error?.message });
     }
