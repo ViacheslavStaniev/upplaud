@@ -16,7 +16,7 @@ import {
   Avatar,
   Upload,
   Tooltip,
-  Statistic,
+  // Statistic,
   Typography,
   Popconfirm,
   ColorPicker,
@@ -39,11 +39,11 @@ export default function PollSharingImage() {
 
   const form = Form.useFormInstance();
   const pollImageSrc = Form.useWatch('pollImageSrc', form);
-  const audioDuration = Form.useWatch('audioDuration', form);
+  // const audioDuration = Form.useWatch('audioDuration', form);
   // const socialShareFileSrc = Form.useWatch('socialShareFileSrc', form);
 
   // Local States
-  const [countdownTime, setCountdownTime] = useState(0);
+  // const [countdownTime, setCountdownTime] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showAddManageImages, setShowAddManageImages] = useState(false);
@@ -147,7 +147,7 @@ export default function PollSharingImage() {
     }
 
     setIsGenerating(true);
-    setCountdownTime(audioDuration || 60);
+    // setCountdownTime(audioDuration || 60);
 
     try {
       const { imageS3Path, videoS3Path } = await generatePollImage(pollSharingImageInfo);
@@ -346,7 +346,7 @@ export default function PollSharingImage() {
         </Simplebar>
       </Modal>
 
-      <Modal
+      {/* <Modal
         centered
         footer={false}
         destroyOnClose
@@ -367,7 +367,7 @@ export default function PollSharingImage() {
           value={Date.now() + countdownTime * 3 * 1000}
           onFinish={() => setCountdownTime(audioDuration || 60)}
         />
-      </Modal>
+      </Modal> */}
     </>
   );
 }
