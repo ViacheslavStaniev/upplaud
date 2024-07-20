@@ -47,15 +47,17 @@ export const getSocialsItems = (socialAccounts = []) => {
     const { type, socialId, page } = item;
 
     const getSocialItem = (subType, subTypeId, subTypeName = '', frequency = 4) => {
+      const isConnected = (subTypeId || '').toString().length > 0;
+
       return {
         type,
         subType,
         frequency,
         subTypeId,
         subTypeName,
-        isActive: false,
+        isConnected,
+        isActive: isConnected,
         _id: `${type}_${subType}`,
-        isConnected: (subTypeId || '').toString().length > 0,
       };
     };
 

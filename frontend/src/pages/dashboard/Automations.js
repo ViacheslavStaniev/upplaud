@@ -107,14 +107,14 @@ export default function Automations() {
     {
       align: 'center',
       key: 'sconnecctors',
-      title: 'Social Connections',
+      title: 'Guest Connections',
       render: ({ sconnecctors }) => {
         const data = [
-          {
-            key: FACEBOOK,
-            slug: 'facebook',
-            isConnected: sconnecctors[FACEBOOK] || false,
-          },
+          // {
+          //   key: FACEBOOK,
+          //   slug: 'facebook',
+          //   isConnected: sconnecctors[FACEBOOK] || false,
+          // },
           {
             key: LINKEDIN,
             slug: 'linkedin',

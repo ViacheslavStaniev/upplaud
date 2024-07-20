@@ -17,6 +17,7 @@ const {
   generateImage,
   generateVideo,
   getFrontendUrl,
+  createUsername,
   replaceConstants,
   getSocialAutomationDetails,
 } = require("../helpers/utills");
@@ -227,7 +228,7 @@ router.post("/", verifyAuth, async (req, res) => {
       pollInfo.guest = guestType === GUEST_TYPE.GUEST_SPEAKER ? userId : newUser?._id;
 
       // UniqueId for Guest Speaker
-      pollInfo.uniqueId = guestType === GUEST_TYPE.GUEST_SPEAKER ? randomString(8) : newUser?.userName;
+      pollInfo.uniqueId = guestType === GUEST_TYPE.GUEST_SPEAKER ? randomString(8) : await createUsername(newUser);
     } else {
       pollInfo.guest = userId; // if guestType is SOLO_SESSION, then guest will be himself/herself
 

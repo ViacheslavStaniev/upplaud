@@ -62,14 +62,10 @@ export function AuthProvider({ children }) {
       try {
         const response = await axios.post('/auth/register', userData);
 
-        const { accessToken, user } = response.data;
-
-        localStorage.setItem('accessToken', accessToken);
-
-        dispatch(saveUser({ payload: { user } }));
+        dispatch(saveUser({ user: response.data, isLoading: false }));
       } catch (error) {
         console.log(error);
-        dispatch(updateState({ isLoading: false, errors: error?.errors }));
+        dispatch(updateState({ isLoading: false, errors: error?.message?.errors || [] }));
       }
     },
     [dispatch]

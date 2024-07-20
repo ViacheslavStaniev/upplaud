@@ -1,5 +1,6 @@
 import Logo from '../components/Logo';
 import { Layout, Typography } from 'antd';
+import { isMobile } from 'react-device-detect';
 import { Link, Outlet } from 'react-router-dom';
 
 const { Text } = Typography;
@@ -18,7 +19,9 @@ export default function CompactLayout() {
         <Outlet />
       </Content>
 
-      <Footer className="bg-white flex-item gap-2 space-between p-2">
+      <Footer
+        className={`bg-white flex-item gap-2 space-between p-2 ${isMobile ? 'flex-column' : ''}`}
+      >
         <Text type="secondary">© {new Date().getFullYear()} Upplaud. All rights reserved.</Text>
         <div className="flex-item gap-2">
           <Link to="/privacy-policy">Privacy Policy</Link>

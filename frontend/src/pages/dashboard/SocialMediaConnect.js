@@ -225,13 +225,13 @@ export default function SocialMediaConnect({
 
   // socialsBtns
   const socialsBtns = [
-    {
-      key: 'facebook',
-      disabled: false,
-      title: 'Facebook',
-      items: getItems(FACEBOOK),
-      isConnected: isSocialConnected(FACEBOOK),
-    },
+    // {
+    //   key: 'facebook',
+    //   disabled: false,
+    //   title: 'Facebook',
+    //   items: getItems(FACEBOOK),
+    //   isConnected: isSocialConnected(FACEBOOK),
+    // },
     {
       key: 'linkedin',
       disabled: false,

@@ -24,10 +24,11 @@ import {
 } from 'antd';
 import { PlusOutlined, InboxOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import Simplebar from 'simplebar-react';
-import PollAudioRecord from './PollAudioRecord';
+// import PollAudioRecord from './PollAudioRecord';
 import Accordian from '../../../components/Accordian';
 // import CustomUpload from '../../layouts/CustomUpload';
 import SuggestionModal from '../../layouts/SuggestionModal';
+import PreviewAutomationImage from './PreviewAutomationImage';
 
 const { Option } = Select;
 const { Dragger } = Upload;
@@ -37,15 +38,15 @@ export default function PollSharingImage() {
   const { user } = useAuthContext();
 
   const form = Form.useFormInstance();
+  const pollImageSrc = Form.useWatch('pollImageSrc', form);
   const audioDuration = Form.useWatch('audioDuration', form);
-  const socialShareFileSrc = Form.useWatch('socialShareFileSrc', form);
+  // const socialShareFileSrc = Form.useWatch('socialShareFileSrc', form);
 
   // Local States
   const [countdownTime, setCountdownTime] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showAddManageImages, setShowAddManageImages] = useState(false);
-  const [showPollImagePreview, setShowPollImagePreview] = useState(false);
 
   // Redux States
   const dispatch = useDispatch();
@@ -208,7 +209,7 @@ export default function PollSharingImage() {
           <TextColorFormItem label="HEADLINE HOOK" title="HEADLINE" formType="header" />
           <TextColorFormItem label="FOOTER BENEFIT" title="FOOTER" formType="footer" />
 
-          <PollAudioRecord name={getFormName('audio')} />
+          {/* <PollAudioRecord name={getFormName('audio')} /> */}
 
           <div className={`flex-item gap-2 mt-4 ${isMobile && 'flex-column'}`}>
             <Button
@@ -218,34 +219,26 @@ export default function PollSharingImage() {
               loading={isGenerating}
               onClick={onPollImageGenerateClick}
             >
-              Generate Video Invitation Post
+              Generate Invitation Post
             </Button>
             {/* <CustomUpload
               cropShape="rect"
               aspect={1.91 / 1}
               onComplete={(value) => form.setFieldValue('pollImageSrc', value)}
             >
-              <Button type="primary">UPLOAD YOUR OWN</Button>
+              <Button type="default">UPLOAD YOUR OWN</Button>
             </CustomUpload> */}
 
-            <Button
-              type="default"
-              block={isMobile}
-              disabled={!socialShareFileSrc}
-              onClick={() => setShowPollImagePreview(true)}
-            >
-              Preview Video Invitation Post
-            </Button>
+            <PreviewAutomationImage
+              pollImageSrc={pollImageSrc}
+              prevEl={
+                <Button type="default" block={isMobile} disabled={!pollImageSrc}>
+                  Preview Invitation Post
+                </Button>
+              }
+            />
 
-            {/* <Image
-              style={{ display: 'none' }}
-              src={getFullS3Url(pollImageSrc)}
-              preview={{
-                visible: showPollImagePreview,
-                onVisibleChange: (value) => setShowPollImagePreview(value),
-              }}
-            /> */}
-            <Modal
+            {/* <Modal
               centered
               footer={false}
               open={showPollImagePreview}
@@ -258,7 +251,7 @@ export default function PollSharingImage() {
                 src={getFullS3Url(socialShareFileSrc)}
                 style={{ width: '100%', height: 'auto' }}
               />
-            </Modal>
+            </Modal> */}
           </div>
         </>
       ),

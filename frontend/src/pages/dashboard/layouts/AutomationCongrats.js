@@ -6,7 +6,8 @@ import { SOCIAL_TITLES } from '../../../utils/types';
 import { useAuthContext } from '../../../auth/AuthProvider';
 import { ArrowLeftOutlined, CheckOutlined } from '@ant-design/icons';
 import CopyText from '../../../components/CopyText';
-import PreviewAutomationVideo from './PreviewAutomationVideo';
+// import PreviewAutomationVideo from './PreviewAutomationVideo';
+import PreviewAutomationImage from './PreviewAutomationImage';
 
 const { Title } = Typography;
 
@@ -45,8 +46,13 @@ export default function AutomationCongrats({ guest, showActionBtns = false, onGo
       </ul>
 
       <Title level={5}>
-        Preview your voter invitation video:{' '}
-        <PreviewAutomationVideo className="ml-1" socialShareFileSrc={guest?.socialShareFileSrc} />{' '}
+        Preview your voter invitation post:{' '}
+        {/* <PreviewAutomationVideo className="ml-1" socialShareFileSrc={guest?.socialShareFileSrc} />{' '} */}
+        <PreviewAutomationImage
+          className="ml-1"
+          pollImageSrc={guest?.pollImageSrc}
+          prevEl={<Button size="small">Preview</Button>}
+        />
       </Title>
 
       <Title level={5} className="mb-1">
