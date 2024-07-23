@@ -1,0 +1,146 @@
+  /* Sticky footer CSS */
+html, body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+.container{
+    flex-grow: 1;
+}
+
+.logo{
+    width: auto;
+    height: 56px;
+}
+/* Custom CSS to center the images */
+.header {
+    text-align: center; /* Center the contents horizontally */
+    padding: 1rem; /* Add padding for visual appeal */
+  }
+
+  .header img {
+    max-width: 100%; /* Ensure the image doesn't exceed its parent's width */
+    display: block; /* Remove any extra space around the image */
+    margin: 0 auto; /* Center the image horizontally within its parent container */
+  }
+
+  /* Custom CSS for the description and logo layout */
+  .description-logo-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between; /* Push the description and logo to the ends */
+    align-items: center; /* Center the elements vertically */
+  }
+
+  .description {
+    flex: 1; /* Allow the description to take the available space */
+    margin-right: 20px; /* Add some space between the description and the logo */
+    display: flex; /* Use flexbox for the image and text alignment */
+    align-items: center; /* Center the image and text vertically */
+    color:black;
+  }
+
+  .description-image {
+    margin-right: 10px; /* Add some space between the image and the text */
+  }
+.poll-heading {
+	font-size: 12px;
+	color: #959595;
+	text-align: center;
+}
+.poll-sub-heading{
+    font-size: 30px;
+    font-weight: 600;
+    text-align: center;
+}
+
+
+/* Custom CSS for the triangular down icon */
+.triangle-down {
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 20px solid black; /* Adjust the color and size as needed */
+    margin-left: 5px; /* Add some space between the icon and the text */
+  }
+
+
+  /* Footer styling */
+  .footer {
+    background-color: #f0f0f0;
+    padding: 10px;
+    text-align: center;
+    /* Position the footer at the bottom and stick to the bottom of the viewport */
+    position: sticky;
+    bottom: 0;
+    width: 100%;
+  }
+
+  .first-poll-option{
+    border: 2px solid #d2f9f9;
+    border-radius: 10px;
+    cursor: pointer;
+    padding: 10px;
+    text-align: center;
+    background: azure;
+    display: inline-grid;
+    justify-content: center;
+    align-items: center;
+    height: 300px; /* Set the height of the parent element */
+    float:left;
+  }
+
+  .second-poll-option{
+    border: 2px solid #d4d4ff;
+    border-radius: 10px;
+    cursor: pointer;
+    padding: 10px;
+    text-align: center;
+    background: lavender;
+    display: inline-grid;
+    justify-content: center;
+    align-items: center;
+    height: 300px; /* Set the height of the parent element */
+  }
+
+  .circular-div {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%; /* Create a circular shape */
+    background-color: #f0f0f0; /* Background color for the circular div */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Custom CSS for the heart icon */
+  .heart-icon {
+    color: red; /* Heart icon color */
+    font-size: 48px; /* Adjust the size of the heart icon */
+  }
+
+.option-row {
+    margin: 10px;
+    padding: 10px;
+    background: #f5ecec;
+    text-align: center;
+    border: 1px solid #f5ecec;
+    border-radius: 15px;
+}
+
+.option-row-no-bg {
+
+    text-align: center;
+    margin: 10px;
+    padding: 10px;
+
+}
+
+.go-back{
+  cursor: pointer;
+}

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <% if(data) { %>
+        <% if(data.title) { %>
+            <title><%= data.title %></title>
+        <% } %>
+        <% if(data.openGraph) { %>
+          <meta property="og:title" content="<%= data.openGraph.title %>" />
+          <meta property="og:description" content="<%= data.openGraph.description %>" />
+          <meta property="og:image" content="<%= data.openGraph.image.url %>" alt="<%= data.openGraph.image.alt %>" />
+        <% } %>
+    <% } %>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="/backend/poll.css" />
+
+
+  <!-- Favicon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png" />
+
+  <!-- Using Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,600;1,700;1,800&display=swap"
+  />
+</head>
+<body>
+
+  <header class="text-white py-1 header">
+    <div class="container">
+      <div class="description-logo-container">
+        <div class="description">
+          <!-- Image in the description area (on the left) -->
+          <div class="description-image">
+            <img class="logo" src="/logo/logo_single.png" alt="Description Image">
+          </div>
+          <!-- Description text -->
+          <p class="pre-poll-description">See our bio's and more. <i class="fas fa-chevron-down"></i></p>
+          <p class="post-poll-description d-none">Wait! Your vote isn't counted yet…</p>
+        </div>
+        <div class="">
+          <!-- Mobile Image (hidden on desktop) -->
+          <img class="d-md-none logo" src="/logo/logo_single.png" alt="Upplaud - Mobile" />
+
+          <!-- Desktop Image (hidden on mobile) -->
+          <img class="d-none d-md-block logo" src="/logo/logo_full.png" alt="Upplaud - Desktop" />
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Content Section -->
+  <div class="container-fluid mt-4">
+    <div class="row">
+      <div class="col-md-12 text-center selected-option d-none"></div>
+    </div>    
+    <div class="row pre-poll">
+      <div class="col-md-12 poll-heading py-2">
+          CLICK A HEART TO VOTE
+      </div>
+      <div class="col-md-12 poll-sub-heading mb-4">
+          Which topic should we prioritize?
+      </div>
+      <div class="col-md-12">
+        <div class="col-md-5 col-sm-12 first-poll-option poll-selection" data-polloption="xyz" data-pollvalue="Option 1">
+          <div><h2>Option 1</h2></div>  
+          
+          <div class="circular-div">
+            <i class="far fa-heart heart-icon"></i>
+          </div>     
+        </div>
+        <div class="col-md-5 col-sm-12 second-poll-option poll-selection" data-polloption="abc" data-pollvalue="Option 2">
+          <h2>Option 2</h2>
+          <div class="circular-div">
+            <i class="far fa-heart heart-icon"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row post-poll d-none">
+      <div class="col-md-5 col-sm-12 option-row">Refer someone or ask about topic</div>
+      <div class="col-md-5 col-sm-12 option-row">Claim free rewards for voting</div>
+      <div class="col-md-5 col-sm-12 option-row">Suggest topic or speakers</div>
+      <div class="col-md-5 col-sm-12 option-row">Vote on more topics</div>
+      <div class="col-md-5 option-row-no-bg">
+        <a href="javascript:void(0)" class="btn btn-primary">HELP US GET MORE VOTES</a>
+      </div>
+      <div class="col-md-5 col-sm-12 option-row-no-bg">
+        <a href="javascript:void(0)" class="thank-you">See winners</a>
+      </div>
+      <div class="col-md-12 col-sm-12 option-row-no-bg go-back"><i class="fas fa-chevron-circle-left"></i>&nbsp;Go back and change vote</div>
+    </div>
+
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" tabindex="-1" role="dialog" id="thankyou">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <!-- <div class="modal-header">
+          <h5 class="modal-title">My Modal</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div> -->
+        <div class="modal-body">
+          <p>Thanks! We'll let you know which topic wins...</p>
+          <div class="container mt-5">
+            <div class="row justify-content-center">
+              <div class="col-md-6">
+                <form>
+                  <div class="form-group">
+                    <label for="inputName">Name</label>
+                    <input type="text" class="form-control" id="inputName" placeholder="Enter your name">
+                  </div>
+                  <div class="form-group">
+                    <label for="inputEmail">Email</label>
+                    <input type="email" class="form-control" id="inputEmail" placeholder="Enter your email">
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary confirm-vote">Confirm Vote</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Skip for now</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  
+
+
+   <!-- Footer -->
+   <!-- <div class="footer">
+    <p>&copy; 2023 Your Website | All rights reserved.</p>
+  </div> -->
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script>
+    $(document).ready(function(){
+      $(document).on('click','.poll-selection', function(){
+        $('.first-poll-option').find('i').removeClass('fas').addClass('far');
+        $('.second-poll-option').find('i').removeClass('fas').addClass('far');
+        if($(this).find('i').hasClass('fas')){
+          $(this).find('i').removeClass('fas').addClass('far');
+        }else{
+          $(this).find('i').removeClass('far').addClass('fas');
+        }
+
+        let selectedPoll = '';
+        $('.poll-selection').each(function(i,v){
+          if($(v).find('i').hasClass('fas')){
+            selectedPoll = $(v).data('polloption');
+          }
+        });
+
+        $('.selected-option').text(selectedPoll).removeClass('d-none');
+
+        $('.pre-poll').addClass('d-none');
+        $('.post-poll').removeClass('d-none');
+
+        $('.pre-poll-description').addClass('d-none');
+        $('.post-poll-description').removeClass('d-none');
+        $('#thankyou').modal('show');
+      });
+      $('.go-back').click(function(){
+        $('.selected-option').text('').addClass('d-none');
+
+        $('.pre-poll').removeClass('d-none');
+        $('.post-poll').addClass('d-none');
+
+        $('.pre-poll-description').removeClass('d-none');
+        $('.post-poll-description').addClass('d-none');
+      });
+
+      $('.confirm-vote').click(function(){
+        /**
+         * Grab name and email from thank you popup
+        */
+        $('#thankyou').modal('hide');
+
+        /**
+         * use fetch method to send the data to backend
+        */
+        
+      });
+    });
+  </script>
+</body>
+</html>

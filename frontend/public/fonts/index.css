@@ -1,0 +1,27 @@
+@font-face {
+  font-family: 'SF Compact Display';
+  font-style: normal;
+  font-weight: 200;
+  src: url('SFCompactDisplay-Thin.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'SF Compact Display';
+  font-style: normal;
+  font-weight: 400;
+  src: url('SFCompactDisplay-Regular.ttf');
+}
+
+@font-face {
+  font-family: 'SF Compact Display';
+  font-style: normal;
+  font-weight: 600;
+  src: url('SFCompactDisplay-Medium.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'SF Compact Display';
+  font-style: normal;
+  font-weight: bold;
+  src: url('SFCompactDisplay-Bold.ttf');
+}
