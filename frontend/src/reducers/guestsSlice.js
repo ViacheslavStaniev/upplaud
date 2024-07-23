@@ -50,6 +50,7 @@ const slice = createSlice({
     onUpdateGuest(state, { payload }) {
       return {
         ...state,
+        guest: payload,
         isLoading: false,
         isPublishing: false,
         isPublished: payload?.status === POLL_STATUS.PUBLISHED,
