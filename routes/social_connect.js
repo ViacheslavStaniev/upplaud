@@ -304,7 +304,7 @@ router.get("/init-auto-posting", async (req, res) => {
       if (frequencyToBePosted === frequencyPosted) continue;
 
       // Check is poll is published
-      if (!poll || poll.status === POLL_STATUS.DRAFT || !subTypeId || !poll?.socialShareFileSrc) continue;
+      if (!poll || poll.status === POLL_STATUS.DRAFT || !subTypeId || !poll?.pollImageSrc) continue;
 
       // Check if social account is connected
       const socialAccount = user.socialAccounts.find((s) => s.type === type);
@@ -318,7 +318,7 @@ router.get("/init-auto-posting", async (req, res) => {
       const postInfo = {
         title: "Click the link in the text to vote",
         description: getSocialShareText(poll, user),
-        url: getS3Path(poll.socialShareFileSrc),
+        url: getS3Path(poll.pollImageSrc),
       };
 
       // Initiate Posting
@@ -341,7 +341,7 @@ router.get("/init-auto-posting", async (req, res) => {
       } else if (type === SOCIAL_TYPE.LINKEDIN) {
         try {
           // Download Video
-          postInfo.videoUrl = await downloadFile(postInfo.url, `${Date.now()}.mp4`);
+          postInfo.imageUrl = await downloadFile(postInfo.url, `${Date.now()}.png`);
 
           const tokenObj = await initLinkedInPosting(subTypeId, postInfo, refreshToken, subType);
 
@@ -380,7 +380,7 @@ router.get("/init-auto-posting", async (req, res) => {
 async function initLinkedInPosting(id, postInfo, refreshToken, subType = PROFILE) {
   console.log("Posting on LinkedIn", subType, id);
   return new Promise(async (resolve, reject) => {
-    const { title, description, videoUrl } = postInfo; // Post Content
+    const { title, description, imageUrl } = postInfo; // Post Content
     const { authClient, restliClient, axiosRestClient } = getLNAuthRestClients();
     const author = subType === PROFILE ? `urn:li:person:${id}` : `urn:li:organization:${id}`; // Author
 
@@ -396,7 +396,7 @@ async function initLinkedInPosting(id, postInfo, refreshToken, subType = PROFILE
       const uploadData = {
         registerUploadRequest: {
           owner: author,
-          recipes: ["urn:li:digitalmediaRecipe:feedshare-video"],
+          recipes: ["urn:li:digitalmediaRecipe:feedshare-image"],
           serviceRelationships: [{ identifier: "urn:li:userGeneratedContent", relationshipType: "OWNER" }],
         },
       };
@@ -406,11 +406,11 @@ async function initLinkedInPosting(id, postInfo, refreshToken, subType = PROFILE
       const uploadUrl = data.value.uploadMechanism["com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest"].uploadUrl;
       console.log("Step 1: Register Upload Complete");
 
-      // 2. Upload Video
-      await uploadFile(videoUrl, uploadUrl);
-      console.log("Step 2: Video Upload Complete");
+      // 2. Upload Image
+      await uploadFile(imageUrl, uploadUrl);
+      console.log("Step 2: Image Upload Complete");
 
-      // 3. Checck if video is ready
+      // 3. Checck if Image is ready
       let isReady = false;
       while (!isReady) {
         const { data } = await restliClient.get({ resourcePath: `/assets/${assetId}`, accessToken });
@@ -427,7 +427,7 @@ async function initLinkedInPosting(id, postInfo, refreshToken, subType = PROFILE
         commentary: description,
         lifecycleState: "PUBLISHED",
         isReshareDisabledByAuthor: false,
-        content: { media: { title, id: `urn:li:video:${assetId}` } },
+        content: { media: { title, id: `urn:li:image:${assetId}` } },
         distribution: { targetEntities: [], feedDistribution: "MAIN_FEED", thirdPartyDistributionChannels: [] },
       };
       const res2 = await axiosRestClient.post("/posts", post);
@@ -438,7 +438,7 @@ async function initLinkedInPosting(id, postInfo, refreshToken, subType = PROFILE
       console.log(error);
       reject({ error: true, msg: error?.response?.data?.error_description || error?.message });
     } finally {
-      await removeFile(videoUrl); // Remove Video File from local
+      await removeFile(imageUrl); // Remove Image File from local
     }
   });
 }

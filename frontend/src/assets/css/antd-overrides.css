@@ -11,10 +11,10 @@
 .ant-btn {
   font-weight: 600;
 }
-.ant-btn:disabled {
+/* .ant-btn:disabled {
   opacity: 0.45;
   pointer-events: none;
-}
+} */
 .ant-btn.ant-btn-info {
   color: white;
   background-color: rgb(0, 184, 217);

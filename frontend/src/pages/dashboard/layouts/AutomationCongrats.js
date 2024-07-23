@@ -2,8 +2,8 @@ import { Button, Typography } from 'antd';
 import { isMobile } from 'react-device-detect';
 import { Link, useNavigate } from 'react-router-dom';
 import { PATH_DASHBOARD } from '../../../routes/paths';
-import { SOCIAL_TITLES } from '../../../utils/types';
 import { useAuthContext } from '../../../auth/AuthProvider';
+import { SOCIAL_TITLES, POLL_STATUS } from '../../../utils/types';
 import { ArrowLeftOutlined, CheckOutlined } from '@ant-design/icons';
 import CopyText from '../../../components/CopyText';
 // import PreviewAutomationVideo from './PreviewAutomationVideo';
@@ -15,6 +15,7 @@ export default function AutomationCongrats({ guest, showActionBtns = false, onGo
   const navigate = useNavigate();
   const { user } = useAuthContext();
   const startHostAutomation = guest?.startHostAutomation || false;
+  const isPublished = guest?.status === POLL_STATUS?.PUBLISHED || false;
 
   const connectedSocials = (guest?.socials || []).reduce((acc, item) => {
     if (!item || !item.isConnected) return acc;
@@ -49,9 +50,14 @@ export default function AutomationCongrats({ guest, showActionBtns = false, onGo
         Preview your voter invitation post:{' '}
         {/* <PreviewAutomationVideo className="ml-1" socialShareFileSrc={guest?.socialShareFileSrc} />{' '} */}
         <PreviewAutomationImage
+          showUploadAlert
           className="ml-1"
           pollImageSrc={guest?.pollImageSrc}
-          prevEl={<Button size="small">Preview</Button>}
+          prevEl={
+            <Button size="small" disabled={!guest?.pollImageSrc}>
+              Preview
+            </Button>
+          }
         />
       </Title>
 
@@ -97,6 +103,12 @@ export default function AutomationCongrats({ guest, showActionBtns = false, onGo
             CONFIRM YOUR NEW UPPLAUD & SEE YOUR OTHER AUTOMATIONS
           </Button>
         </>
+      )}
+
+      {!isPublished && (
+        <Title level={4} className="mt-3 mb-0" type="danger">
+          Your Upplaud is not yet published. Please publish it to start posting.
+        </Title>
       )}
     </div>
   );

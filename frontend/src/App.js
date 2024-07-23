@@ -6,7 +6,7 @@ import { AuthProvider } from './auth/AuthProvider';
 import { HelmetProvider } from 'react-helmet-async';
 import { App as AntApp, ConfigProvider } from 'antd';
 
-const App = () => {
+export default function App() {
   return (
     <HelmetProvider>
       <ConfigProvider
@@ -39,6 +39,4 @@ const App = () => {
       </ConfigProvider>
     </HelmetProvider>
   );
-};
-
-export default App;
+}

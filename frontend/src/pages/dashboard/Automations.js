@@ -146,11 +146,7 @@ export default function Automations() {
       render: ({ id, votes, status, isPublished }) => (
         <Space>
           <Tooltip title="Congrats & Details">
-            <Button
-              icon={<LikeOutlined />}
-              disabled={!isPublished}
-              onClick={() => setAutomationCongrats(id)}
-            />
+            <Button icon={<LikeOutlined />} onClick={() => setAutomationCongrats(id)} />
           </Tooltip>
           <EmailInviteResendBtn id={id} />
           <Tooltip title="Edit Automation Details">
@@ -168,7 +164,10 @@ export default function Automations() {
               );
             }}
           />
-          <Tooltip title="Download Voting Data">
+          <Tooltip
+            color={!votes?.length ? 'orange' : ''}
+            title={votes?.length ? 'Download Voting Data' : 'There is no data to download.'}
+          >
             <Button
               disabled={!votes?.length}
               icon={<CloudDownloadOutlined />}
