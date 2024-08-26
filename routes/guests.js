@@ -21,6 +21,7 @@ const {
   replaceConstants,
   getSocialAutomationDetails,
 } = require("../helpers/utills");
+const EmailAutomation = require("../models/EmailAutomation");
 
 const router = express.Router();
 
@@ -179,6 +180,8 @@ router.post("/", verifyAuth, async (req, res) => {
     pollSharingImage = null,
     status = POLL_STATUS.DRAFT,
     recordingDate = new Date(),
+    emailFrequency = 4,
+    selectedEmails = [],
     startHostAutomation = false,
     guestType = GUEST_TYPE.HOST_GUEST,
   } = req.body;
@@ -208,6 +211,8 @@ router.post("/", verifyAuth, async (req, res) => {
       startHostAutomation,
       pollImageInfo: null,
       password: randomString(6),
+      emailFrequency,
+      selectedEmails
     };
 
     // Save Email Template
@@ -215,7 +220,7 @@ router.post("/", verifyAuth, async (req, res) => {
 
     // Create Guest User && update it if guestType is not SOLO_SESSION
     if (guestType !== GUEST_TYPE.SOLO_SESSION) {
-      const { fullName = "", email = "", phone = "", about = "", picture = "", jobTitle = "", organization = "" } = guest;
+      const { fullName = "", email = "", phone = "", about = "", picture = "", jobTitle = "", organization = "", selectedEmails = [], emailFrequency = 4 } = guest;
       const nameArr = fullName.split(" ");
       const firstName = nameArr.shift();
       const lastName = nameArr.join(" ");
@@ -229,6 +234,8 @@ router.post("/", verifyAuth, async (req, res) => {
 
       // UniqueId for Guest Speaker
       pollInfo.uniqueId = guestType === GUEST_TYPE.GUEST_SPEAKER ? randomString(8) : await createUsername(newUser);
+
+
     } else {
       pollInfo.guest = userId; // if guestType is SOLO_SESSION, then guest will be himself/herself
 
@@ -283,13 +290,43 @@ router.post("/", verifyAuth, async (req, res) => {
     }
 
     // Send Email in case of Publish
-    await sendEmailToGuest(poll);
+    // await sendEmailToGuest(poll);
+
+    if (selectedEmails.length > 0) {
+      const emailAutomationTasks = selectedEmails.map(async (email) => {
+        const startTime = new Date(new Date().getTime() + 1 * 60000);
+        const endTime = new Date(poll.recordingDate);
+
+        // Check for existing EmailAutomation entry  
+        const existingEntry = await EmailAutomation.findOne({
+          destEmail: email,
+          cronJobId: poll.uniqueId
+        });
+
+        if (!existingEntry) {
+          // Create new EmailAutomation entry   
+          const emailAutomation = new EmailAutomation({
+            emailContent: "test",
+            destEmail: email,
+            frequency: poll.emailFrequency,  // '1 week', '2 weeks', etc.  
+            startTime: startTime,
+            endTime: endTime,
+            cronJobId: poll.uniqueId
+          });
+
+          await emailAutomation.save(options);
+        }
+      });
+
+      await Promise.all(emailAutomationTasks);
+    }  
 
     await session.commitTransaction();
     session.endSession();
 
     res.json(await getPoll(poll._id));
   } catch (err) {
+    console.log(err);
     await session.abortTransaction();
     session.endSession();
 

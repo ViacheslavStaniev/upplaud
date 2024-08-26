@@ -10,17 +10,21 @@ const cookieParser = require("cookie-parser");
 
 const app = express();
 
-const { SERVER_URL, REACT_APP_URL, PORT, PASSPORT_SECERT } = process.env;
+const emailAutomationRoutes = require('./routes/automations');
+const { scheduleHourlyCheck } = require('./helpers/scheduler'); 
 
-// Set EJS as the view engine
+const { SERVER_URL, REACT_APP_URL, PORT, PASSPORT_SECRET } = process.env;
+
+// Set EJS as the view engine  
 app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "frontend/public")));
 
-connectDB(); // Connect MongoDB
+// Connect MongoDB  
+connectDB();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Init Middleware
+// Init Middleware  
 app.use(
   express.json({
     extended: false,
@@ -35,16 +39,16 @@ app.use(
 const corsOptions = {
   credentials: true,
   origin: [REACT_APP_URL, SERVER_URL],
-  optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+  optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204  
 };
 
-// Passport Auth
+// Passport Auth  
 app.use(cookieParser());
 app.use(
   session({
     resave: true,
     saveUninitialized: true,
-    secret: PASSPORT_SECERT,
+    secret: PASSPORT_SECRET,
     maxAge: 24 * 60 * 60 * 1000,
     cookie: { secure: true, httpOnly: true },
   })
@@ -52,25 +56,30 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Passport serializeUser/deserializeUser
+// Passport serializeUser/deserializeUser  
 passport.serializeUser((user, done) => done(null, user));
 passport.deserializeUser((user, done) => done(null, user));
 
-// Add headers
+// Add headers  
 app.use(cors(corsOptions));
 app.options("*", cors());
 
 app.get("/", (req, res) => res.send("API running"));
 
-// Define Routes
+// Define Routes  
 app.use("/poll", require("./routes/poll"));
 app.use("/api/auth", require("./routes/auth"));
-// app.use("/api/show", require("./routes/show"));
 app.use("/api/files", require("./routes/files"));
 app.use("/api/users", require("./routes/users"));
 app.use("/api/guests", require("./routes/guests"));
 app.use("/auth/login", require("./routes/social_auth"));
 app.use("/auth/connect", require("./routes/social_connect"));
+app.use('/api/gmail', require('./routes/googleRoutes'));
+app.use('/api/outlook', require('./routes/outlookRoutes'));
+app.use("/api/contacts", require("./routes/contact"));
+app.use("/api/emails", require("./routes/email"));
+
+app.use('/api/emailAutomations', emailAutomationRoutes);  
 
 const LISTEN_PORT = PORT || 5000;
 

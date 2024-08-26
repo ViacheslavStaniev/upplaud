@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { scheduleHourlyCheck } = require("../helpers/scheduler");
 
 const { MONGO_HOST, MONGO_DATABASE, MONGO_USERNAME, MONGO_PASSWORD, MONGO_CONNECTION_PARAMS, MONGO_CONNECTION_PREFIX } = process.env;
 
@@ -19,6 +20,9 @@ const connectDB = async (max_attempts = 5) => {
         useUnifiedTopology: true,
       });
       console.log("MongoDB Connected ...");
+
+      scheduleHourlyCheck();
+
     } catch (err) {
       console.error(err.message);
       console.log("retrying in 2 seconds");

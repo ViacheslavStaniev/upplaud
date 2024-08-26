@@ -1,6 +1,7 @@
-import store from './store';
+import { store, persistor } from './store';
 import Router from './routes';
 import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthProvider';
 import { HelmetProvider } from 'react-helmet-async';
@@ -27,15 +28,17 @@ export default function App() {
           },
         }}
       >
-        <Provider store={store}>
-          <AntApp>
-            <AuthProvider>
-              <BrowserRouter>
-                <Router />
-              </BrowserRouter>
-            </AuthProvider>
-          </AntApp>
-        </Provider>
+        <PersistGate loading={null} persistor={persistor}>
+          <Provider store={store}>
+            <AntApp>
+              <AuthProvider>
+                <BrowserRouter>
+                  <Router />
+                </BrowserRouter>
+              </AuthProvider>
+            </AntApp>
+          </Provider>
+        </PersistGate>
       </ConfigProvider>
     </HelmetProvider>
   );

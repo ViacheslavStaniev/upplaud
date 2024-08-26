@@ -31,6 +31,9 @@ const GuestSchema = new Schema(
     guestType: { type: String, enum: Object.values(GUEST_TYPE), default: GUEST_TYPE.HOST_GUEST },
     socials: [{ ref: "SocialPosting", type: Schema.Types.ObjectId }],
     emailTemplate: { type: Object, default: { subject: "", body: "" } },
+    selectedEmails: [{ type: String }],
+    emailFrequency: { type: Number, default: 2 },
+    socialFrequency: { type: Number, default: 2 }
   },
   { timestamps: true, autoCreate: true }
 );

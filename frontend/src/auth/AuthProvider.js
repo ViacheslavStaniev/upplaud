@@ -4,6 +4,7 @@ import { App } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
 import { initialize, saveUser, logoutUser, updateState } from '../reducers/userSlice';
 import { createContext, useEffect, useCallback, useMemo, useContext } from 'react';
+import { setEmails, setEmailsForGuestPage } from '../reducers/emailsSlice';
 
 // AuthContext to keep the latest state
 const AuthContext = createContext(null);
@@ -47,6 +48,9 @@ export function AuthProvider({ children }) {
 
       try {
         const { data } = await axios.post('/auth/login', loginData);
+
+        dispatch(setEmails([]));
+        dispatch(setEmailsForGuestPage([]));
 
         dispatch(saveUser({ user: data, isLoading: false }));
       } catch (error) {

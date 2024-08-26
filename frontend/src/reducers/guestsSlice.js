@@ -232,10 +232,10 @@ export const getSocials = (userId, pollId) => {
 };
 
 // Save Social items of a user
-export const saveSocials = (userId, pollId, socials) => {
+export const saveSocials = (userId, pollId, data) => {
   return new Promise((resolve, reject) => {
     axios
-      .post(`users/${userId}/socials/${pollId}`, socials)
+      .post(`users/${userId}/socials/${pollId}`, data)
       .then(({ data }) => resolve(data))
       .catch((error) => reject(error));
   });

@@ -33,6 +33,8 @@ import {
   GuestAcceptance,
   UserAutomations,
 } from './elements';
+import GmailLoading from '../pages/dashboard/GmailLoading';
+import OutlookLoading from '../pages/dashboard/OutlookLoading';
 
 export default function Router() {
   return useRoutes([
@@ -59,6 +61,26 @@ export default function Router() {
         { path: 'forgot-password', element: <ForgotPasswordPage /> },
         { path: 'reset-password/:token', element: <ResetPasswordPage /> },
       ],
+    },
+    {
+      path: 'gmail',
+      children: [
+        {
+          path: 'callback',
+          element: (
+            <GmailLoading />
+          )
+        }]
+    },
+    {
+      path: 'outlook',
+      children: [
+        {
+          path: 'callback',
+          element: (
+            <OutlookLoading />
+          )
+        }]
     },
     {
       element: (

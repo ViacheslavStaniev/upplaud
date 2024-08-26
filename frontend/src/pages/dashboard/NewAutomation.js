@@ -149,11 +149,15 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
     socialShareFileSrc = '',
     potentialTopics = ['', ''],
     startHostAutomation = false,
+    emailFrequency = 4,
+    selectedEmails = [],
     emailTemplate = {
       subject: '[PRESENTATION_NAME] NEXT STEPS',
       body: `<blockquote>Hi [GUEST_FIRSTNAME], it's [USER_FULLNAME]. (To reach me, please reply all.) I use Upplaud to grow my audience; you can use it at no cost to reach more people too:</blockquote><blockquote>Can we post on our LinkedIn &amp; Facebook about [PODCAST / PRESENTATION NAME] before we do it? Upplaud makes it easy &amp; engaging. (See your private link &amp; password at the end.)</blockquote><blockquote>Here's how Upplaud grows our audience:</blockquote><blockquote>Instead of guessing what others want to know from both of us... Let's ask them! I chose 2 possible topics for our connections to vote on. They can even suggest their own topics privately.</blockquote><blockquote>I've already setup everything, including voting invitation posts for our Facebook &amp; LinkedIn. (It doesn't matter how active you are: Influencers on social media love engaging like this, and will share you with more people!)</blockquote><blockquote>We can also share our Upplaud voting page through email &amp; elsewhere. All you need to do is click the Grow Audience link below. It only takes a few seconds to connect your LinkedIn and/or Facebook to Upplaud. (I've connected mine already.)</blockquote><blockquote>Thanks for doing this now (and not procrastinating!) Every day counts to grow our audience: More time for more votes, more shares &amp; more results.</blockquote><blockquote>The link to click is below my name (be sure to reference your Private Password, to securely connect your social media). I'm excited to grow together.</blockquote><blockquote><br></blockquote><blockquote>Thanks again, see you soon. - [USER_FIRSTNAME]</blockquote><p><br></p>`,
     },
   } = guest || {};
+
+  console.log(guest);
 
   // Default Socials Items
   const defaultSocials = getSocialsItems(user?.socialAccounts || []);
@@ -205,6 +209,8 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
     audio: audio?._id || null,
     audioDuration: audio?.duration || 0,
     guest: getGuesUsertObj(guestUser),
+    emailFrequency,
+    selectedEmails,
     socials: socials.length > 0 ? socials : defaultSocials,
     pollSharingImage: getPostSharingImageInfo(pollImageInfo),
     recordingDate: recordingDate ? dayjs.utc(recordingDate).local() : null,
@@ -291,7 +297,7 @@ export default function NewAutomation({ isGuestAcceptance = false }) {
       content: (
         <>
           <PollSharingImage />
-          <SocialPostingItem />
+          <SocialPostingItem selectedEmailsFromProps={selectedEmails} emailFrequencyFromProps={emailFrequency}/>
         </>
       ),
     },

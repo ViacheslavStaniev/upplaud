@@ -1,16 +1,15 @@
+import React, { useState, useEffect } from 'react';
 import axios from '../../utils/axios';
 import CustomIcon from '../../components/CustomIcon';
-import { useState, useEffect } from 'react';
 import { isMobile } from 'react-device-detect';
 import { APP_BASEURL } from '../../config-global';
 import { SOCIAL_TYPE, SOCIAL_TITLES } from '../../utils/types';
-import {
-  StopOutlined,
-  SyncOutlined,
-  CheckCircleFilled,
-  CloseCircleFilled,
-} from '@ant-design/icons';
-import { Button, Space, Typography, Dropdown, notification, Badge } from 'antd';
+import { useSelector, useDispatch } from 'react-redux';
+import { notification, Table, Button, Space, Select, Typography, Dropdown, Badge, Checkbox, Modal } from 'antd';
+import { StopOutlined, SyncOutlined, CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
+import { setOriginType, setOriginURL, setEmailForSocialConnect } from '../../reducers/emailsSlice';
+
+import Papa from 'papaparse'; // csv parsing library  
 
 const { Title, Text } = Typography;
 const { FACEBOOK, LINKEDIN } = SOCIAL_TYPE;
@@ -19,31 +18,126 @@ export default function SocialMediaConnect({
   user,
   className = '',
   showTitle = true,
-  update = () => {},
+  update = () => { },
   btnSize = 'large',
+  isGuest = false,
+  updateParent = () => { }
 }) {
+
   const socialAccounts = user?.socialAccounts || [];
   const getItem = (type) => socialAccounts.find((item) => item.type === type);
 
   const [loading, setLoading] = useState(false);
   const [openKeys, setOpenKeys] = useState([]);
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [contacts, setContacts] = useState([]);
+  const [selectedContacts, setSelectedContacts] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [activeContact, setActiveContact] = useState(null);
+
+  const [emailPostingFrequency, setEmailPostingFrequency] = useState(4);
+
+  const postingOptions = [4, 3, 2, 1].map((value) => ({
+    value,
+    label: `Post [${value}x] monthly`,
+  }));
+
+  const sendContactsToBackend = async (contacts, userEmail, mGmail) => {
+    try {
+      const response = await axios.post('/contacts',
+        {
+          contacts,
+          userEmail,
+          email: mGmail,
+          type: 'upload'
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          }
+        }
+      );
+
+      if (response.status !== 200) {
+        throw new Error('Failed to send contacts to backend');
+      }
+      console.log('Contacts sent successfully:', response.data);
+      setContacts(response.data);
+    } catch (error) {
+      console.error('Failed to send contacts to backend:', error);
+    }
+  };
+
+  const handleUploadContacts = async () => {
+    try {
+      const response = await axios.post('/emails', {
+        contacts: activeContact.emails.filter(contact => {
+          return selectedContacts.includes(contact.contactEmail);
+        }),
+        userEmail: user.email,
+        isGuest,
+        frequency: emailPostingFrequency,
+        userId: user._id
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        }
+      });
+
+      if (response.status !== 200) {
+        throw new Error('Failed to upload contacts');
+      }
+
+      notification.success({
+        message: 'Success',
+        description: 'Contacts uploaded successfully.'
+      });
+    } catch (error) {
+      console.error('Failed to upload contacts:', error);
+      notification.error({
+        message: 'Error',
+        description: 'Failed to upload contacts.'
+      });
+    }
+  };
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    // Show Page/Group Selection if not selected
+    // Fetch contacts on page load  
+    const fetchContacts = async () => {
+      try {
+        const response = await axios.get(`/contacts?email=${user.email}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          }
+        });
+        setContacts(response.data);
+      } catch (error) {
+        console.error('Error fetching contacts:', error);
+      }
+    };
+
+    fetchContacts();
+  }, []);
+
+  useEffect(() => {
+    // Show Page/Group Selection if not selected  
     const fbItem = getItem(FACEBOOK);
     if (fbItem && fbItem?.isConnected && (fbItem?.page?.askToChoose || fbItem.group?.askToChoose)) {
       setOpenDropdown('facebook');
       setOpenKeys([fbItem?.page?.askToChoose ? 'page' : 'group']);
     }
 
-    // Show Page Selection if not selected
+    // Show Page Selection if not selected  
     const lnItem = getItem(LINKEDIN);
     if (lnItem && lnItem?.isConnected && lnItem?.page?.askToChoose) {
       setOpenKeys(['page']);
       setOpenDropdown('linkedin');
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps  
   }, []);
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -61,14 +155,13 @@ export default function SocialMediaConnect({
     if (error) notification.error({ message: 'Error', description: error });
   }, [error, isConnected]);
 
-  // isSocialConnected
+  // isSocialConnected  
   const isSocialConnected = (type) => getItem(type)?.isConnected || false;
 
-  // Get Social Connect Url
+  // Get Social Connect Url  
   const getSocialConnectUrl = (type, disconnect = false) => {
-    return `${APP_BASEURL}/auth/connect/${type}/${user?.userName}/${
-      disconnect ? 'disconnect' : ''
-    }?returnUrl=${window.location.href}`;
+    return `${APP_BASEURL}/auth/connect/${type}/${user?.userName}/${disconnect ? 'disconnect' : ''
+      }?returnUrl=${window.location.href}`;
   };
 
   const getConnectIcon = (isConnected = false, size = 14) => {
@@ -79,14 +172,14 @@ export default function SocialMediaConnect({
     );
   };
 
-  // onPageGroupSelect
+  // onPageGroupSelect  
   const onPageGroupSelect = async (type, subType, id, name) => {
     setLoading(true);
 
     try {
       await axios.get(`users/${user?._id}/connect/${type}/${subType}/${id}`);
 
-      // Update user
+      // Update user  
       const newUser = {
         ...user,
         socialAccounts: (user?.socialAccounts || []).map((item) => {
@@ -109,14 +202,14 @@ export default function SocialMediaConnect({
     }
   };
 
-  // Account Disconnect
+  // Account Disconnect  
   const onAccountDisconnect = async (type) => {
     setLoading(true);
 
     try {
       await axios.get(`users/${user?._id}/disconnect/${type}`);
 
-      // Update user
+      // Update user  
       const newUser = {
         ...user,
         socialAccounts: (user?.socialAccounts || []).map((item) =>
@@ -139,7 +232,7 @@ export default function SocialMediaConnect({
     }
   };
 
-  // getItems
+  // getItems  
   const getItems = (type = FACEBOOK) => {
     const item = getItem(type) || {};
     const title = SOCIAL_TITLES[type];
@@ -223,28 +316,140 @@ export default function SocialMediaConnect({
     ];
   };
 
-  // socialsBtns
   const socialsBtns = [
-    // {
-    //   key: 'facebook',
-    //   disabled: false,
-    //   title: 'Facebook',
-    //   items: getItems(FACEBOOK),
-    //   isConnected: isSocialConnected(FACEBOOK),
-    // },
     {
       key: 'linkedin',
+      type: 'social',
       disabled: false,
       title: 'LinkedIn',
       items: getItems(LINKEDIN),
       isConnected: isSocialConnected(LINKEDIN),
-    },
+    }
   ];
+
+  const readGmail = () => {
+    axios.get("/gmail/get-redirect-url").then((response) => {
+      const data = response.data;
+      if (data.url) {
+        dispatch(setOriginURL(window.location.href));
+        dispatch(isGuest ? setOriginType('guest') : setOriginType('user'));
+        dispatch(setEmailForSocialConnect(user.email));
+        window.location.href = data.url;
+      }
+    });
+  };
+
+  const readOutlook = () => {
+    axios.get("/outlook/get-redirect-url").then((response) => {
+      const data = response.data;
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    });
+  };
+
+  const handleUploadCSV = (event) => {
+
+    const generateRandomNumber = (min, max) => {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }  
+
+    const file = event.target.files[0];
+    if (file) {
+      Papa.parse(file, {
+        header: true,
+        complete: (results) => {
+          sendContactsToBackend(results.data.map((email) => {
+            console.log(email);
+            return {
+              contactName: email.Name,
+              contactEmail: email[" Email"],
+              sentCount: email[" Sent"],
+              receivedCount: email[" Received"]
+            }
+          }), user.email, "upload" + generateRandomNumber(1, 10000000) + "@upload.com")
+
+          event.target.value = null;
+        },
+        error: (error) => {
+          console.error('Error parsing CSV:', error);
+        },
+      });
+    }
+
+
+  };
+
+  const columns = [
+    {
+      key: 'checkbox',
+      title: '',
+      render: (_, record) => (
+        <Checkbox
+          checked={selectedContacts.includes(record.contactEmail)}
+          onChange={(e) => handleCheckboxChange(e, record.contactEmail)}
+        />
+      )
+    },
+    {
+      key: 'contactName',
+      title: 'Name',
+      dataIndex: 'contactName',
+      className: 'minw-150px',
+      render: (name) => (
+        <p>{name}</p>
+      )
+    },
+    {
+      key: 'contactEmail',
+      title: 'Email',
+      className: 'minw-200px',
+      dataIndex: 'contactEmail',
+      render: (email) => (
+        <p>{email}</p>
+      )
+    },
+    {
+      key: 'sentCount',
+      title: 'Sent',
+      dataIndex: 'sentCount',
+      className: 'minw-150px',
+      render: (sent) => (
+        <p>{sent}</p>
+      )
+    },
+    {
+      key: 'receivedCount',
+      title: 'Received',
+      dataIndex: 'receivedCount',
+      className: 'minw-150px',
+      render: (received) => (
+        <p>{received}</p>
+      )
+    }
+  ];
+
+  const handleCheckboxChange = (e, contactEmail) => {
+    if (e.target.checked) {
+      setSelectedContacts([...selectedContacts, contactEmail]);
+    } else {
+      setSelectedContacts(selectedContacts.filter(email => email !== contactEmail));
+    }
+  };
+
+  const handleFrequencyChange = (value) => {
+    setEmailPostingFrequency(value);
+  };
+
+  const handleModalOpen = (contact) => {
+    setActiveContact(contact);
+    setSelectedContacts([]);
+    setModalVisible(true);
+  };
 
   return (
     <div className={`social-media ${className}`}>
-      {showTitle && <Title level={3}>Connect with social media</Title>}
-
+      {showTitle && <Title level={3}>Connect with social media & email</Title>}
       <Space
         size={16}
         direction={isMobile ? 'vertical' : 'horizontal'}
@@ -286,10 +491,83 @@ export default function SocialMediaConnect({
           </Dropdown>
         ))}
 
-        {/* <Button hidden size="large" shape="round" type="instagram" icon={<CustomIcon name="instagram" />}>
-          Connect with Instagram
-        </Button> */}
+        <button style={{
+          padding: '0px',
+          borderRadius: '10px',
+          border: 'none'
+        }} onClick={readGmail}>
+          <img src="/svgs/gmail.svg" />
+        </button>
+        <button style={{
+          padding: '0px',
+          borderRadius: '10px',
+          border: 'none'
+        }} onClick={readOutlook}>
+          <img src="/svgs/outlook.svg" />
+        </button>
+        <Button type="primary">
+          <label htmlFor="csv-upload" style={{ cursor: 'pointer' }}>Upload CSV</label>
+        </Button>
+        <input
+          id="csv-upload"
+          type="file"
+          accept=".csv"
+          onChange={handleUploadCSV}
+          style={{ display: 'none' }}
+        />
       </Space>
+
+      <div style={{ marginTop: '20px' }}>
+        {contacts.map(contact => (
+          <Button
+            key={contact._id}
+            type="default"
+            onClick={() => handleModalOpen(contact)}
+            style={{ margin: '5px' }}
+          >
+            {contact.name}
+          </Button>
+        ))}
+      </div>
+
+      <Modal
+        visible={modalVisible}
+        onCancel={() => setModalVisible(false)}
+        footer={null}
+        title={activeContact ? activeContact.name : 'Contact Details'}
+        width="80%"
+      >
+        <Table
+          columns={columns}
+          dataSource={activeContact ? activeContact.emails : []}
+          pagination={{ defaultPageSize: 5 }}
+          scroll={{ x: '100%' }}
+        />
+
+        {isGuest && (
+          <div>
+            <Select
+              size="small"
+              value={emailPostingFrequency}
+              placeholder="Select"
+              options={postingOptions}
+              style={{ minWidth: 200, marginTop: '20px' }}
+              className={isMobile && 'w-100'}
+              onChange={handleFrequencyChange}
+            />
+          </div>
+        )}
+
+        {selectedContacts.length > 0 && (
+          <Button
+            type="primary"
+            onClick={handleUploadContacts}
+            style={{ marginTop: '20px' }}
+          >
+            {isGuest ? 'Run Automation' : 'Upload Selected Contacts'}
+          </Button>
+        )}
+      </Modal>
     </div>
   );
-}
+}  
